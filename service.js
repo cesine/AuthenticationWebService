@@ -247,7 +247,7 @@ app.get('/addroletouser', function(req, res, next) {
 });
 
 /**
- * Responds to requests for adding a corpus to a user, if successful replies with the pouchname of the new corpus in a string and a corpusaded = true 
+ * Responds to requests for adding a corpus to a user, if successful replies with the pouchname of the new corpus in a string and a corpusaded = true
  */
 app.post('/newcorpus', function(req, res, next) {
   authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function(err, user, info) {
@@ -301,20 +301,6 @@ app.post('/updateroles', function(req, res, next) {
       returndata.userFriendlyErrors = [info.message];
     }
 
-    console.log(new Date() + "This method is not supported.");
-    returndata.userFriendlyErrors = ["This method is not supported."];
-
-
-    /* ____  _                _          _                _ _     _ 
-    / ___|| |__   ___  _ __| |_    ___(_)_ __ ___ _   _(_) |_  | |
-    \___ \| '_ \ / _ \| '__| __|  / __| | '__/ __| | | | | __| | |
-     ___) | | | | (_) | |  | |_  | (__| | | | (__| |_| | | |_  |_|
-    |____/|_| |_|\___/|_|   \__|  \___|_|_|  \___|\__,_|_|\__| (_)
-                                                                  */
-
-    /*
-    NOTE: Turning off all following logic as it permits non-admin users (any user, including lingllama) to delete any user from any corpus 
-    */
     if (!user) {
       returndata.userFriendlyErrors = [info.message];
     } else {
@@ -325,7 +311,7 @@ app.post('/updateroles', function(req, res, next) {
       corpus.updateRoles(req, function(err, roles, info) {
         if (err) {
           console.log(new Date() + " There was an error in corpus.updateRoles\n");
-          returndata.userFriendlyErrors = ["There was an error updating the user roles.\nUser " + roles + " does not exist."];
+          returndata.userFriendlyErrors = [info.message];
         }
         if (!roles) {
           returndata.userFriendlyErrors = ["There was an error updating the user roles."];
