@@ -1,107 +1,86 @@
-var https = require('https');
-var express = require('express');
-var fs = require('fs');
-var util = require('util');
-var path = require('path');
-var routes = require('./routes/routes');
-var deploy = process.env.NODE_DEPLOY_TARGET || "local";
-var config = require('./lib/nodeconfig_' + deploy);
-var couchkeys = require('./lib/couchkeys_' + deploy);
-var mailconfig = require('./lib/mailconfig_' + deploy);
-
-var UserHandler = require('./lib/Users');
-var FieldDBHandler = require('./lib/FieldDB');
-var AppHandler = require('./lib/About');
-
-var authenticationfunctions = require('./lib/userauthentication');
-var corpus = require('./lib/corpus');
-
-//read in the specified filenames as the security key and certificate
-config.httpsOptions.key = fs.readFileSync(config.httpsOptions.key);
-config.httpsOptions.cert = fs.readFileSync(config.httpsOptions.cert);
+var express = require('express'),
+  oauthserver = require('node-oauth2-server'); // Would be: 'node-oauth2-server'
 
 var app = express();
 
-// configure Express
 app.configure(function() {
-  app.use(express.logger());
-  app.use(express.cookieParser());
+  app.oauth = oauthserver({
+    model: require('./lib/oauthmodel'),
+    grants: ['auth_code', 'password'],
+    debug: true
+  });
   app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
 });
 
-app.configure('development', function() {
-  app.use(express.errorHandler({
-    dumpExceptions: true,
-    showStack: true
-  }));
+// Handle token grant requests
+app.all('/oauth/token', app.oauth.grant());
+
+// Show them the "do you authorise xyz app to access your content?" page
+app.get('/oauth/authorise', function (req, res, next) {
+  if (!req.session.user) {
+    // If they aren't logged in, send them to your own login implementation
+    return res.redirect('/login?redirect=' + req.path + '&client_id=' +
+        req.query.client_id + '&redirect_uri=' + req.query.redirect_uri);
+  }
+
+  res.render('authorise', {
+    client_id: req.query.client_id,
+    redirect_uri: req.query.redirect_uri
+  });
 });
-app.configure('production', function() {
-  app.use(express.errorHandler());
+
+// Handle authorise
+app.post('/oauth/authorise', function (req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/login?client_id=' + req.query.client_id +
+      '&redirect_uri=' + req.query.redirect_uri);
+  }
+
+  next();
+}, app.oauth.authCodeGrant(function (req, next) {
+  // The first param should to indicate an error
+  // The second param should a bool to indicate if the user did authorise the app
+  // The third param should for the user/uid (only used for passing to saveAuthCode)
+  next(null, req.body.allow === 'yes', req.session.user.id, req.session.user);
+}));
+
+// Show login
+app.get('/login', function (req, res, next) {
+  res.render('login', {
+    redirect: req.query.redirect,
+    client_id: req.query.client_id,
+    redirect_uri: req.query.redirect_uri
+  });
 });
 
-
-var handlers = {
-  users: new UserHandler({
-    'authentication': authenticationfunctions,
-    'corpus': corpus
-  }),
-  fielddb: new FieldDBHandler({
-    'authentication': authenticationfunctions,
-    'corpus': corpus
-  }),
-  app: new AppHandler({
-    'config': config,
-    'couchkeys': couchkeys
-  })
-};
-
-routes.setup(app, handlers);
-/*
- * CORS support
- * http://stackoverflow.com/questions/7067966/how-to-allow-cors-in-express-nodejs
- */
-var build_headers_from_request = function(req) {
-  if (req.headers['access-control-request-headers']) {
-    headers = req.headers['access-control-request-headers'];
+// Handle login
+app.post('/login', function (req, res, next) {
+  // Insert your own login mechanism
+  if (req.body.email !== 'thom@nightworld.com') {
+    res.render('login', {
+      redirect: req.body.redirect,
+      client_id: req.body.client_id,
+      redirect_uri: req.body.redirect_uri
+    });
   } else {
-    headers = 'accept, accept-charset, accept-encoding, accept-language, authorization, content-length, content-type, host, origin, proxy-connection, referer, user-agent, x-requested-with';
-    _ref = req.headers;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      header = _ref[_i];
-      if (req.indexOf('x-') === 0) {
-        headers += ', ' + header;
-      }
-    }
-  }
-  headers.host = "authdev.lingsync.org"; //target0.hostname;
-  var cors_headers = {
-    'access-control-allow-methods': 'HEAD, POST, GET, PUT, PATCH, DELETE',
-    'access-control-max-age': '86400',
-    'access-control-allow-headers': headers,
-    'access-control-allow-credentials': 'true',
-    'access-control-allow-origin': req.headers.origin || '*'
-  };
-  return cors_headers;
-};
-
-app.options('*', function(req, res, next) {
-  if (req.method === 'OPTIONS') {
-    console.log('responding to OPTIONS request');
-    var cors_headers = build_headers_from_request(req);
-    for (var key in cors_headers) {
-      value = cors_headers[key];
-      res.setHeader(key, value);
-    }
-    res.send(200);
+    // Successful logins should send the user back to the /oauth/authorise
+    // with the client_id and redirect_uri (you could store these in the session)
+    return res.redirect((req.body.redirect || '/home') + '?client_id=' +
+        req.body.client_id + '&redirect_uri=' + req.body.redirect_uri);
   }
 });
 
-
-// http.createServer(app).listen(app.get('port'), function(){
-//   console.log('Express server listening on port ' + app.get('port'));
-// });
-https.createServer(config.httpsOptions, app).listen(config.httpsOptions.port, function() {
-  console.log("Express server listening on port %d", config.httpsOptions.port);
+app.get('/secret', app.oauth.authorise(), function (req, res) {
+  // Will require a valid access_token
+  res.send('Secret area');
 });
+
+app.get('/public', function (req, res) {
+  // Does not require an access_token
+  res.send('Public area');
+});
+
+// Error handling
+app.use(app.oauth.errorHandler());
+
+app.listen(3000);
