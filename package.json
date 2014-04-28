@@ -1,6 +1,6 @@
 {
   "name": "fielddb-auth",
-  "version": "0.72.1",
+  "version": "2.0.1",
   "description": "Authentication web services for FieldDB.",
   "homepage": "https://github.com/OpenSourceFieldlinguistics/FieldDB/issues/milestones?state=closed",
   "repository": {
@@ -12,7 +12,7 @@
   },
   "keywords": [
     "fielddb",
-    "authentication"
+    "api"
   ],
   "author": "cesine <cesine@yahoo.com>",
   "contributors": [
@@ -23,17 +23,11 @@
     "Fieldlinguist <info@fieldlinguist.com>"
   ],
   "dependencies": {
-    "bcrypt": "^0.7.6",
-    "cors": "*",
-    "cradle": "*",
-    "diacritics" : "1.0.0",
-    "express": "^3.3.7",
-    "MD5": "*",
-    "nano": "^4.1.1",
-    "nodemailer": "^0.5.2",
-    "swagger-node-express": "*",
-    "underscore": "^1.5.1",
-    "uuid": "^1.4.1"
+    "swagger-node-express": "^2.0.1",
+    "express": "3.x",
+    "cors": "^2.2.0",
+    "body-parser": "^1.0.2",
+    "diacritics": "^1.1.0"
   },
   "peerDependencies": {
     "fielddb-api": "*",

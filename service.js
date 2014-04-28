@@ -4,13 +4,6 @@
 var https = require('https');
 var FileSystem = require('fs');
 
-/* Load modules provided by $ npm install, see package.json for details */
-var CrossOriginResourceSharing = require('cors');
-var ExpressWebServer = require('express');
-
-/* Load modules provided by this codebase */
-var AuthWebServiceRoutes = require('./routes/routes');
-
 /** 
  * You can control aspects of the deployment by using Environment Variables
  *
@@ -26,45 +19,107 @@ var config = require('./lib/nodeconfig_' + deploy_target);
 /**
  * Use Express to create the AuthWebService see http://expressjs.com/ for more details
  */
-var AuthWebService = ExpressWebServer();
-AuthWebService.configure(function() {
-  AuthWebService.use(ExpressWebServer.logger());
-  AuthWebService.use(ExpressWebServer.cookieParser());
-  AuthWebService.use(ExpressWebServer.bodyParser());
-  AuthWebService.use(ExpressWebServer.methodOverride());
-  AuthWebService.use(CrossOriginResourceSharing());
-  AuthWebService.use(AuthWebService.router);
-  /*
-   * Although this is mostly a webservice used by machines (not a websserver used by humans)
-   * we are still serving a user interface for the api sandbox in the public folder
-   */
-  AuthWebService.use(ExpressWebServer.static(__dirname + '/public'));
+var express = require("express");
+  url = require("url"),
+  cors = require("cors"),
+  bodyParser = require('body-parser'),
+  swagger = require("swagger-node-express/Common/node/swagger");
+
+var corpusResources = require("./routes/corpora.js");
+
+var app = express();
+
+// app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(cors());
+
+
+// Set the main handler in swagger to the express app
+swagger.setAppHandler(app);
+
+
+// This is a sample validator.  It simply says that for _all_ POST, DELETE, PUT
+// methods, the header `api_key` OR query param `api_key` must be equal
+// to the string literal `special-key`.  All other HTTP ops are A-OK
+swagger.addValidator(
+  function validate(req, path, httpMethod) {
+    //  example, only allow POST for api_key="special-key"
+    if ("POST" == httpMethod || "DELETE" == httpMethod || "PUT" == httpMethod) {
+      var apiKey = req.headers["api_key"];
+      if (!apiKey) {
+        apiKey = url.parse(req.url, true).query["api_key"];
+      }
+      if ("special-key" == apiKey) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+);
+
+var models = require("./lib/About.js").FieldDB().getApiDocs().models;
+
+// Add models and methods to swagger
+swagger.addModels(models)
+  .addPost(corpusResources.addCorpus)
+  .addPut(corpusResources.updateCorpus)
+  .addDelete(corpusResources.deleteCorpus);
+
+swagger.configureDeclaration("corpus", {
+  description: "Operations about Corpora",
+  authorizations: ["oauth2"],
+  produces: ["application/json"]
 });
 
-AuthWebService.configure('development', function() {
-  AuthWebService.use(ExpressWebServer.errorHandler({
-    dumpExceptions: true,
-    showStack: true
-  }));
+// set api info
+swagger.setApiInfo({
+  title: "Swagger Sample App",
+  description: "This is a sample server Corporatore server. You can find out more about Swagger at <a href=\"http://swagger.wordnik.com\">http://swagger.wordnik.com</a> or on irc.freenode.net, #swagger.  For this sample, you can use the api key \"special-key\" to test the authorization filters",
+  termsOfServiceUrl: "http://helloreverb.com/terms/",
+  contact: "apiteam@wordnik.com",
+  license: "Apache 2.0",
+  licenseUrl: "http://www.apache.org/licenses/LICENSE-2.0.html"
 });
 
-AuthWebService.configure('production', function() {
-  AuthWebService.use(ExpressWebServer.errorHandler());
+swagger.setAuthorizations({
+  apiKey: {
+    type: "apiKey",
+    passAs: "header"
+  }
 });
 
-/**
- * Set up all the available URL AuthWebServiceRoutes see routes/routes.js for more details
- */
-AuthWebServiceRoutes.setup(AuthWebService);
+// Configures the app's base path and api version.
+swagger.configureSwaggerPaths("", "api-docs", "")
+swagger.configure(config.httpsOptions.protocol + config.httpsOptions.host + ":" + config.httpsOptions.port, "1.0.0");
+
+// Serve up swagger ui at /docs via static route
+var docs_handler = express.static(__dirname + '/node_modules/swagger-node-express/swagger-ui/');
+app.get(/^\/docs(\/.*)?$/, function(req, res, next) {
+  if (req.url === '/docs') { // express static barfs on root url w/o trailing slash
+    res.writeHead(302, {
+      'Location': req.url + '/'
+    });
+    res.end();
+    return;
+  }
+  // take off leading /docs so that connect locates file correctly
+  req.url = req.url.substr('/docs'.length);
+  return docs_handler(req, res, next);
+});
 
 
 /**
  * Read in the specified filenames for this config's security key and certificates,
  * and then ask https to turn on the webservice
  */
-config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
-config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
+if (config.httpsOptions.protocol === "https://") {
+  config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
+  config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
 
-https.createServer(config.httpsOptions, AuthWebService).listen(config.httpsOptions.port, function() {
-  console.log("Listening on port %d", config.httpsOptions.port);
-});
+  https.createServer(config.httpsOptions, app).listen(config.httpsOptions.port, function() {
+    console.log("Listening on port %d", config.httpsOptions.port);
+  });
+} else {
+  app.listen(config.httpsOptions.port);
+}
