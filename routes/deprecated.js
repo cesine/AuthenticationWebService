@@ -38,7 +38,7 @@ var addDeprecatedRoutes = function(app, node_config) {
     });
   });
   app.get('/login', function(req, res, next) {
-    res.send(); // {info: "Service is running normally."});
+    res.send({info: "Service is running normally."});
   });
 
   /**

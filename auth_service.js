@@ -101,14 +101,14 @@ deprecatedRoutes.addDeprecatedRoutes(AuthWebService, config);
  * and then ask https to turn on the webservice
  */
 
-if (config.httpsOptions.protocol === "https://") {
+if (process.env.NODE_DEPLOY_TARGET === "production") {
+  AuthWebService.listen(config.httpsOptions.port);
+  console.log("Running in production mode behind an Nginx proxy, Listening on http port %d", config.httpsOptions.port);
+} else {
   config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
   config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
 
   https.createServer(config.httpsOptions, AuthWebService).listen(config.httpsOptions.port, function() {
-    console.log("Listening on port %d", config.httpsOptions.port);
+    console.log("Listening on https port %d", config.httpsOptions.port);
   });
-} else {
-  AuthWebService.listen(config.httpsOptions.port);
-  console.log("Listening on port %d", config.httpsOptions.port);
 }

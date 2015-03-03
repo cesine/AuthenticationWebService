@@ -38,11 +38,6 @@
     "uuid": "1.4.1"
   },
   "peerDependencies": {
-    "fielddb-api": "*",
-    "fielddb-web": "*",
-    "fielddb-audio": "*",
-    "fielddb-lexicon": "*",
-    "fielddb-spider": "*"
   },
   "devDependencies": {
     "grunt": "*",

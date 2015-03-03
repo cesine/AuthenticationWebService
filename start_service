@@ -4,7 +4,6 @@ whoami
 echo "logs are in $PM2_HOME/logs"
 
 cd $FIELDDB_HOME/AuthenticationWebService
-bash switch_to_producti.sh 
 
 pm2 \
 start \
