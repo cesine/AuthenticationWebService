@@ -24,7 +24,7 @@ module.exports = {
     "secretkey": ""
   },
   "publicCorpus": "Private",
-  "collection": "private_corpuses",
+  "collection": "private_corpora",
   "comments": [],
   "datumFields": [{
     "label": "judgement",

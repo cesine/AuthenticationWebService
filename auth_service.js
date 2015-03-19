@@ -37,7 +37,7 @@ var corsOptions = {
     } else if (origin.search(/^https?:\/\/.*\.lingsync.org$/) > -1 || origin.search(/^https?:\/\/.*\.phophlo.ca$/) > -1 || origin.search(/^https?:\/\/localhost:[0-9]*$/) > -1 || origin.search(/^chrome-extension:\/\/[^\/]*$/) > -1) {
       originIsWhitelisted = true;
     }
-    console.log(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
+    // console.log(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
     callback(null, originIsWhitelisted);
   }
 };

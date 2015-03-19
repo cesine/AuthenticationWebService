@@ -9,7 +9,7 @@ var authenticationfunctions = require('./../lib/userauthentication.js'),
  *
  * @param {[type]} app [description]
  */
-var addDeprecatedRoutes = function(app, node_config) {
+var addDeprecatedRoutes = function(app) {
 
   /**
    * Responds to requests for login, if sucessful replies with the user's details
@@ -38,7 +38,9 @@ var addDeprecatedRoutes = function(app, node_config) {
     });
   });
   app.get('/login', function(req, res, next) {
-    res.send({info: "Service is running normally."});
+    res.send({
+      info: "Service is running normally."
+    });
   });
 
   /**
@@ -258,42 +260,144 @@ var addDeprecatedRoutes = function(app, node_config) {
    * as json
    */
   var addroletouser = function(req, res, next) {
+    var returndata = {};
+    if (!req.body.username) {
+      res.status(412);
+      returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. missing: username of requester"];
+      res.send(returndata);
+      return;
+    }
+
+    if (!req.body.password) {
+      res.status(412);
+      returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. info: user credentials must be reqested from the user prior to running this request"];
+      res.send(returndata);
+      return;
+    }
+
     authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function(err, user, info) {
       var returndata = {};
       if (err) {
         res.status(err.status || 400);
         returndata.status = err.status || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
+
         returndata.userFriendlyErrors = [info.message];
         res.send(returndata);
         return;
       }
-      if (!user) {
-        returndata.userFriendlyErrors = [info.message];
-      } else {
 
-        // Add a role to the user
-        authenticationfunctions.addRoleToUser(req, function(err, roles, info) {
-          if (err) {
-            res.status(err.status || 400);
-            returndata.status = err.status || 400;
-            console.log(new Date() + " There was an error in the authenticationfunctions.addRoleToUser:\n" + util.inspect(err));
-            returndata.userFriendlyErrors = [info.message];
-          }
-          if (!roles) {
-            returndata.userFriendlyErrors = [info.message];
-          } else {
-            returndata.roleadded = true;
-            returndata.info = [info.message];
-            // returndata.userFriendlyErrors = ["Faking an error"];
 
-            console.log(new Date() + " Returning role added okay:\n");
+      var users = req.body.users;
+      if (!users) {
+        //backward compatability for prototype app
+        if (req.body.userToAddToRole && req.body.roles) {
+          users = [{
+            username: req.body.userToAddToRole,
+            remove: [],
+            add: req.body.roles
+          }];
+        }
+        req.body.users = users;
+      }
+
+
+      var defaultConnection = corpus.getCouchConnectionFromServerCode(req.body.serverCode);
+      var couchconnection = req.body.couchConnection;
+      if (!couchconnection) {
+        couchconnection = defaultConnection;
+        if (req.body.pouchname) {
+          couchconnection.pouchname = req.body.pouchname;
+        }
+      }
+      for (var attrib in defaultConnection) {
+        if (defaultConnection.hasOwnProperty(attrib) && !couchconnection[attrib]) {
+          couchconnection[attrib] = defaultConnection[attrib];
+        }
+      }
+      if (req.body.pouchname && couchconnection.pouchname === "default") {
+        couchconnection.pouchname = req.body.pouchname;
+      }
+      req.body.couchConnection = couchconnection;
+      console.log(req.body.couchConnection);
+      if (!req.body.couchConnection || !req.body.couchConnection.pouchname || req.body.couchConnection.pouchname === "default") {
+        console.log("Client didnt define the corpus to modify.");
+        res.status(412);
+        returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. info: the corpus to be modified must be included in the request"];
+        res.send(returndata);
+        return;
+      }
+
+      if (!req || !req.body.users || req.body.users.length === 0 || !req.body.users[0].username) {
+        console.log("Client didnt define the user(s) to modify.");
+        res.status(412);
+        returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. info: user(s) to modify must be included in this request"];
+        res.send(returndata);
+        return;
+      }
+
+
+      // Add a role to the user
+      var currentlyProcessingUsername = req.body.users[0].username;
+      authenticationfunctions.addRoleToUser(req, function(err, userPermissionSet, optionalInfo) {
+        console.log("Getting back the results of authenticationfunctions.addRoleToUser ");
+        // console.log(err);
+        // console.log(userPermissionSet);
+
+        if (!userPermissionSet) {
+          userPermissionSet = {
+            username: "error",
+            status: 500,
+            message: "There was a problem processing your request, Please report this 32134."
+          };
+          if (optionalInfo && optionalInfo.message) {
+            userPermissionSet.message = optionalInfo.message;
           }
-          console.log(new Date() + " Returning response:\n" + util.inspect(returndata));
-          res.send(returndata);
+          if (err && err.status) {
+            userPermissionSet.status = err.status;
+          }
+        }
+
+        if (Object.prototype.toString.call(userPermissionSet) !== "[object Array]") {
+          userPermissionSet = [userPermissionSet];
+        }
+        console.log(userPermissionSet);
+
+        var info = userPermissionSet.map(function(userPermission) {
+          if (!userPermission) {
+            return "";
+          }
+          if (!userPermission.message) {
+            userPermission.message = "There was a problem processing this user permission, Please report this 3134.";
+            console.log(userPermission.message);
+            console.log(userPermission);
+          } else if (userPermission.message.indexOf("not found") > -1) {
+            userPermission.message = "You can't add " + userPermission.username + " to this corpus, their username was unrecognized. " + userPermission.message;
+          }
+          return userPermission.message;
         });
 
-      }
+        // console.log(info);
+
+        if (err) {
+          res.status(err.status || 500);
+          returndata.status = err.status || 500;
+          console.log(new Date() + " There was an error in the authenticationfunctions.addRoleToUser:\n" + util.inspect(err));
+
+          returndata.userFriendlyErrors = info;
+
+        } else {
+          returndata.roleadded = true;
+          returndata.users = userPermissionSet;
+          returndata.info = info;
+          // returndata.userFriendlyErrors = ["Faking an error"];
+          console.log(new Date() + " Returning role added okay:\n");
+        }
+        console.log(new Date() + " Returning response:\n" + util.inspect(returndata));
+        res.send(returndata);
+      });
+
+
     });
   };
 
@@ -366,13 +470,13 @@ var addDeprecatedRoutes = function(app, node_config) {
   app.post('/updateroles', function(req, res, next) {
 
     /* convert spreadhseet data into data which the addroletouser api can read */
-    var userRoleInfo = req.body.userRoleInfo || {};
+    req.body.userRoleInfo = req.body.userRoleInfo || {};
     var roles = [];
 
-    if (!req.body.roles && userRoleInfo) {
-      for (var role in userRoleInfo) {
-        if (userRoleInfo.hasOwnProperty(role)) {
-          if (role === "admin" || role === "writer" || role === "reader" || role === "commenter") {
+    if (!req.body.roles && req.body.userRoleInfo) {
+      for (var role in req.body.userRoleInfo) {
+        if (req.body.userRoleInfo.hasOwnProperty(role)) {
+          if (req.body.userRoleInfo[role] && (role === "admin" || role === "writer" || role === "reader" || role === "commenter")) {
             roles.push(role);
           }
         }
@@ -382,7 +486,9 @@ var addDeprecatedRoutes = function(app, node_config) {
     req.body.roles = req.body.roles || roles;
     console.log(new Date() + " updateroles is DEPRECATED, using the addroletouser route to process this request", roles);
     req.body.userToAddToRole = req.body.userToAddToRole || req.body.userRoleInfo.usernameToModify;
-    req.body.pouchname = userRoleInfo.pouchname;
+    if (req.body.userRoleInfo.pouchname) {
+      req.body.pouchname = req.body.userRoleInfo.pouchname;
+    }
     console.log(new Date() + " requester " + req.body.username + "  userToAddToRole " + req.body.userToAddToRole + " on " + req.body.pouchname);
 
     /* use the old api not the updateroles api */
