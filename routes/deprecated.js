@@ -31,6 +31,9 @@ var addDeprecatedRoutes = function(app) {
         delete returndata.user.password;
         delete returndata.user.serverlogs;
         returndata.info = [info.message];
+        if (req && req.syncDetails) {
+          returndata.info.unshift("Preferences saved.");
+        }
         //console.log(new Date() + " Returning the existing user as json:\n" + util.inspect(user));
       }
       console.log(new Date() + " Returning response:\n" + util.inspect(returndata));
