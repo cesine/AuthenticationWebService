@@ -305,25 +305,25 @@ var addDeprecatedRoutes = function(app) {
       }
 
 
-      var defaultConnection = corpus.getCouchConnectionFromServerCode(req.body.serverCode);
-      var couchconnection = req.body.couchConnection;
-      if (!couchconnection) {
-        couchconnection = defaultConnection;
-        if (req.body.pouchname) {
-          couchconnection.pouchname = req.body.pouchname;
+      var defaultConnection = corpus.getConnectionFromServerCode(req.body.serverCode);
+      var connection = req.body.connection;
+      if (!connection) {
+        connection = defaultConnection;
+        if (req.body.dbname) {
+          connection.dbname = req.body.dbname;
         }
       }
       for (var attrib in defaultConnection) {
-        if (defaultConnection.hasOwnProperty(attrib) && !couchconnection[attrib]) {
-          couchconnection[attrib] = defaultConnection[attrib];
+        if (defaultConnection.hasOwnProperty(attrib) && !connection[attrib]) {
+          connection[attrib] = defaultConnection[attrib];
         }
       }
-      if (req.body.pouchname && couchconnection.pouchname === "default") {
-        couchconnection.pouchname = req.body.pouchname;
+      if (req.body.dbname && connection.dbname === "default") {
+        connection.dbname = req.body.dbname;
       }
-      req.body.couchConnection = couchconnection;
-      console.log(req.body.couchConnection);
-      if (!req.body.couchConnection || !req.body.couchConnection.pouchname || req.body.couchConnection.pouchname === "default") {
+      req.body.connection = connection;
+      console.log(req.body.connection);
+      if (!req.body.connection || !req.body.connection.dbname || req.body.connection.dbname === "default") {
         console.log("Client didnt define the corpus to modify.");
         res.status(412);
         returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. info: the corpus to be modified must be included in the request"];
@@ -410,7 +410,7 @@ var addDeprecatedRoutes = function(app) {
   });
 
   /**
-   * Responds to requests for adding a corpus to a user, if successful replies with the pouchname of the new corpus in a string and a corpusaded = true
+   * Responds to requests for adding a corpus to a user, if successful replies with the dbname of the new corpus in a string and a corpusaded = true
    */
   app.post('/newcorpus', function(req, res, next) {
     authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function(err, user, info) {
@@ -489,10 +489,10 @@ var addDeprecatedRoutes = function(app) {
     req.body.roles = req.body.roles || roles;
     console.log(new Date() + " updateroles is DEPRECATED, using the addroletouser route to process this request", roles);
     req.body.userToAddToRole = req.body.userToAddToRole || req.body.userRoleInfo.usernameToModify;
-    if (req.body.userRoleInfo.pouchname) {
-      req.body.pouchname = req.body.userRoleInfo.pouchname;
+    if (req.body.userRoleInfo.dbname) {
+      req.body.dbname = req.body.userRoleInfo.dbname;
     }
-    console.log(new Date() + " requester " + req.body.username + "  userToAddToRole " + req.body.userToAddToRole + " on " + req.body.pouchname);
+    console.log(new Date() + " requester " + req.body.username + "  userToAddToRole " + req.body.userToAddToRole + " on " + req.body.dbname);
 
     /* use the old api not the updateroles api */
     addroletouser(req, res, next);

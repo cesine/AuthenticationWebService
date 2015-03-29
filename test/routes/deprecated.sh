@@ -365,7 +365,7 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "testingspreadshee",  "couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+-d '{"username": "testingspreadshee",  "connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/corpusteam `"
 echo ""
 echo "Response: $result";
@@ -398,15 +398,15 @@ result="`curl -kX POST \
   "username": "testingspreadsheet",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "testingspreadsheet", 
 "password": "test", 
-"couchConnection": {
-  "pouchname": "jenkins-firstcorpus"
+"connection": {
+  "dbname": "jenkins-firstcorpus"
 } }' \
 $SERVER/corpusteam `"
 echo ""
@@ -436,8 +436,8 @@ echo " eg: "
 echo '       {'
 echo '         "username": "jenkins",'
 echo '         "password": "phoneme",'
-echo '         "couchConnection": {'
-echo '           "pouchname": "jenkins-firstcorpus"'
+echo '         "connection": {'
+echo '           "dbname": "jenkins-firstcorpus"'
 echo '         }'
 echo '       }'
 echo ""
@@ -446,8 +446,8 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
-"couchConnection": 
-{"pouchname": 
+"connection": 
+{"dbname": 
 "jenkins-firstcorpus"} }' \
 $SERVER/corpusteam `"
 echo ""
@@ -478,7 +478,7 @@ echo '      {'
 echo '        "username": "jenkins",'
 echo '        "password": "phoneme",'
 echo '        "serverCode": "localhost",'
-echo '        "pouchname": "jenkins-firstcorpus"'
+echo '        "dbname": "jenkins-firstcorpus"'
 echo '      }'
 echo ""
 TESTCOUNT=$[TESTCOUNT + 1]
@@ -487,7 +487,7 @@ result="`curl -kX POST \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
 "serverCode": "localhost", 
-"pouchname": "jenkins-firstcorpus"}' \
+"dbname": "jenkins-firstcorpus"}' \
 $SERVER/corpusteam `"
 echo ""
 if [[ $result =~ userFriendlyErrors ]]
@@ -573,8 +573,8 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
-"couchConnection": {
-  "pouchname":
+"connection": {
+  "dbname":
   "jenkins-firstcorpus"
 } }' \
 $SERVER/addroletouser `"
@@ -608,7 +608,7 @@ result="`curl -kX POST \
 "users": [{
   "username": "testingprototype"
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -641,7 +641,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -660,8 +660,8 @@ if [[ $result =~ userFriendlyErrors ]]
         -H "Content-Type: application/json" \
         -d '{"username": "testingprototype", "password": "test"}' \
         $SERVER/login `"
-        echo "Response: $result" | grep -C 4 pouchname;
-        if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+        echo "Response: $result" | grep -C 4 dbname;
+        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
           then {
             TESTFAILED=$[TESTFAILED + 1]
             TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
@@ -691,7 +691,7 @@ result="`curl -kX POST \
   "add": ["reader", "commenter"],
   "remove": ["admin", "writer"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -712,7 +712,7 @@ if [[ $result =~ userFriendlyErrors ]]
         "password": "test"}' \
         $SERVER/login `"
         echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-        if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
           then {
             echo "    sever made sure the corpus was listed in this user too"
           } else {
@@ -742,7 +742,7 @@ result="`curl -kX POST \
   "add": ["reader", "commenter"],
   "remove": ["admin", "writer"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -777,7 +777,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo " prep: remove other user"
 result="`curl -kX POST \
@@ -787,13 +787,13 @@ result="`curl -kX POST \
   "username": "testingspreadsheet",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo '{' 
 echo '  "username": "jenkins",' 
 echo '  "password": "phoneme",' 
-echo '  "couchConnection": {' 
-echo '    "pouchname": "jenkins-firstcorpus"' 
+echo '  "connection": {' 
+echo '    "dbname": "jenkins-firstcorpus"' 
 echo '  },' 
 echo '  "users": [{' 
 echo '    "username": "testingspreadsheet",' 
@@ -826,7 +826,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "add": ["writer"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -847,7 +847,7 @@ if [[ $result =~ userFriendlyErrors ]]
         "password": "test"}' \
         $SERVER/login `"
         echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-        if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
           then {
             echo "    sever added corpus to the first user too"
             echo " Checking if corpus was added to the second user"
@@ -857,7 +857,7 @@ if [[ $result =~ userFriendlyErrors ]]
             "password": "test"}' \
             $SERVER/login `"
             echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-            if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+            if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
               then {
                 echo "    sever added corpus to the second user too"
               } else {
@@ -888,8 +888,8 @@ echo '      "username": "jenkins",'
 echo '      "password": "phoneme",'
 echo '      "userToAddToRole": "testingprototype",'
 echo '      "roles": ["reader", "commenter"],'
-echo '      "couchConnection": {'
-echo '        "pouchname": "jenkins-firstcorpus"'
+echo '      "connection": {'
+echo '        "dbname": "jenkins-firstcorpus"'
 echo '      }'
 echo '    }'
 echo " prep: remove the user"
@@ -900,7 +900,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
@@ -909,8 +909,8 @@ result="`curl -kX POST \
 "password": "phoneme", 
 "userToAddToRole": "testingprototype", 
 "roles": ["reader","commenter"], 
-"couchConnection": {
-  "pouchname": "jenkins-firstcorpus"
+"connection": {
+  "dbname": "jenkins-firstcorpus"
 } }' \
 $SERVER/addroletouser `"
 echo ""
@@ -1001,7 +1001,7 @@ echo '      "password": "phoneme",'
 echo '      "serverCode": "localhost",'
 echo '      "userRoleInfo": {'
 echo '        "usernameToModify": "testingspreadsheet",'
-echo '        "pouchname": "jenkins-firstcorpus",'
+echo '        "dbname": "jenkins-firstcorpus",'
 echo '        "admin": false,'
 echo '        "writer": true,'
 echo '        "reader": true,'
@@ -1011,7 +1011,7 @@ echo '     }'
 # echo 'file://angular_client/modules/spreadsheet/app/scripts/controllers/SpreadsheetController.js '
 # echo '      dataToPost.userRoleInfo = {};'
 # echo '      dataToPost.userRoleInfo.usernameToModify = userid;'
-# echo '      dataToPost.userRoleInfo.pouchname = $rootScope.corpus.pouchname;'
+# echo '      dataToPost.userRoleInfo.dbname = $rootScope.corpus.dbname;'
 # echo '      //dataToPost.userRoleInfo.removeUser = true;'
 # echo '      switch (newUserRoles.role) {'
 # # echo '      /*'
@@ -1063,7 +1063,7 @@ echo '     }'
 # # echo '        break;'
 # # echo '    }'
 # echo ''
-# echo '    newUserRoles.pouchname = $rootScope.corpus.pouchname;'
+# echo '    newUserRoles.dbname = $rootScope.corpus.dbname;'
 # echo ''
 # echo '    var dataToPost = {};'
 # echo '    dataToPost.username = $rootScope.user.username.trim();'
@@ -1082,7 +1082,7 @@ result="`curl -kX POST \
   "username": "testingspreadsheet",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
@@ -1091,7 +1091,7 @@ result="`curl -kX POST \
 "serverCode": "localhost", 
 "userRoleInfo": {
   "usernameToModify": "testingspreadsheet", 
-  "pouchname": "jenkins-firstcorpus", 
+  "dbname": "jenkins-firstcorpus", 
   "admin": false, 
   "writer": true, 
   "reader": true, 
@@ -1126,7 +1126,7 @@ echo '     {'
 echo '      "username": "jenkins",'
 echo '      "password": "phoneme",'
 echo '      "serverCode": "localhost",'
-echo '      "pouchname": "jenkins-firstcorpus",'
+echo '      "dbname": "jenkins-firstcorpus",'
 echo '      "users": [{'
 echo '        "username": "testingspreadsheet",'
 echo '        "add": ["writer", "commenter", "reader"],'
@@ -1141,7 +1141,7 @@ result="`curl -kX POST \
   "username": "testingspreadsheet",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo '    '
 TESTCOUNT=$[TESTCOUNT + 1]
@@ -1150,7 +1150,7 @@ result="`curl -kX POST \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
 "serverCode": "localhost", 
-"pouchname": "jenkins-firstcorpus", 
+"dbname": "jenkins-firstcorpus", 
 "users": [{
   "username": "testingspreadsheet", 
   "add":["writer","commenter","reader"], 

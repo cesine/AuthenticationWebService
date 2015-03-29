@@ -3,7 +3,7 @@ module.exports = {
   "title": "Private Corpus",
   "titleAsUrl": "private_corpus",
   "description": "The details of this corpus are not public.",
-  "couchConnection": {},
+  "connection": {},
   "termsOfUse": {
     "humanReadable": "Sample: The materials included in this corpus are available for research and educational use. If you want to use the materials for commercial purposes, please notify the author(s) of the corpus (myemail@myemail.org) prior to the use of the materials. Users of this corpus can copy and redistribute the materials included in this corpus, under the condition that the materials copied/redistributed are properly attributed.  Modification of the data in any copied/redistributed work is not allowed unless the data source is properly cited and the details of the modification is clearly mentioned in the work. Some of the items included in this corpus may be subject to further access conditions specified by the owners of the data and/or the authors of the corpus."
   },
@@ -13,7 +13,7 @@ module.exports = {
     "link": "http://creativecommons.org/licenses/by-sa/3.0/"
   },
   "copyright": "Default: Add names of the copyright holders of the corpus.",
-  "pouchname": "",
+  "dbname": "",
   "datumFields": [{
     "label": "judgement",
     "value": "",

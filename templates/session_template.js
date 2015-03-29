@@ -1,5 +1,5 @@
 module.exports = {
-  "pouchname": "",
+  "dbname": "",
   "comments": [],
   "sessionFields": [{
     "label": "goal",

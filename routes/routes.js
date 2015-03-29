@@ -23,7 +23,7 @@ var setup = function(api, apiVersion) {
 	var APIModelShema = {};
 	APIModelShema.models = {
 		'User': userRoutes.UserSchema,
-		'CouchConnection': userRoutes.CorpusConnectionSchema
+		'Connection': userRoutes.ConnectionSchema
 	};
 	swagger.addModels(APIModelShema);
 
