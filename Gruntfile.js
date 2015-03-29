@@ -40,6 +40,11 @@ module.exports = function(grunt) {
         cmd: function() {
           return "bash test/routes/deprecated.sh";
         }
+      },
+      sim_link_fielddb_npm: {
+        cmd: function() {
+          return "ls ../FieldDB && rm -rf node_modules/fielddb && ln -s $FIELDDB_HOME/FieldDB node_modules/fielddb && ls -al node_modules/fielddb";
+        }
       }
     }
   });

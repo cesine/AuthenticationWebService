@@ -29,6 +29,7 @@
     "cradle": "0.6.6",
     "diacritic": "0.0.2",
     "express": "3.5.2",
+    "fielddb": "^0.93.2",
     "grunt-exec": "^0.4.6",
     "nano": "4.1.1",
     "nodemailer": "0.5.2",
@@ -37,8 +38,7 @@
     "underscore": "1.5.1",
     "uuid": "1.4.1"
   },
-  "peerDependencies": {
-  },
+  "peerDependencies": {},
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-nodeunit": "*",
