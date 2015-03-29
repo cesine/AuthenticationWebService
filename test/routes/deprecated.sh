@@ -28,7 +28,7 @@ TESTCOUNT=0;
 TESTFAILED=0;
 TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 TESTPASSED=0;
-TESTCOUNTEXPECTED=27;
+TESTCOUNTEXPECTED=29;
 
 # Production server is using http behind nginx
 SERVER="https://localhost:3183";
@@ -65,6 +65,63 @@ if [[ $result =~ "\"prefs\": " ]]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
  }
 fi 
+
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should suggest a vaid username"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "Jênk iлs", "password": "phoneme"}' \
+$SERVER/login `"
+echo "$result"
+echo "Response: $result" | grep -C 4 prefs;
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+    echo " success"
+    if [[ $result =~ "Maybe your username is jenkins?"  ]]
+     then {
+       echo "   server provided an informative message";
+     } else {
+      TESTFAILED=$[TESTFAILED + 1]
+      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    }
+  fi
+} else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+}
+fi 
+
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should support ქართული usernames"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "ნინო ბერიძე", "password": "phoneme"}' \
+$SERVER/login `"
+echo "$result"
+echo "Response: $result" | grep -C 4 prefs;
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+    echo " success"
+    if [[ $result =~ "Maybe your username is ninoberidze?"  ]] 
+     then {
+       echo "   server provided an informative message"; 
+     } else {
+      TESTFAILED=$[TESTFAILED + 1]
+      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    }
+  fi
+} else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+}
+fi 
+
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should count down the password reset"
