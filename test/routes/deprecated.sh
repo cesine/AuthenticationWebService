@@ -41,12 +41,12 @@ echo ""
 echo "Using $SERVER"
 
 echo "-------------------------------------------------------------"
-TESTNAME="It should return user details upon successful login"
+TESTNAME="It should return (upgraded) user details upon successful login"
 echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "phoneme"}' \
+-d '{"username": "testingprototype", "password": "test"}' \
 $SERVER/login `"
 echo ""
 echo "Response: $result" | grep -C 4 prefs;
@@ -60,6 +60,19 @@ if [[ $result =~ "\"prefs\": " ]]
   then {
     echo "Details recieved, you can use this user object in your app settings for this user."
     echo "   success";
+
+    # echo "Response: $result";
+    echo "  $result" | grep -C 4 "corpuses";
+    echo "  $result" | grep -C 4 "corpora";
+    if [[ $result =~ "\"corpuses\": " ]]
+      then {
+       TESTFAILED=$[TESTFAILED + 1]
+       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      } else  {
+        echo "Upgraded users corpuses to corpora."
+        echo "   success";
+     }
+    fi 
   } else  {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
@@ -194,7 +207,7 @@ echo "Response: $result";
 if [[ $result =~ userFriendlyErrors ]]
   then {
     echo "  success"
-    if [[ $result =~ "Username already exists, try a different username"  ]]
+    if [[ $result =~ "Username jenkins already exists, try a different username"  ]]
       then {
         echo "   server provided an informative message";
       } else {
