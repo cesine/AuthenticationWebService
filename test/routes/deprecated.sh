@@ -28,7 +28,7 @@ TESTCOUNT=0;
 TESTFAILED=0;
 TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 TESTPASSED=0;
-TESTCOUNTEXPECTED=29;
+TESTCOUNTEXPECTED=30;
 
 # Production server is using http behind nginx
 SERVER="https://localhost:3183";
@@ -39,6 +39,34 @@ fi
 
 echo ""
 echo "Using $SERVER"
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should return username or passwrod invalid"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "testingprototype", "password": "wrongpassword"}' \
+$SERVER/login `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ "stack" ]]
+  then {
+   TESTFAILED=$[TESTFAILED + 1]
+   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+ } else {
+  if [[ $result =~ "Username or password is invalid. Please try again" ]]
+    then {
+      echo "Semi-uninformative message recieved"
+      echo "   success";
+    } else  {
+     TESTFAILED=$[TESTFAILED + 1]
+     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   }
+  fi 
+ }
+fi 
+
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should return (upgraded) user details upon successful login"
