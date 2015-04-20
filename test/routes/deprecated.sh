@@ -28,7 +28,7 @@ TESTCOUNT=0;
 TESTFAILED=0;
 TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 TESTPASSED=0;
-TESTCOUNTEXPECTED=30;
+TESTCOUNTEXPECTED=32;
 
 # Production server is using http behind nginx
 SERVER="https://localhost:3183";
@@ -41,7 +41,7 @@ echo ""
 echo "Using $SERVER"
 
 echo "-------------------------------------------------------------"
-TESTNAME="It should return username or passwrod invalid"
+TESTNAME="It should return username or password invalid"
 echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
@@ -1045,7 +1045,7 @@ echo "Response: $result";
 if [[ $result =~ userFriendlyErrors ]]
   then {
     echo "   success"
-    if [[ $result =~ "missing: newCorpusName" ]]
+    if [[ $result =~ "missing: newCorpusTitle" ]]
       then {
         echo "Response: $result" | grep -C 4 readers;
         echo "    server replied with informative info"
@@ -1069,7 +1069,7 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
-"newCorpusName": "My new corpus title"}' \
+"newCorpusName": "Testing v3.0.19"}' \
 $SERVER/newcorpus `"
 echo ""
 echo "Response: $result";
@@ -1079,13 +1079,67 @@ if [[ $result =~ userFriendlyErrors ]]
  } else {
   if [[ $result =~ "already exists, no need to create it" ]]
     then {
-      echo "Response: $result" | grep -C 2 my_new_corpus_title;
+      echo "Response: $result" | grep -C 2 testing;
       echo "    server replied with a 302 status saying it existed."
     } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
     }
   fi 
+}
+fi 
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should create branded corpora"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "jenkins", 
+"password": "phoneme", 
+"appbrand": "georgiantogether",
+"newCorpusName": "Georgian"}' \
+$SERVER/newcorpus `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+   echo "   success"
+ } else {
+  if [[ $result =~ "already exists, no need to create it" ]]
+    then {
+      echo "Response: $result" | grep -C 2 georgian;
+      echo "    server replied with a 302 status saying it existed."
+    } else {
+      TESTFAILED=$[TESTFAILED + 1]
+      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    }
+  fi 
+}
+fi 
+
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should try to create all corpora listed in the user"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "jenkins", 
+"password": "phoneme", 
+"syncDetails": true, 
+"syncUserDetails": { 
+  "newCorpusConnections": [{"dbname": "jenkins-firstcorpus"},{},{"dbname": "someoneelsesdb-shouldnt_be_creatable"},{"dbname": "jenkins-an_offline_corpus_created_in_the_prototype"},{"dbname": "jenkins-firstcorpus"}] 
+}}' \
+$SERVER/login `"
+echo ""
+echo "Response: $result" | grep -C 2 corpora;
+if [[ $result =~ corpora ]]
+  then {
+   echo "   success"
+ } else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 }
 fi 
 

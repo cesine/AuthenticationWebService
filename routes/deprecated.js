@@ -449,11 +449,12 @@ var addDeprecatedRoutes = function(app) {
           return;
         }
         req.body.appbrand = req.body.appbrand || req.body.brand || req.body.serverCode || req.body.serverLabel;
+        console.log(" Creating a corpus withbranding " + req.body.appbrand);
         var connection = new Connection(Connection.defaultConnection(req.body.appbrand))
         connection.title = req.body.newCorpusTitle;
         connection.dbname = req.body.username + "-" + connection.titleAsUrl;
-
-        returndata.info = [info.message];
+        console.log("Connection", connection);
+        
         // Add a new corpus for the user
         corpus.createNewCorpus({
           username: req.body.username,
