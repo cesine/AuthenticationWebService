@@ -35,7 +35,7 @@ SERVER="https://localhost:3183";
 if [ "$NODE_DEPLOY_TARGET" == "production" ]; then
   SERVER="http://localhost:3183";
 fi
-# SERVER="https://authdev.lingsync.org";
+SERVER="https://apidev.lingsync.org";
 
 echo ""
 echo "Using $SERVER"
@@ -170,19 +170,19 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "phoneme"}' \
+-d '{"username": "testingprototype", "password": "test"}' \
 $SERVER/login `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "opps"}' \
+-d '{"username": "testingprototype", "password": "opps"}' \
 $SERVER/login `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "wrongpassword"}' \
+-d '{"username": "testingprototype", "password": "wrongpassword"}' \
 $SERVER/login `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "again"}' \
+-d '{"username": "testingprototype", "password": "again"}' \
 $SERVER/login `"
 echo "$result"
 if [[ $result =~ "You have 2 more attempts"  ]]
@@ -195,7 +195,7 @@ if [[ $result =~ "You have 2 more attempts"  ]]
 fi
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "trying"}' \
+-d '{"username": "testingprototype", "password": "trying"}' \
 $SERVER/login `"
 # echo "$result"
 if [[ $result =~ "You have 1 more attempts"  ]]
@@ -208,7 +208,7 @@ if [[ $result =~ "You have 1 more attempts"  ]]
 fi
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "wrongpassword"}' \
+-d '{"username": "testingprototype", "password": "wrongpassword"}' \
 $SERVER/login `"
 echo "$result"
 if [[ $result =~ "You have tried to log in"  ]]
@@ -493,7 +493,7 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", "password": "phoneme",
 "users": [{
-  "username": "testingspreadsheet",
+  "username": "testingprototype",
   "remove": ["all"]
 }],
 "connection": {"dbname": "jenkins-firstcorpus"} }' \
@@ -501,7 +501,7 @@ $SERVER/addroletouser `"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "testingspreadsheet", 
+-d '{"username": "testingprototype", 
 "password": "test", 
 "connection": {
   "dbname": "jenkins-firstcorpus"
