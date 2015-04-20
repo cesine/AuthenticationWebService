@@ -6,8 +6,8 @@ var Connection = require('FieldDB/api/corpus/Connection').Connection;
 
 
 var cleanErrorStatus = function(status) {
-  if (status && status.length === 3) {
-    return status;
+  if (status) {
+    return parseInt(status, 10);
   }
   return "";
 };
@@ -208,7 +208,7 @@ var addDeprecatedRoutes = function(app) {
         res.status(cleanErrorStatus(err.status) || 400);
         returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.fetchCorpusPermissions:\n" + util.inspect(err));
-        returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+        returndata.userFriendlyErrors = [info.message];
       }
       if (!users) {
         returndata.userFriendlyErrors = [info.message];
@@ -235,7 +235,7 @@ var addDeprecatedRoutes = function(app) {
         res.status(cleanErrorStatus(err.status) || 400);
         returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
-        returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+        returndata.userFriendlyErrors = [info.message];
         res.send(returndata);
         return;
       }
@@ -244,7 +244,7 @@ var addDeprecatedRoutes = function(app) {
           res.status(cleanErrorStatus(err.status) || 400);
           returndata.status = cleanErrorStatus(err.status) || 400;
           console.log(new Date() + " There was an error in the authenticationfunctions.fetchCorpusPermissions:\n" + util.inspect(err));
-          returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+          returndata.userFriendlyErrors = [info.message];
         }
         if (!users) {
           returndata.userFriendlyErrors = [info.message];
@@ -430,7 +430,7 @@ var addDeprecatedRoutes = function(app) {
         res.status(cleanErrorStatus(err.status) || 400);
         returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
-        returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+        returndata.userFriendlyErrors = [info.message];
         res.send(returndata);
         return;
       }
