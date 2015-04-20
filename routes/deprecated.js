@@ -203,6 +203,7 @@ var addDeprecatedRoutes = function(app) {
    */
   app.post('/corpusteam', function(req, res, next) {
     var returndata = {};
+    req.body.dbname = req.body.dbname || req.body.pouchname;
     authenticationfunctions.fetchCorpusPermissions(req, function(err, users, info) {
       if (err) {
         res.status(cleanErrorStatus(err.status) || 400);
