@@ -440,30 +440,37 @@ var addDeprecatedRoutes = function(app) {
         return;
       } else {
 
-        if (!req.body.newCorpusName) {
+        req.body.newCorpusTitle = req.body.newCorpusTitle || req.body.newCorpusName;
+        if (!req.body.newCorpusTitle) {
           res.status(412);
           returndata.status = 412;
-          returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. missing: newCorpusName"];
+          returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. missing: newCorpusTitle"];
           res.send(returndata);
           return;
         }
-        req.body.appbrand = req.body.appbrand ||  req.body.brand || req.body.serverCode || req.body.serverLabel;
+        req.body.appbrand = req.body.appbrand || req.body.brand || req.body.serverCode || req.body.serverLabel;
+        var connection = new Connection(Connection.defaultConnection(req.body.appbrand))
+        connection.title = req.body.newCorpusTitle;
+        connection.dbname = req.body.username + "-" + connection.titleAsUrl;
 
-        returndata.corpusadded = true;
         returndata.info = [info.message];
         // Add a new corpus for the user
-        corpus.createNewCorpus(req, function(err, corpus, info) {
+        corpus.createNewCorpus({
+          username: req.body.username,
+          title: req.body.newCorpusTitle,
+          connection: connection
+        }, function(err, corpus, info) {
           if (err) {
             res.status(cleanErrorStatus(err.status) || 400);
             returndata.status = cleanErrorStatus(err.status) || 400;
             console.log(new Date() + " There was an error in corpus.createNewCorpus");
-            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusName];
+            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusTitle];
             if (err.status === 302) {
               returndata.corpusadded = true;
             }
           }
           if (!corpus) {
-            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusName];
+            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusTitle];
           } else {
             returndata.corpusadded = true;
             returndata.info = ["Corpus " + corpus.title + " created successfully."];
