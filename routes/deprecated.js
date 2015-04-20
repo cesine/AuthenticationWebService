@@ -430,7 +430,7 @@ var addDeprecatedRoutes = function(app) {
         res.status(cleanErrorStatus(err.status) || 400);
         returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
-        returndata.userFriendlyErrors = [info.message];
+        returndata.userFriendlyErrors = ["Unable to create your corpus. " + info.message];
         res.send(returndata);
         return;
       }
