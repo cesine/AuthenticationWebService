@@ -1,7 +1,7 @@
-var authenticationfunctions = require('./../lib/userauthentication.js'),
-  fs = require('fs'),
-  util = require('util'),
-  corpus = require('./../lib/corpus');
+var authenticationfunctions = require('./../lib/userauthentication.js');
+var util = require('util');
+var corpus = require('./../lib/corpus');
+var Connection = require('FieldDB/api/corpus/Connection').Connection;
 
 /** 
  * These are all the old routes that haphazardly grew over time and make up API version 0.1
@@ -305,7 +305,7 @@ var addDeprecatedRoutes = function(app) {
       }
 
 
-      var defaultConnection = corpus.getConnectionFromServerCode(req.body.serverCode);
+      var defaultConnection = Connection.defaultConnection(req.body.serverCode);
       var connection = req.body.connection;
       if (!connection) {
         connection = defaultConnection;
@@ -344,7 +344,6 @@ var addDeprecatedRoutes = function(app) {
 
 
       // Add a role to the user
-      var currentlyProcessingUsername = req.body.users[0].username;
       authenticationfunctions.addRoleToUser(req, function(err, userPermissionSet, optionalInfo) {
         console.log("Getting back the results of authenticationfunctions.addRoleToUser ");
         // console.log(err);

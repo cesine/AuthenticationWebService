@@ -1,6 +1,6 @@
 {
   "name": "fielddb-auth",
-  "version": "2.49.29",
+  "version": "3.0.19",
   "description": "Authentication web services for FieldDB.",
   "homepage": "https://github.com/OpenSourceFieldlinguistics/FieldDB/issues/milestones?state=closed",
   "repository": {
@@ -31,7 +31,7 @@
     "express": "3.5.2",
     "fielddb": "3.0.19",
     "grunt-exec": "^0.4.6",
-    "nano": "4.1.1",
+    "nano": "6.1.2",
     "nodemailer": "0.5.2",
     "q": "^1.1.2",
     "swagger-node-express": "git://github.com/cesine/swagger-node-express#search",
