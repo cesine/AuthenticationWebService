@@ -309,10 +309,13 @@ var addDeprecatedRoutes = function(app) {
       var connection = req.body.connection;
       if (!connection) {
         connection = defaultConnection;
+        req.body.dbname = req.body.dbname || req.body.pouchname;
         if (req.body.dbname) {
           connection.dbname = req.body.dbname;
         }
       }
+      connection.dbname = connection.dbname || connection.pouchname;
+
       for (var attrib in defaultConnection) {
         if (defaultConnection.hasOwnProperty(attrib) && !connection[attrib]) {
           connection[attrib] = defaultConnection[attrib];
@@ -474,6 +477,7 @@ var addDeprecatedRoutes = function(app) {
 
     /* convert spreadhseet data into data which the addroletouser api can read */
     req.body.userRoleInfo = req.body.userRoleInfo || {};
+    req.body.userRoleInfo.dbname = req.body.userRoleInfo.dbname || req.body.userRoleInfo.pouchname;
     var roles = [];
 
     if (!req.body.roles && req.body.userRoleInfo) {
