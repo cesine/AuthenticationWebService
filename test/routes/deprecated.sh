@@ -35,7 +35,7 @@ SERVER="https://localhost:3183";
 if [ "$NODE_DEPLOY_TARGET" == "production" ]; then
   SERVER="http://localhost:3183";
 fi
-SERVER="https://apidev.lingsync.org";
+# SERVER="https://auth.lingsync.org";
 
 echo ""
 echo "Using $SERVER"
