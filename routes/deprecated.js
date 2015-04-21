@@ -1,7 +1,16 @@
-var authenticationfunctions = require('./../lib/userauthentication.js'),
-  fs = require('fs'),
-  util = require('util'),
-  corpus = require('./../lib/corpus');
+var authenticationfunctions = require('./../lib/userauthentication.js');
+var util = require('util');
+var corpus = require('./../lib/corpus');
+var Connection = require('FieldDB/api/corpus/Connection').Connection;
+
+
+
+var cleanErrorStatus = function(status) {
+  if (status) {
+    return parseInt(status, 10);
+  }
+  return "";
+};
 
 /** 
  * These are all the old routes that haphazardly grew over time and make up API version 0.1
@@ -19,8 +28,8 @@ var addDeprecatedRoutes = function(app) {
     authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function(err, user, info) {
       var returndata = {};
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
         returndata.userFriendlyErrors = [info.message];
       }
@@ -31,6 +40,9 @@ var addDeprecatedRoutes = function(app) {
         delete returndata.user.password;
         delete returndata.user.serverlogs;
         returndata.info = [info.message];
+        if (req && req.syncDetails) {
+          returndata.info.unshift("Preferences saved.");
+        }
         //console.log(new Date() + " Returning the existing user as json:\n" + util.inspect(user));
       }
       console.log(new Date() + " Returning response:\n" + util.inspect(returndata));
@@ -67,8 +79,8 @@ var addDeprecatedRoutes = function(app) {
     authenticationfunctions.registerNewUser('local', req, function(err, user, info) {
       var returndata = {};
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.registerNewUser" + util.inspect(err));
         returndata.userFriendlyErrors = [info.message];
       }
@@ -123,8 +135,8 @@ var addDeprecatedRoutes = function(app) {
     authenticationfunctions.setPassword(oldpassword, newpassword, username, function(err, user, info) {
       var returndata = {};
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.setPassword " + util.inspect(err));
         returndata.userFriendlyErrors = [info.message];
       }
@@ -168,8 +180,8 @@ var addDeprecatedRoutes = function(app) {
     authenticationfunctions.forgotPassword(email, function(err, forgotPasswordResults, info) {
       var returndata = {};
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.setPassword " + util.inspect(err));
         returndata.userFriendlyErrors = [info.message];
       } else {
@@ -191,12 +203,13 @@ var addDeprecatedRoutes = function(app) {
    */
   app.post('/corpusteam', function(req, res, next) {
     var returndata = {};
+    req.body.dbname = req.body.dbname || req.body.pouchname;
     authenticationfunctions.fetchCorpusPermissions(req, function(err, users, info) {
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.fetchCorpusPermissions:\n" + util.inspect(err));
-        returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+        returndata.userFriendlyErrors = [info.message];
       }
       if (!users) {
         returndata.userFriendlyErrors = [info.message];
@@ -220,19 +233,19 @@ var addDeprecatedRoutes = function(app) {
     var returndata = {};
     authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function(err, user, info) {
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
-        returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+        returndata.userFriendlyErrors = [info.message];
         res.send(returndata);
         return;
       }
       authenticationfunctions.fetchCorpusPermissions(req, function(err, users, info) {
         if (err) {
-          res.status(err.status || 400);
-          returndata.status = err.status || 400;
+          res.status(cleanErrorStatus(err.status) || 400);
+          returndata.status = cleanErrorStatus(err.status) || 400;
           console.log(new Date() + " There was an error in the authenticationfunctions.fetchCorpusPermissions:\n" + util.inspect(err));
-          returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+          returndata.userFriendlyErrors = [info.message];
         }
         if (!users) {
           returndata.userFriendlyErrors = [info.message];
@@ -278,8 +291,8 @@ var addDeprecatedRoutes = function(app) {
     authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function(err, user, info) {
       var returndata = {};
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
 
         returndata.userFriendlyErrors = [info.message];
@@ -302,25 +315,28 @@ var addDeprecatedRoutes = function(app) {
       }
 
 
-      var defaultConnection = corpus.getCouchConnectionFromServerCode(req.body.serverCode);
-      var couchconnection = req.body.couchConnection;
-      if (!couchconnection) {
-        couchconnection = defaultConnection;
-        if (req.body.pouchname) {
-          couchconnection.pouchname = req.body.pouchname;
+      var defaultConnection = Connection.defaultConnection(req.body.serverCode);
+      var connection = req.body.connection;
+      if (!connection) {
+        connection = defaultConnection;
+        req.body.dbname = req.body.dbname || req.body.pouchname;
+        if (req.body.dbname) {
+          connection.dbname = req.body.dbname;
         }
       }
+      connection.dbname = connection.dbname || connection.pouchname;
+
       for (var attrib in defaultConnection) {
-        if (defaultConnection.hasOwnProperty(attrib) && !couchconnection[attrib]) {
-          couchconnection[attrib] = defaultConnection[attrib];
+        if (defaultConnection.hasOwnProperty(attrib) && !connection[attrib]) {
+          connection[attrib] = defaultConnection[attrib];
         }
       }
-      if (req.body.pouchname && couchconnection.pouchname === "default") {
-        couchconnection.pouchname = req.body.pouchname;
+      if (req.body.dbname && connection.dbname === "default") {
+        connection.dbname = req.body.dbname;
       }
-      req.body.couchConnection = couchconnection;
-      console.log(req.body.couchConnection);
-      if (!req.body.couchConnection || !req.body.couchConnection.pouchname || req.body.couchConnection.pouchname === "default") {
+      req.body.connection = connection;
+      console.log(req.body.connection);
+      if (!req.body.connection || !req.body.connection.dbname || req.body.connection.dbname === "default") {
         console.log("Client didnt define the corpus to modify.");
         res.status(412);
         returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. info: the corpus to be modified must be included in the request"];
@@ -338,7 +354,6 @@ var addDeprecatedRoutes = function(app) {
 
 
       // Add a role to the user
-      var currentlyProcessingUsername = req.body.users[0].username;
       authenticationfunctions.addRoleToUser(req, function(err, userPermissionSet, optionalInfo) {
         console.log("Getting back the results of authenticationfunctions.addRoleToUser ");
         // console.log(err);
@@ -380,8 +395,8 @@ var addDeprecatedRoutes = function(app) {
         // console.log(info);
 
         if (err) {
-          res.status(err.status || 500);
-          returndata.status = err.status || 500;
+          res.status(cleanErrorStatus(err.status) || 500);
+          returndata.status = cleanErrorStatus(err.status) || 500;
           console.log(new Date() + " There was an error in the authenticationfunctions.addRoleToUser:\n" + util.inspect(err));
 
           returndata.userFriendlyErrors = info;
@@ -407,16 +422,16 @@ var addDeprecatedRoutes = function(app) {
   });
 
   /**
-   * Responds to requests for adding a corpus to a user, if successful replies with the pouchname of the new corpus in a string and a corpusaded = true
+   * Responds to requests for adding a corpus to a user, if successful replies with the dbname of the new corpus in a string and a corpusaded = true
    */
   app.post('/newcorpus', function(req, res, next) {
     authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function(err, user, info) {
       var returndata = {};
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
-        returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
+        returndata.userFriendlyErrors = ["Unable to create your corpus. " + info.message];
         res.send(returndata);
         return;
       }
@@ -426,29 +441,38 @@ var addDeprecatedRoutes = function(app) {
         return;
       } else {
 
-        if (!req.body.newCorpusName) {
+        req.body.newCorpusTitle = req.body.newCorpusTitle || req.body.newCorpusName;
+        if (!req.body.newCorpusTitle) {
           res.status(412);
           returndata.status = 412;
-          returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. missing: newCorpusName"];
+          returndata.userFriendlyErrors = ["This app has made an invalid request. Please notify its developer. missing: newCorpusTitle"];
           res.send(returndata);
           return;
         }
-
-        returndata.corpusadded = true;
-        returndata.info = [info.message];
+        req.body.appbrand = req.body.appbrand || req.body.brand || req.body.serverCode || req.body.serverLabel;
+        console.log(" Creating a corpus withbranding " + req.body.appbrand);
+        var connection = new Connection(Connection.defaultConnection(req.body.appbrand))
+        connection.title = req.body.newCorpusTitle;
+        connection.dbname = req.body.username + "-" + connection.titleAsUrl;
+        console.log("Connection", connection);
+        
         // Add a new corpus for the user
-        corpus.createNewCorpus(req, function(err, corpus, info) {
+        corpus.createNewCorpus({
+          username: req.body.username,
+          title: req.body.newCorpusTitle,
+          connection: connection
+        }, function(err, corpus, info) {
           if (err) {
-            res.status(err.status || 400);
-            returndata.status = err.status || 400;
+            res.status(cleanErrorStatus(err.status) || 400);
+            returndata.status = cleanErrorStatus(err.status) || 400;
             console.log(new Date() + " There was an error in corpus.createNewCorpus");
-            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusName];
+            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusTitle];
             if (err.status === 302) {
               returndata.corpusadded = true;
             }
           }
           if (!corpus) {
-            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusName];
+            returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusTitle];
           } else {
             returndata.corpusadded = true;
             returndata.info = ["Corpus " + corpus.title + " created successfully."];
@@ -471,6 +495,7 @@ var addDeprecatedRoutes = function(app) {
 
     /* convert spreadhseet data into data which the addroletouser api can read */
     req.body.userRoleInfo = req.body.userRoleInfo || {};
+    req.body.userRoleInfo.dbname = req.body.userRoleInfo.dbname || req.body.userRoleInfo.pouchname;
     var roles = [];
 
     if (!req.body.roles && req.body.userRoleInfo) {
@@ -486,10 +511,10 @@ var addDeprecatedRoutes = function(app) {
     req.body.roles = req.body.roles || roles;
     console.log(new Date() + " updateroles is DEPRECATED, using the addroletouser route to process this request", roles);
     req.body.userToAddToRole = req.body.userToAddToRole || req.body.userRoleInfo.usernameToModify;
-    if (req.body.userRoleInfo.pouchname) {
-      req.body.pouchname = req.body.userRoleInfo.pouchname;
+    if (req.body.userRoleInfo.dbname) {
+      req.body.dbname = req.body.userRoleInfo.dbname;
     }
-    console.log(new Date() + " requester " + req.body.username + "  userToAddToRole " + req.body.userToAddToRole + " on " + req.body.pouchname);
+    console.log(new Date() + " requester " + req.body.username + "  userToAddToRole " + req.body.userToAddToRole + " on " + req.body.dbname);
 
     /* use the old api not the updateroles api */
     addroletouser(req, res, next);
@@ -506,8 +531,8 @@ var addDeprecatedRoutes = function(app) {
         depcrecated: true
       };
       if (err) {
-        res.status(err.status || 400);
-        returndata.status = err.status || 400;
+        res.status(cleanErrorStatus(err.status) || 400);
+        returndata.status = cleanErrorStatus(err.status) || 400;
         console.log(new Date() + " There was an error in the authenticationfunctions.authenticateUser:\n" + util.inspect(err));
         returndata.userFriendlyErrors = "Please supply a username and password to ensure this is you.";
         res.send(returndata);
@@ -523,8 +548,8 @@ var addDeprecatedRoutes = function(app) {
         // Update user roles for corpus
         corpus.updateRoles(req, function(err, roles, info) {
           if (err) {
-            res.status(err.status || 400);
-            returndata.status = err.status || 400;
+            res.status(cleanErrorStatus(err.status) || 400);
+            returndata.status = cleanErrorStatus(err.status) || 400;
             console.log(new Date() + " There was an error in corpus.updateRoles\n");
             returndata.userFriendlyErrors = [info.message];
           }

@@ -28,25 +28,53 @@ TESTCOUNT=0;
 TESTFAILED=0;
 TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 TESTPASSED=0;
-TESTCOUNTEXPECTED=27;
+TESTCOUNTEXPECTED=32;
 
 # Production server is using http behind nginx
 SERVER="https://localhost:3183";
 if [ "$NODE_DEPLOY_TARGET" == "production" ]; then
   SERVER="http://localhost:3183";
 fi
-# SERVER="https://authdev.lingsync.org";
+# SERVER="https://auth.lingsync.org";
 
 echo ""
 echo "Using $SERVER"
 
 echo "-------------------------------------------------------------"
-TESTNAME="It should return user details upon successful login"
+TESTNAME="It should return username or password invalid"
 echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "phoneme"}' \
+-d '{"username": "testingprototype", "password": "wrongpassword"}' \
+$SERVER/login `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ "stack" ]]
+  then {
+   TESTFAILED=$[TESTFAILED + 1]
+   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+ } else {
+  if [[ $result =~ "Username or password is invalid. Please try again" ]]
+    then {
+      echo "Semi-uninformative message recieved"
+      echo "   success";
+    } else  {
+     TESTFAILED=$[TESTFAILED + 1]
+     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   }
+  fi 
+ }
+fi 
+
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should return (upgraded) user details upon successful login"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "testingprototype", "password": "test"}' \
 $SERVER/login `"
 echo ""
 echo "Response: $result" | grep -C 4 prefs;
@@ -60,11 +88,81 @@ if [[ $result =~ "\"prefs\": " ]]
   then {
     echo "Details recieved, you can use this user object in your app settings for this user."
     echo "   success";
+
+    # echo "Response: $result";
+    echo "  $result" | grep -C 4 "corpuses";
+    echo "  $result" | grep -C 4 "corpora";
+    if [[ $result =~ "\"corpuses\": " ]]
+      then {
+       TESTFAILED=$[TESTFAILED + 1]
+       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      } else  {
+        echo "Upgraded users corpuses to corpora."
+        echo "   success";
+     }
+    fi 
   } else  {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
  }
 fi 
+
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should suggest a vaid username"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "Jênk iлs", "password": "phoneme"}' \
+$SERVER/login `"
+echo "$result"
+echo "Response: $result" | grep -C 4 prefs;
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+    echo " success"
+    if [[ $result =~ "Maybe your username is jenkins?"  ]]
+     then {
+       echo "   server provided an informative message";
+     } else {
+      TESTFAILED=$[TESTFAILED + 1]
+      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    }
+  fi
+} else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+}
+fi 
+
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should support ქართული usernames"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "ნინო ბერიძე", "password": "phoneme"}' \
+$SERVER/login `"
+echo "$result"
+echo "Response: $result" | grep -C 4 prefs;
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+    echo " success"
+    if [[ $result =~ "Maybe your username is ninoberidze?"  ]] 
+     then {
+       echo "   server provided an informative message"; 
+     } else {
+      TESTFAILED=$[TESTFAILED + 1]
+      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    }
+  fi
+} else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+}
+fi 
+
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should count down the password reset"
@@ -72,19 +170,19 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "phoneme"}' \
+-d '{"username": "testingprototype", "password": "test"}' \
 $SERVER/login `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "opps"}' \
+-d '{"username": "testingprototype", "password": "opps"}' \
 $SERVER/login `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "wrongpassword"}' \
+-d '{"username": "testingprototype", "password": "wrongpassword"}' \
 $SERVER/login `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "again"}' \
+-d '{"username": "testingprototype", "password": "again"}' \
 $SERVER/login `"
 echo "$result"
 if [[ $result =~ "You have 2 more attempts"  ]]
@@ -97,7 +195,7 @@ if [[ $result =~ "You have 2 more attempts"  ]]
 fi
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "trying"}' \
+-d '{"username": "testingprototype", "password": "trying"}' \
 $SERVER/login `"
 # echo "$result"
 if [[ $result =~ "You have 1 more attempts"  ]]
@@ -110,7 +208,7 @@ if [[ $result =~ "You have 1 more attempts"  ]]
 fi
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", "password": "wrongpassword"}' \
+-d '{"username": "testingprototype", "password": "wrongpassword"}' \
 $SERVER/login `"
 echo "$result"
 if [[ $result =~ "You have tried to log in"  ]]
@@ -137,7 +235,7 @@ echo "Response: $result";
 if [[ $result =~ userFriendlyErrors ]]
   then {
     echo "  success"
-    if [[ $result =~ "Username already exists, try a different username"  ]]
+    if [[ $result =~ "Username jenkins already exists, try a different username"  ]]
       then {
         echo "   server provided an informative message";
       } else {
@@ -365,7 +463,7 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "testingspreadshee",  "couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+-d '{"username": "testingspreadshee",  "connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/corpusteam `"
 echo ""
 echo "Response: $result";
@@ -395,18 +493,18 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", "password": "phoneme",
 "users": [{
-  "username": "testingspreadsheet",
+  "username": "testingprototype",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "testingspreadsheet", 
+-d '{"username": "testingprototype", 
 "password": "test", 
-"couchConnection": {
-  "pouchname": "jenkins-firstcorpus"
+"connection": {
+  "dbname": "jenkins-firstcorpus"
 } }' \
 $SERVER/corpusteam `"
 echo ""
@@ -436,8 +534,8 @@ echo " eg: "
 echo '       {'
 echo '         "username": "jenkins",'
 echo '         "password": "phoneme",'
-echo '         "couchConnection": {'
-echo '           "pouchname": "jenkins-firstcorpus"'
+echo '         "connection": {'
+echo '           "dbname": "jenkins-firstcorpus"'
 echo '         }'
 echo '       }'
 echo ""
@@ -446,8 +544,8 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
-"couchConnection": 
-{"pouchname": 
+"connection": 
+{"dbname": 
 "jenkins-firstcorpus"} }' \
 $SERVER/corpusteam `"
 echo ""
@@ -478,7 +576,7 @@ echo '      {'
 echo '        "username": "jenkins",'
 echo '        "password": "phoneme",'
 echo '        "serverCode": "localhost",'
-echo '        "pouchname": "jenkins-firstcorpus"'
+echo '        "dbname": "jenkins-firstcorpus"'
 echo '      }'
 echo ""
 TESTCOUNT=$[TESTCOUNT + 1]
@@ -487,7 +585,7 @@ result="`curl -kX POST \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
 "serverCode": "localhost", 
-"pouchname": "jenkins-firstcorpus"}' \
+"dbname": "jenkins-firstcorpus"}' \
 $SERVER/corpusteam `"
 echo ""
 if [[ $result =~ userFriendlyErrors ]]
@@ -573,8 +671,8 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
-"couchConnection": {
-  "pouchname":
+"connection": {
+  "dbname":
   "jenkins-firstcorpus"
 } }' \
 $SERVER/addroletouser `"
@@ -608,7 +706,7 @@ result="`curl -kX POST \
 "users": [{
   "username": "testingprototype"
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -641,7 +739,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -660,8 +758,8 @@ if [[ $result =~ userFriendlyErrors ]]
         -H "Content-Type: application/json" \
         -d '{"username": "testingprototype", "password": "test"}' \
         $SERVER/login `"
-        echo "Response: $result" | grep -C 4 pouchname;
-        if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+        echo "Response: $result" | grep -C 4 dbname;
+        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
           then {
             TESTFAILED=$[TESTFAILED + 1]
             TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
@@ -691,7 +789,7 @@ result="`curl -kX POST \
   "add": ["reader", "commenter"],
   "remove": ["admin", "writer"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -712,7 +810,7 @@ if [[ $result =~ userFriendlyErrors ]]
         "password": "test"}' \
         $SERVER/login `"
         echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-        if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
           then {
             echo "    sever made sure the corpus was listed in this user too"
           } else {
@@ -742,7 +840,7 @@ result="`curl -kX POST \
   "add": ["reader", "commenter"],
   "remove": ["admin", "writer"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -777,7 +875,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo " prep: remove other user"
 result="`curl -kX POST \
@@ -787,13 +885,13 @@ result="`curl -kX POST \
   "username": "testingspreadsheet",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo '{' 
 echo '  "username": "jenkins",' 
 echo '  "password": "phoneme",' 
-echo '  "couchConnection": {' 
-echo '    "pouchname": "jenkins-firstcorpus"' 
+echo '  "connection": {' 
+echo '    "dbname": "jenkins-firstcorpus"' 
 echo '  },' 
 echo '  "users": [{' 
 echo '    "username": "testingspreadsheet",' 
@@ -826,7 +924,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "add": ["writer"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo ""
 echo "Response: $result";
@@ -847,7 +945,7 @@ if [[ $result =~ userFriendlyErrors ]]
         "password": "test"}' \
         $SERVER/login `"
         echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-        if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
           then {
             echo "    sever added corpus to the first user too"
             echo " Checking if corpus was added to the second user"
@@ -857,7 +955,7 @@ if [[ $result =~ userFriendlyErrors ]]
             "password": "test"}' \
             $SERVER/login `"
             echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-            if [[ $result =~ "\"pouchname\": \"jenkins-firstcorpus\"" ]]
+            if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
               then {
                 echo "    sever added corpus to the second user too"
               } else {
@@ -888,8 +986,8 @@ echo '      "username": "jenkins",'
 echo '      "password": "phoneme",'
 echo '      "userToAddToRole": "testingprototype",'
 echo '      "roles": ["reader", "commenter"],'
-echo '      "couchConnection": {'
-echo '        "pouchname": "jenkins-firstcorpus"'
+echo '      "connection": {'
+echo '        "dbname": "jenkins-firstcorpus"'
 echo '      }'
 echo '    }'
 echo " prep: remove the user"
@@ -900,7 +998,7 @@ result="`curl -kX POST \
   "username": "testingprototype",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
@@ -909,8 +1007,8 @@ result="`curl -kX POST \
 "password": "phoneme", 
 "userToAddToRole": "testingprototype", 
 "roles": ["reader","commenter"], 
-"couchConnection": {
-  "pouchname": "jenkins-firstcorpus"
+"connection": {
+  "dbname": "jenkins-firstcorpus"
 } }' \
 $SERVER/addroletouser `"
 echo ""
@@ -947,7 +1045,7 @@ echo "Response: $result";
 if [[ $result =~ userFriendlyErrors ]]
   then {
     echo "   success"
-    if [[ $result =~ "missing: newCorpusName" ]]
+    if [[ $result =~ "missing: newCorpusTitle" ]]
       then {
         echo "Response: $result" | grep -C 4 readers;
         echo "    server replied with informative info"
@@ -971,7 +1069,7 @@ result="`curl -kX POST \
 -H "Content-Type: application/json" \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
-"newCorpusName": "My new corpus title"}' \
+"newCorpusName": "Testing v3.0.19"}' \
 $SERVER/newcorpus `"
 echo ""
 echo "Response: $result";
@@ -981,13 +1079,67 @@ if [[ $result =~ userFriendlyErrors ]]
  } else {
   if [[ $result =~ "already exists, no need to create it" ]]
     then {
-      echo "Response: $result" | grep -C 2 my_new_corpus_title;
+      echo "Response: $result" | grep -C 2 testing;
       echo "    server replied with a 302 status saying it existed."
     } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
     }
   fi 
+}
+fi 
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should create branded corpora"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "jenkins", 
+"password": "phoneme", 
+"appbrand": "georgiantogether",
+"newCorpusName": "Georgian"}' \
+$SERVER/newcorpus `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+   echo "   success"
+ } else {
+  if [[ $result =~ "already exists, no need to create it" ]]
+    then {
+      echo "Response: $result" | grep -C 2 georgian;
+      echo "    server replied with a 302 status saying it existed."
+    } else {
+      TESTFAILED=$[TESTFAILED + 1]
+      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    }
+  fi 
+}
+fi 
+
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should try to create all corpora listed in the user"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "jenkins", 
+"password": "phoneme", 
+"syncDetails": true, 
+"syncUserDetails": { 
+  "newCorpusConnections": [{"dbname": "jenkins-firstcorpus"},{},{"dbname": "someoneelsesdb-shouldnt_be_creatable"},{"dbname": "jenkins-an_offline_corpus_created_in_the_prototype"},{"dbname": "jenkins-firstcorpus"}] 
+}}' \
+$SERVER/login `"
+echo ""
+echo "Response: $result" | grep -C 2 corpora;
+if [[ $result =~ corpora ]]
+  then {
+   echo "   success"
+ } else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 }
 fi 
 
@@ -1001,7 +1153,7 @@ echo '      "password": "phoneme",'
 echo '      "serverCode": "localhost",'
 echo '      "userRoleInfo": {'
 echo '        "usernameToModify": "testingspreadsheet",'
-echo '        "pouchname": "jenkins-firstcorpus",'
+echo '        "dbname": "jenkins-firstcorpus",'
 echo '        "admin": false,'
 echo '        "writer": true,'
 echo '        "reader": true,'
@@ -1011,7 +1163,7 @@ echo '     }'
 # echo 'file://angular_client/modules/spreadsheet/app/scripts/controllers/SpreadsheetController.js '
 # echo '      dataToPost.userRoleInfo = {};'
 # echo '      dataToPost.userRoleInfo.usernameToModify = userid;'
-# echo '      dataToPost.userRoleInfo.pouchname = $rootScope.corpus.pouchname;'
+# echo '      dataToPost.userRoleInfo.dbname = $rootScope.corpus.dbname;'
 # echo '      //dataToPost.userRoleInfo.removeUser = true;'
 # echo '      switch (newUserRoles.role) {'
 # # echo '      /*'
@@ -1063,7 +1215,7 @@ echo '     }'
 # # echo '        break;'
 # # echo '    }'
 # echo ''
-# echo '    newUserRoles.pouchname = $rootScope.corpus.pouchname;'
+# echo '    newUserRoles.dbname = $rootScope.corpus.dbname;'
 # echo ''
 # echo '    var dataToPost = {};'
 # echo '    dataToPost.username = $rootScope.user.username.trim();'
@@ -1082,7 +1234,7 @@ result="`curl -kX POST \
   "username": "testingspreadsheet",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
@@ -1091,7 +1243,7 @@ result="`curl -kX POST \
 "serverCode": "localhost", 
 "userRoleInfo": {
   "usernameToModify": "testingspreadsheet", 
-  "pouchname": "jenkins-firstcorpus", 
+  "dbname": "jenkins-firstcorpus", 
   "admin": false, 
   "writer": true, 
   "reader": true, 
@@ -1126,7 +1278,7 @@ echo '     {'
 echo '      "username": "jenkins",'
 echo '      "password": "phoneme",'
 echo '      "serverCode": "localhost",'
-echo '      "pouchname": "jenkins-firstcorpus",'
+echo '      "dbname": "jenkins-firstcorpus",'
 echo '      "users": [{'
 echo '        "username": "testingspreadsheet",'
 echo '        "add": ["writer", "commenter", "reader"],'
@@ -1141,7 +1293,7 @@ result="`curl -kX POST \
   "username": "testingspreadsheet",
   "remove": ["all"]
 }],
-"couchConnection": {"pouchname": "jenkins-firstcorpus"} }' \
+"connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
 echo '    '
 TESTCOUNT=$[TESTCOUNT + 1]
@@ -1150,7 +1302,7 @@ result="`curl -kX POST \
 -d '{"username": "jenkins", 
 "password": "phoneme", 
 "serverCode": "localhost", 
-"pouchname": "jenkins-firstcorpus", 
+"dbname": "jenkins-firstcorpus", 
 "users": [{
   "username": "testingspreadsheet", 
   "add":["writer","commenter","reader"], 
