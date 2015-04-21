@@ -29,7 +29,7 @@
     "cradle": "0.6.6",
     "diacritic": "0.0.2",
     "express": "3.5.2",
-    "fielddb": "3.0.20",
+    "fielddb": "3.0.21",
     "grunt-exec": "^0.4.6",
     "nano": "6.1.2",
     "nodemailer": "0.5.2",
@@ -51,7 +51,7 @@
     "fielddb-auth": "./service.js"
   },
   "engines": {
-    "node": "~0.8 || ~0.10"
+    "node": "~0.8 || ~0.10 || ~0.12"
   },
   "scripts": {
     "test": "grunt test"
