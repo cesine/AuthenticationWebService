@@ -35,7 +35,7 @@ SERVER="https://localhost:3183";
 if [ "$NODE_DEPLOY_TARGET" == "production" ]; then
   SERVER="http://localhost:3183";
 fi
-# SERVER="https://auth.lingsync.org";
+SERVER="https://auth.lingsync.org";
 
 echo ""
 echo "Using $SERVER"
@@ -67,6 +67,34 @@ if [[ $result =~ "stack" ]]
  }
 fi 
 
+echo "-------------------------------------------------------------"
+TESTNAME="It should tell users why they are disabled"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "testingdisabledusers", "password": "test"}' \
+$SERVER/login `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ "stack" ]]
+  then {
+   TESTFAILED=$[TESTFAILED + 1]
+   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+ } else {
+  if [[ $result =~ "This username was reported to us as a suspicously fictitous username" ]]
+    then {
+      echo "Informative message recieved"
+      echo "   success";
+    } else  {
+     TESTFAILED=$[TESTFAILED + 1]
+     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   }
+  fi 
+ }
+fi 
+
+exit
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should return (upgraded) user details upon successful login"
