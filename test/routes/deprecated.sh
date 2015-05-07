@@ -35,7 +35,7 @@ SERVER="https://localhost:3183";
 if [ "$NODE_DEPLOY_TARGET" == "production" ]; then
   SERVER="http://localhost:3183";
 fi
-SERVER="https://auth.lingsync.org";
+# SERVER="https://auth.lingsync.org";
 
 echo ""
 echo "Using $SERVER"
@@ -82,6 +82,7 @@ if [[ $result =~ "stack" ]]
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
  } else {
+  # if [[ $result =~ "This username has been disabled. Please contact us at  if you would like to reactivate this username. Reasons: This username was reported to us as a suspicously fictitous username.This username was reported to us as a suspicously fictitous username" ]]
   if [[ $result =~ "This username was reported to us as a suspicously fictitous username" ]]
     then {
       echo "Informative message recieved"
@@ -93,8 +94,6 @@ if [[ $result =~ "stack" ]]
   fi 
  }
 fi 
-
-exit
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should return (upgraded) user details upon successful login"
