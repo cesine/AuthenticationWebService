@@ -469,6 +469,8 @@ var addDeprecatedRoutes = function(app) {
             returndata.userFriendlyErrors = [info.message]; //["There was an error creating your corpus. " + req.body.newCorpusTitle];
             if (err.status === 302) {
               returndata.corpusadded = true;
+              returndata.corpusexisted = true;
+              returndata.connection = connection;
             }
           }
           if (!corpus) {
@@ -477,6 +479,7 @@ var addDeprecatedRoutes = function(app) {
             returndata.corpusadded = true;
             returndata.info = ["Corpus " + corpus.title + " created successfully."];
             returndata.corpus = corpus;
+            returndata.connection = connection;
             //returndata.info = [ info.message ];
             console.log(new Date() + " Returning corpus added okay:\n");
           }
