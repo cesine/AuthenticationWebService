@@ -39,6 +39,8 @@ var setup = function(api, apiVersion) {
 	swagger.addDelete(corporaRoutes.deleteCorpora);
 	swagger.addSearch(corporaRoutes.searchCorpora);
 
+	// api.delete('/corpus/:corpusid', corporaRoutes.deleteCorpora.action);
+	
 	swagger.addGet(dataRoutes.getData);
 	swagger.addPost(dataRoutes.postData);
 	swagger.addPut(dataRoutes.putData);

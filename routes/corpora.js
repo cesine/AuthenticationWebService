@@ -67,7 +67,7 @@ exports.deleteCorpora = {
     'nickname': 'deleteCorpora'
   },
   'action': function(req, res, next) {
-    res.send({});
+    res.send({"running" :  true});
   }
 };
 
