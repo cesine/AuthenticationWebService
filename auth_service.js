@@ -112,3 +112,5 @@ if (process.env.NODE_DEPLOY_TARGET === "production") {
     console.log("Listening on https port %d", config.httpsOptions.port);
   });
 }
+
+exports.AuthWebService = AuthWebService;
