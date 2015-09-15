@@ -1203,7 +1203,7 @@ echo '     }'
 # # echo '            cant see each others data.'
 # # echo ''
 # # echo '            Probably the clients wanted the spreadsheet roles to appear implicative since its more common.'
-# # echo '            see https://github.com/OpenSourceFieldlinguistics/FieldDB/issues/1113'
+# # echo '            see https://github.com/FieldDB/FieldDB/issues/1113'
 # # echo '          */'
 # # echo '      case "admin":'
 # # echo '        newUserRoles.admin = true;'
@@ -1386,7 +1386,7 @@ else
   exit $TESTFAILED;
 fi
 # ls noqata_tusunayawami.mp3 || {
-# 	result="`curl -O --retry 999 --retry-max-time 0 -C - https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/sample_data/noqata_tusunayawami.mp3?raw=true
+# 	result="`curl -O --retry 999 --retry-max-time 0 -C - https://github.com/FieldDB/FieldDB/blob/master/sample_data/noqata_tusunayawami.mp3?raw=true
 # 	mv "noqata_tusunayawami.mp3?raw=true" noqata_tusunayawami.mp3
 # }
 
