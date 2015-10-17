@@ -34,7 +34,7 @@ var corsOptions = {
     var originIsWhitelisted = false;
     if ( /* permit curl */ origin === undefined || /* permit android */ origin === "null" || origin === null || !origin) {
       originIsWhitelisted = true;
-    } else if (origin.search(/^https?:\/\/.*\.lingsync.org$/) > -1 || origin.search(/^https?:\/\/.*\.phophlo.ca$/) > -1 || origin.search(/^https?:\/\/localhost:[0-9]*$/) > -1 || origin.search(/^chrome-extension:\/\/[^\/]*$/) > -1) {
+    } else if (origin.search(/^https?:\/\/.*\.lingsync.org$/) > -1 || origin.search(/^https?:\/\/.*\.phophlo.ca$/) > -1 || origin.search(/^https?:\/\/(localhost|127.0.0.1):[0-9]*$/) > -1 || origin.search(/^chrome-extension:\/\/[^\/]*$/) > -1 || origin.search(/^https?:\/\/.*\.jrwdunham.com$/) > -1 ) {
       originIsWhitelisted = true;
     }
     // console.log(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
