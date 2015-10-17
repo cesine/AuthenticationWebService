@@ -1,10 +1,11 @@
 #!/bin/bash
 
-whoami
-echo "logs are in $PM2_HOME/logs"
-
 cd $FIELDDB_HOME/AuthenticationWebService
 
-pm2 \
+
+forever \
 start \
+-al $FIELDDB_HOME/logs/fielddbauth.log \
+-ao $FIELDDB_HOME/logs/fielddbauthout.log \
+-ae $FIELDDB_HOME/logs/fielddbautherr.log \
 auth_service.js
