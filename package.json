@@ -1,14 +1,14 @@
 {
   "name": "fielddb-auth",
-  "version": "3.19.2",
+  "version": "3.21.15",
   "description": "Authentication web services for FieldDB.",
-  "homepage": "https://github.com/OpenSourceFieldlinguistics/FieldDB/issues/milestones?state=closed",
+  "homepage": "https://github.com/FieldDB/FieldDB/issues/milestones?state=closed",
   "repository": {
     "type": "git",
-    "url": "git://github.com/OpenSourceFieldlinguistics/AuthenticationWebService.git"
+    "url": "git://github.com/FieldDB/AuthenticationWebService.git"
   },
   "bugs": {
-    "url": "https://github.com/OpenSourceFieldlinguistics/FieldDB/issues"
+    "url": "https://github.com/FieldDB/FieldDB/issues"
   },
   "keywords": [
     "fielddb",
@@ -46,9 +46,9 @@
     "grunt-contrib-watch": "*",
     "nodeunit": "*"
   },
-  "main": "./service.js",
+  "main": "./auth_service.js",
   "bin": {
-    "fielddb-auth": "./service.js"
+    "fielddb-auth": "./auth_service.js"
   },
   "engines": {
     "node": "~0.8 || ~0.10 || ~0.12"
@@ -56,5 +56,5 @@
   "scripts": {
     "test": "grunt test"
   },
-  "license": "Apache 2.0"
+  "license": "Apache-2.0"
 }
