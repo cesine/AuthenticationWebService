@@ -14,7 +14,7 @@
     "fielddb",
     "authentication"
   ],
-  "author": "cesine <cesine@yahoo.com>",
+  "author": "FieldDB contributors <opensource@fielddb.org>",
   "contributors": [
     "cesine <cesine@yahoo.com>",
     "Tobin Skinner <tobin.skinner@gmail.com>",
@@ -23,35 +23,34 @@
     "Fieldlinguist <info@fieldlinguist.com>"
   ],
   "dependencies": {
-    "MD5": "1.1.0",
-    "bcrypt": "0.8.1",
-    "cors": "*",
-    "cradle": "0.6.6",
-    "diacritic": "0.0.2",
-    "express": "3.5.2",
-    "fielddb": "3.0.21",
-    "grunt-exec": "^0.4.6",
-    "nano": "6.1.2",
-    "nodemailer": "0.5.2",
-    "q": "^1.1.2",
-    "swagger-node-express": "git://github.com/cesine/swagger-node-express#search",
-    "underscore": "1.5.1",
-    "uuid": "1.4.1"
+    "bcrypt": "0.8.5",
+    "cors": "2.7.1",
+    "cradle": "0.6.9",
+    "express": "4.13.3",
+    "fielddb": "git://github.com/fielddb/fielddb.git",
+    "md5": "2.0.0",
+    "nano": "6.1.5",
+    "nodemailer": "1.10.0",
+    "q": "1.4.1",
+    "swagger-node-express": "git://github.com/cesine/swagger-node-express.git#search",
+    "underscore": "1.8.3",
+    "uuid": "2.0.1"
   },
   "peerDependencies": {},
   "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-nodeunit": "*",
-    "grunt-contrib-jshint": "*",
-    "grunt-contrib-watch": "*",
-    "nodeunit": "*"
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-contrib-nodeunit": "^0.4.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-exec": "^0.4.6",
+    "nodeunit": "^0.9.1"
   },
   "main": "./auth_service.js",
   "bin": {
     "fielddb-auth": "./auth_service.js"
   },
   "engines": {
-    "node": "~0.8 || ~0.10 || ~0.12"
+    "node": ">4.2.2"
   },
   "scripts": {
     "test": "grunt test"
