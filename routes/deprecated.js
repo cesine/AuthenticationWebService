@@ -12,7 +12,7 @@ var cleanErrorStatus = function(status) {
   return "";
 };
 
-/** 
+/**
  * These are all the old routes that haphazardly grew over time and make up API version 0.1
  * which we still have to support until all clients have switched to the new routes
  *
@@ -81,7 +81,7 @@ var addDeprecatedRoutes = function(app) {
       if (err) {
         res.status(cleanErrorStatus(err.status) || 400);
         returndata.status = cleanErrorStatus(err.status) || 400;
-        console.log(new Date() + " There was an error in the authenticationfunctions.registerNewUser" + util.inspect(err));
+        console.log(new Date() + " There was an error in the authenticationfunctions.registerNewUser", err, info);
         returndata.userFriendlyErrors = [info.message];
       }
       if (!user) {
@@ -455,7 +455,7 @@ var addDeprecatedRoutes = function(app) {
         connection.title = req.body.newCorpusTitle;
         connection.dbname = req.body.username + "-" + connection.titleAsUrl;
         console.log("Connection", connection);
-        
+
         // Add a new corpus for the user
         corpus.createNewCorpus({
           username: req.body.username,
