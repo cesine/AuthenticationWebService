@@ -1,6 +1,17 @@
+# to install bcrypt
+env:
+  - CXX=g++-4.8
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
 language: node_js
 node_js:
-  - 0.12
+  - 4.2.2
 before_script:
   - npm install -g grunt-cli
 script: grunt travis

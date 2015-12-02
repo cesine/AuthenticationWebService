@@ -3,15 +3,22 @@
 /* Load modules provided by Node */
 var https = require('https');
 var FileSystem = require('fs');
+var path = require("path");
 
 /* Load modules provided by $ npm install, see package.json for details */
-var CrossOriginResourceSharing = require('cors');
-var ExpressWebServer = require('express');
+var crossOriginResourceSharing = require('cors');
+var expressWebServer = require('express');
+var favicon = require("serve-favicon");
+var logger = require("morgan");
+var methodOverride = require("method-override");
+var session = require("express-session");
+var bodyParser = require("body-parser");
+var errorHandler = require("errorhandler");
 
 /* Load modules provided by this codebase */
-var AuthWebServiceRoutes = require('./routes/routes');
+var authWebServiceRoutes = require('./routes/routes');
 var deprecatedRoutes = require('./routes/deprecated');
-/** 
+/**
  * You can control aspects of the deployment by using Environment Variables
  *
  * Examples:
@@ -39,7 +46,7 @@ var corsOptions = {
       origin.search(/^https?:\/\/(localhost|127.0.0.1):[0-9]*$/) > -1 ||
       origin.search(/^chrome-extension:\/\/[^\/]*$/) > -1 ||
       origin.search(/^https?:\/\/.*\.jrwdunham.com$/) > -1) {
-      
+
       originIsWhitelisted = true;
     }
     // console.log(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
@@ -48,43 +55,38 @@ var corsOptions = {
 };
 
 /**
- * Use Express to create the AuthWebService see http://expressjs.com/ for more details
+ * Use Express to create the authWebService see http://expressjs.com/ for more details
  */
-var AuthWebService = ExpressWebServer();
-AuthWebService.configure(function() {
-
-  AuthWebService.use(CrossOriginResourceSharing(corsOptions));
-  // Accept versions 
-  AuthWebService.use(function(req, res, next) {
-    if (req.url.indexOf("/" + apiVersion) === 0) {
-      req.url = req.url.replace("/" + apiVersion, "");
-    }
-    next();
-  });
-  AuthWebService.use(ExpressWebServer.logger());
-  AuthWebService.use(ExpressWebServer.cookieParser());
-  AuthWebService.use(ExpressWebServer.bodyParser());
-  AuthWebService.use(ExpressWebServer.methodOverride());
-  AuthWebService.use(AuthWebService.router);
-  /*
-   * Although this is mostly a webservice used by machines (not a websserver used by humans)
-   * we are still serving a user interface for the api sandbox in the public folder
-   */
-  AuthWebService.use(ExpressWebServer.static(__dirname + '/public'));
+var authWebService = expressWebServer();
+authWebService.use(crossOriginResourceSharing(corsOptions));
+// Accept versions
+authWebService.use(function(req, res, next) {
+  if (req.url.indexOf("/" + apiVersion) === 0) {
+    req.url = req.url.replace("/" + apiVersion, "");
+  }
+  next();
 });
+authWebService.use(favicon(__dirname + "/public/favicon.ico"));
+authWebService.use(logger("common"));
+authWebService.use(session({
+  resave: true,
+  saveUninitialized: true,
+  secret: config.session_key
+}));
+authWebService.use(bodyParser.json());
+authWebService.use(bodyParser.urlencoded({
+  extended: true
+}));
+authWebService.use(methodOverride());
+// authWebService.use(authWebService.router);
 
-AuthWebService.configure('development', function() {
-  AuthWebService.use(ExpressWebServer.errorHandler({
-    dumpExceptions: true,
-    showStack: true
-  }));
-});
+/*
+ * Although this is mostly a webservice used by machines (not a websserver used by humans)
+ * we are still serving a user interface for the api sandbox in the public folder
+ */
+authWebService.use(expressWebServer.static(path.join(__dirname, "public")));
 
-AuthWebService.configure('production', function() {
-  AuthWebService.use(ExpressWebServer.errorHandler());
-});
-
-AuthWebService.options('*', function(req, res, next) {
+authWebService.options('*', function(req, res, next) {
   if (req.method === 'OPTIONS') {
     console.log('responding to OPTIONS request');
     res.send(204);
@@ -92,14 +94,26 @@ AuthWebService.options('*', function(req, res, next) {
 });
 
 /**
- * Set up all the available URL AuthWebServiceRoutes see routes/routes.js for more details
+ * Set up all the available URL authWebServiceRoutes see routes/routes.js for more details
  */
-AuthWebServiceRoutes.setup(AuthWebService, apiVersion);
+authWebServiceRoutes.setup(authWebService, apiVersion);
 
 /**
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
-deprecatedRoutes.addDeprecatedRoutes(AuthWebService, config);
+deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
+
+/*
+ * Error handling middleware should be loaded after the loading the routes
+ */
+if ("production" === authWebService.get("env")) {
+  authWebService.use(errorHandler());
+} else {
+  authWebService.use(errorHandler({
+    dumpExceptions: true,
+    showStack: true
+  }));
+}
 
 /**
  * Read in the specified filenames for this config's security key and certificates,
@@ -107,13 +121,13 @@ deprecatedRoutes.addDeprecatedRoutes(AuthWebService, config);
  */
 
 if (process.env.NODE_DEPLOY_TARGET === "production") {
-  AuthWebService.listen(config.httpsOptions.port);
+  authWebService.listen(config.httpsOptions.port);
   console.log("Running in production mode behind an Nginx proxy, Listening on http port %d", config.httpsOptions.port);
 } else {
   config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
   config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
 
-  https.createServer(config.httpsOptions, AuthWebService).listen(config.httpsOptions.port, function() {
+  https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function() {
     console.log("Listening on https port %d", config.httpsOptions.port);
   });
 }
