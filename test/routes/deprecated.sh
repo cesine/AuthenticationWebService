@@ -295,6 +295,56 @@ if [[ $result =~ userFriendlyErrors ]]
 fi
 
 echo "-------------------------------------------------------------"
+TESTNAME="It should register a new user"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "testingv3_32",
+"password": "test"}' \
+$SERVER/register `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+   echo "   success"
+ } else {
+    sleep 1
+    result="`curl -kX GET \
+      -H "Content-Type: application/json" \
+      https://testingv3_32:test@localhost:6984/testingv3_32-firstcorpus/_design/lexicon/_view/lexiconNodes `"
+
+    echo "Should replicate lexicon: $result";
+    if [[ $result =~ "{\"rows\":" ]]
+      then {
+        echo "Response: $result" | grep -C 2 rows;
+        echo "    lexicon was replicated"
+
+        result="`curl -kX GET \
+          -H "Content-Type: application/json" \
+          https://testingv3_32:test@localhost:6984/_session `"
+
+        echo "Should have user types: $result";
+        if [[ $result =~ "[\"testingv3_32-firstcorpus_admin\",\"testingv3_32-firstcorpus_writer\",\"testingv3_32-firstcorpus_reader\",\"testingv3_32-firstcorpus_commenter\",\"public-firstcorpus_reader\",\"fielddbuser\",\"lingsync_betauser\"]" ]]
+          then {
+            echo "Response: $result" | grep -C 2 roles;
+            echo "    user types set correctly"
+          } else {
+            TESTFAILED=$[TESTFAILED + 1]
+            TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+            echo "$TESTSFAILEDSTRING $result " >> test_errors.log
+          }
+        fi
+      } else {
+        TESTFAILED=$[TESTFAILED + 1]
+        TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
+      }
+    fi
+}
+fi
+
+echo "-------------------------------------------------------------"
 TESTNAME="It should refuse to register short usernames"
 echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
@@ -1151,6 +1201,47 @@ if [[ $result =~ userFriendlyErrors ]]
   }
 fi
 
+echo "-------------------------------------------------------------"
+TESTNAME="It should create a corpus"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "jenkins",
+"password": "phoneme",
+"newCorpusName": "Testing v3.32.01"}' \
+$SERVER/newcorpus `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+   echo "   success"
+ } else {
+  if [[ $result =~ "already exists, no need to create it" ]]
+    then {
+      echo "Response: $result" | grep -C 2 testing;
+      echo "    server replied with a 302 status saying it existed."
+    } else {
+      sleep 1
+      result="`curl -kX GET \
+      -H "Content-Type: application/json" \
+      https://jenkins:phoneme@localhost:6984/jenkins-testing_v3_32_01/_design/lexicon/_view/lexiconNodes `"
+
+      echo "Should replicate lexicon: $result";
+      if [[ $result =~ "{\"rows\":" ]]
+        then {
+          echo "Response: $result" | grep -C 2 testing;
+          echo "    lexicon was replicated"
+        } else {
+          TESTFAILED=$[TESTFAILED + 1]
+          TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+          echo "$TESTSFAILEDSTRING $result " >> test_errors.log
+        }
+      fi
+    }
+  fi
+}
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should not complain if users tries to recreate a newcorpus"
