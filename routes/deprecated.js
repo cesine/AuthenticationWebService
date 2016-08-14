@@ -1,7 +1,7 @@
 var authenticationfunctions = require('./../lib/userauthentication.js');
 var util = require('util');
 var corpus = require('./../lib/corpus');
-var Connection = require('FieldDB/api/corpus/Connection').Connection;
+var Connection = require('fielddb/api/corpus/Connection').Connection;
 
 
 
