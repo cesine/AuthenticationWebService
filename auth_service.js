@@ -28,6 +28,7 @@ var deprecatedRoutes = require('./routes/deprecated');
  * $ NODE_ENV=yoursecretconfig  # uses lib/nodeconfig_yoursecretconfig.js
  */
 var deploy_target = process.env.NODE_ENV || "localhost";
+console.log('process.env.NODE_ENV', process.env.NODE_ENV);
 var config = require('./lib/nodeconfig_' + deploy_target);
 var apiVersion = "v" + parseInt(require("./package.json").version, 10);
 console.log("Accepting api version " + apiVersion);
@@ -86,7 +87,7 @@ authWebService.use(methodOverride());
  */
 authWebService.use(expressWebServer.static(path.join(__dirname, "public")));
 
-authWebService.options('*', function(req, res, next) {
+authWebService.options('*', function(req, res) {
   if (req.method === 'OPTIONS') {
     console.log('responding to OPTIONS request');
     res.send(204);
@@ -120,14 +121,18 @@ if ("production" === authWebService.get("env")) {
  * and then ask https to turn on the webservice
  */
 
-if (process.env.NODE_ENV === "production") {
-  authWebService.listen(config.httpsOptions.port);
-  console.log("Running in production mode behind an Nginx proxy, Listening on http port %d", config.httpsOptions.port);
-} else {
-  config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
-  config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
+if (!module.parent) {
+  if (process.env.NODE_ENV === "production") {
+    authWebService.listen(config.httpsOptions.port);
+    console.log("Running in production mode behind an Nginx proxy, Listening on http port %d", config.httpsOptions.port);
+  } else {
+    config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
+    config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
 
-  https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function() {
-    console.log("Listening on https port %d", config.httpsOptions.port);
-  });
+    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function() {
+      console.log("Listening on https port %d", config.httpsOptions.port);
+    });
+  }
+} else {
+  module.exports = authWebService;
 }
