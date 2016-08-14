@@ -53,9 +53,9 @@
   },
   "scripts": {
     "test": "jasmine-node test",
-    "test:fielddb": "node test/fielddbt-test.js",
-    "test:travis": "npm test",
     "test:deprecated": "bash test/routes/deprecated.sh",
+    "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
+    "test:travis": "npm test",
     "start": "node auth_service.js"
   },
   "license": "Apache-2.0"
