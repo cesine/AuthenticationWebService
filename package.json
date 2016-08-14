@@ -1,6 +1,6 @@
 {
   "name": "fielddb-auth",
-  "version": "3.32.01",
+  "version": "4.16.14",
   "description": "Authentication web services for FieldDB.",
   "homepage": "https://github.com/FieldDB/FieldDB/issues/milestones?state=closed",
   "repository": {
@@ -23,7 +23,7 @@
     "Fieldlinguist <info@fieldlinguist.com>"
   ],
   "dependencies": {
-    "bcrypt": "0.8.5",
+    "bcrypt": "0.8.7",
     "body-parser": "^1.15.0",
     "cors": "2.7.1",
     "cradle": "0.6.9",
