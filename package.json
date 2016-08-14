@@ -1,6 +1,6 @@
 {
   "name": "fielddb-auth",
-  "version": "3.32.01",
+  "version": "4.16.14",
   "description": "Authentication web services for FieldDB.",
   "homepage": "https://github.com/FieldDB/FieldDB/issues/milestones?state=closed",
   "repository": {
@@ -23,28 +23,27 @@
     "Fieldlinguist <info@fieldlinguist.com>"
   ],
   "dependencies": {
-    "bcrypt": "0.8.5",
+    "bcrypt": "0.8.7",
+    "body-parser": "^1.15.0",
     "cors": "2.7.1",
     "cradle": "0.6.9",
+    "errorhandler": "^1.4.3",
     "express": "4.13.3",
+    "express-session": "^1.13.0",
     "fielddb": "git://github.com/fielddb/fielddb.git",
     "md5": "2.0.0",
+    "method-override": "^2.3.5",
+    "morgan": "^1.7.0",
     "nano": "6.1.5",
     "nodemailer": "1.10.0",
     "q": "1.4.1",
+    "serve-favicon": "^2.3.0",
     "swagger-node-express": "git://github.com/cesine/swagger-node-express.git#search",
     "underscore": "1.8.3",
     "uuid": "2.0.1"
   },
   "peerDependencies": {},
-  "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-jshint": "^0.11.3",
-    "grunt-contrib-nodeunit": "^0.4.1",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-exec": "^0.4.6",
-    "nodeunit": "^0.9.1"
-  },
+  "devDependencies": {},
   "main": "./auth_service.js",
   "bin": {
     "fielddb-auth": "./auth_service.js"
@@ -53,7 +52,12 @@
     "node": ">4.2.2"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "jasmine-node test",
+    "test:deprecated": "bash test/routes/deprecated.sh",
+    "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
+    "test:travis": "npm test",
+    "test:production": "ls lib/nodeconfig_production.js && ls lib/couchkeys_production.js && ls lib/mailconfig_production.js",
+    "start": "node auth_service.js"
   },
   "license": "Apache-2.0"
 }

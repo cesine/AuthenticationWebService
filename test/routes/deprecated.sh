@@ -34,7 +34,7 @@ echo "" > test_errors.log
 
 # Production server is using http behind nginx
 SERVER="https://localhost:3183";
-if [ "$NODE_DEPLOY_TARGET" == "production" ]; then
+if [ "$NODE_ENV" == "production" ]; then
   SERVER="http://localhost:3183";
 fi
 # SERVER="https://auth.lingsync.org";
