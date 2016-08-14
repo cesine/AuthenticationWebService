@@ -3,7 +3,7 @@
 var http = require('http'),
   https = require('https');
 // https://github.com/Zugwalt/nodeunit-async
-// 
+//
 var palindrode = require('../lib/fielddb-auth.js');
 
 var makeJSONRequest = function(options, data, onResult) {
