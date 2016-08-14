@@ -22,12 +22,12 @@ var deprecatedRoutes = require('./routes/deprecated');
  * You can control aspects of the deployment by using Environment Variables
  *
  * Examples:
- * $ NODE_DEPLOY_TARGET=production        # uses lib/nodeconfig_production.js
- * $ NODE_DEPLOY_TARGET=devserver         # uses lib/nodeconfig_devserver.js
- * $ NODE_DEPLOY_TARGET=local             # uses lib/nodeconfig_local.js
- * $ NODE_DEPLOY_TARGET=yoursecretconfig  # uses lib/nodeconfig_yoursecretconfig.js
+ * $ NODE_ENV=production        # uses lib/nodeconfig_production.js
+ * $ NODE_ENV=devserver         # uses lib/nodeconfig_devserver.js
+ * $ NODE_ENV=localhost             # uses lib/nodeconfig_localhost.js
+ * $ NODE_ENV=yoursecretconfig  # uses lib/nodeconfig_yoursecretconfig.js
  */
-var deploy_target = process.env.NODE_DEPLOY_TARGET || "local";
+var deploy_target = process.env.NODE_ENV || "localhost";
 var config = require('./lib/nodeconfig_' + deploy_target);
 var apiVersion = "v" + parseInt(require("./package.json").version, 10);
 console.log("Accepting api version " + apiVersion);
@@ -120,7 +120,7 @@ if ("production" === authWebService.get("env")) {
  * and then ask https to turn on the webservice
  */
 
-if (process.env.NODE_DEPLOY_TARGET === "production") {
+if (process.env.NODE_ENV === "production") {
   authWebService.listen(config.httpsOptions.port);
   console.log("Running in production mode behind an Nginx proxy, Listening on http port %d", config.httpsOptions.port);
 } else {

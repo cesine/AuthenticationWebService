@@ -10,7 +10,7 @@ var dataRoutes = require('./data');
 var eLanguagesRoutes = require('./elanguages');
 var morphologicalParsesRoutes = require('./morphologicalparses');
 
-var deploy_target = process.env.NODE_DEPLOY_TARGET || "local";
+var deploy_target = process.env.NODE_ENV || "localhost";
 var config = require('./../lib/nodeconfig_' + deploy_target);
 
 
