@@ -43,14 +43,7 @@
     "uuid": "2.0.1"
   },
   "peerDependencies": {},
-  "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-jshint": "^0.11.3",
-    "grunt-contrib-nodeunit": "^0.4.1",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-exec": "^0.4.6",
-    "nodeunit": "^0.9.1"
-  },
+  "devDependencies": {},
   "main": "./auth_service.js",
   "bin": {
     "fielddb-auth": "./auth_service.js"
@@ -59,7 +52,11 @@
     "node": ">4.2.2"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "jasmine-node test",
+    "test:fielddb": "node test/fielddbt-test.js",
+    "test:travis": "npm test",
+    "test:deprecated": "bash test/routes/deprecated.sh",
+    "start": "node auth_service.js"
   },
   "license": "Apache-2.0"
 }

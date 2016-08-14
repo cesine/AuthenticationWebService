@@ -11,7 +11,9 @@ addons:
 
 language: node_js
 node_js:
-  - 4.2.2
+  - 4.4.3
+
 before_script:
-  - npm install -g grunt-cli
-script: grunt travis
+  - npm install -g jasmine-node
+script:
+  - npm run test:travis
