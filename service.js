@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var debug = require('debug')('service');
 var express = require('express');
-var logger = require('morgan');
+var morgan = require('morgan');
 
 var authenticationRoutes = require('./routes/authentication').router;
 var oauthRoutes = require('./routes/oauth').router;
@@ -16,12 +16,11 @@ var userRoutes = require('./routes/user').router;
 var service = express();
 
 var env = process.env.NODE_ENV || 'development';
-service.locals.ENV_DEVELOPMENT = env === 'development';
 
 /**
  * Config
  */
-service.use(logger(env));
+service.use(morgan('combined'));
 
 /**
  * Body parsers
