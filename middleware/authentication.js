@@ -1,7 +1,7 @@
 'use strict';
+var AsToken = require('as-token');
 var debug = require('debug')('middleware:authentication');
 var ExtractJwt = require('passport-jwt').ExtractJwt;
-var jsonwebtoken = require('jsonwebtoken');
 var JwtStrategy = require('passport-jwt').Strategy;
 var passport = require('passport');
 
@@ -10,7 +10,7 @@ var user = require('./../models/user');
 
 var opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeader(),
-  secretOrKey: config.jwt.private,
+  secretOrKey: AsToken.config.jwt.private,
   issuer: config.url,
   audience: 'anythings.net'
 };
@@ -35,10 +35,10 @@ passport.use(new JwtStrategy(opts, function(jwtPayload, done) {
 
 function jwt(req, res, next) {
   var tokenString;
-  if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ' + config.jwt.prefix) > -1) {
+  if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ') > -1) {
     tokenString = req.headers.authorization;
     debug('used header', req.headers.authorization);
-  } else if (req && req.headers && req.headers.cookie && req.headers.cookie.indexOf('Authorization=Bearer ' + config.jwt.prefix) > -1) {
+  } else if (req && req.headers && req.headers.cookie && req.headers.cookie.indexOf('Authorization=Bearer ') > -1) {
     debug(req.headers.cookie);
     tokenString = req.headers.cookie.split(';').filter(function(cookie) {
       return cookie.indexOf('Authorization') > -1;
@@ -48,17 +48,10 @@ function jwt(req, res, next) {
     debug('used cookie', req.headers.cookie);
   }
   if (tokenString) {
-    var token = tokenString.replace(new RegExp('Bearer ' + config.jwt.prefix), '');
-    var decoded = jsonwebtoken.decode(token);
-
-    debug('public key', config.jwt.public);
     try {
-      var verified = jsonwebtoken.verify(token, config.jwt.public, {
-        algorithm: config.jwt.algorithm
-      });
-
-      req.app.locals.user = req.user = decoded;
-      req.app.locals.token = 'Bearer ' + config.jwt.prefix + token;
+      var verified = AsToken.verify(tokenString);
+      req.app.locals.user = req.user = verified;
+      req.app.locals.token = tokenString;
       // Oauth2 is trying to use this token
       delete req.headers.authorization;
 

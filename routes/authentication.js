@@ -1,9 +1,9 @@
 'use strict';
 /*jshint camelcase: false */
 
+var AsToken = require('as-token');
 var debug = require('debug')('authentication');
 var express = require('express');
-var jsonwebtoken = require('jsonwebtoken');
 var sequelize = require('sequelize');
 var util = require('util');
 
@@ -36,10 +36,7 @@ function postLogin(req, res, next) {
       return next(err, req, res, next);
     }
 
-    var token = config.jwt.prefix + jsonwebtoken.sign(user, config.jwt.private, {
-      algorithm: config.jwt.algorithm,
-      // expiresIn: 60 // minutes
-    });
+    var token = AsToken.sign(user, null);
     debug('token', token);
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
     res.set('Authorization', 'Bearer ' + token);
@@ -98,10 +95,7 @@ function postRegister(req, res, next) {
         req.body.redirect_uri);
 
 
-    var token = config.jwt.prefix + jsonwebtoken.sign(user, config.jwt.private, {
-      algorithm: config.jwt.algorithm,
-      // expiresIn: 60 // minutes
-    });
+    var token = AsToken.sign(user, null);
     debug('token', token);
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
     res.set('Authorization', 'Bearer ' + token);

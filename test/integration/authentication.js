@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect;
 var supertest = require('supertest');
-var jsonwebtoken = require('jsonwebtoken');
+var AsToken = require('as-token');
 
 var config = require('./../../config');
 var service = require('./../../');
@@ -152,7 +152,7 @@ describe('/authentication', function() {
           var token = res.headers.authorization.replace(/Bearer v1\//, '');
           expect(token).exists;
 
-          var decoded = jsonwebtoken.decode(token);
+          var decoded = AsToken.decode(token);
           expect(decoded).to.deep.equal({
             name: {
               givenName: '',
@@ -174,9 +174,7 @@ describe('/authentication', function() {
             // exp: decoded.exp
           });
 
-          var verified = jsonwebtoken.verify(token, config.jwt.public, {
-            algorithm: config.jwt.algorithm
-          });
+          var verified = AsToken.verify(token);
           expect(verified).to.deep.equal(decoded);
 
           done();

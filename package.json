@@ -14,6 +14,7 @@
   },
   "main": "service",
   "dependencies": {
+    "as-token": "https://github.com/cesine/as-token.git",
     "bcrypt": "^0.8.7",
     "bluebird": "^3.4.1",
     "body-parser": "^1.14.2",
@@ -22,7 +23,6 @@
     "express": "^4.13.3",
     "express-handlebars": "^3.0.0",
     "express-oauth-server": "https://github.com/cesine/express-oauth-server.git",
-    "jsonwebtoken": "^7.0.1",
     "morgan": "^1.6.1",
     "node-uuid": "^1.4.7",
     "oauth2-server": "https://github.com/cesine/node-oauth2-server.git",
