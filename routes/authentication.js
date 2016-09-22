@@ -36,7 +36,7 @@ function postLogin(req, res, next) {
       return next(err, req, res, next);
     }
 
-    var token = AsToken.sign(user, null);
+    var token = AsToken.sign(user, 60 * 24);
     debug('token', token);
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
     res.set('Authorization', 'Bearer ' + token);
@@ -95,7 +95,7 @@ function postRegister(req, res, next) {
         req.body.redirect_uri);
 
 
-    var token = AsToken.sign(user, null);
+    var token = AsToken.sign(user, 60 * 24);
     debug('token', token);
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
     res.set('Authorization', 'Bearer ' + token);
