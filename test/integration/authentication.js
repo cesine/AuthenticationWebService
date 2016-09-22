@@ -55,7 +55,7 @@ describe('/authentication', function() {
     it('should redirect to login/', function(done) {
       supertest(service)
         .get('/authentication/login?anything=query_should_be_kept')
-        .expect(303)
+        .expect(301)
         .expect('Content-Type', 'text/html; charset=UTF-8')
         .end(function(err, res) {
           if (err) throw err;
@@ -171,7 +171,7 @@ describe('/authentication', function() {
             createdAt: decoded.createdAt,
             updatedAt: decoded.updatedAt,
             iat: decoded.iat,
-            // exp: decoded.exp
+            exp: decoded.exp
           });
 
           var verified = AsToken.verify(token);
@@ -216,7 +216,7 @@ describe('/authentication', function() {
     it('should redirect to signup/', function(done) {
       supertest(service)
         .get('/authentication/signup?anything=query_should_be_kept')
-        .expect(303)
+        .expect(301)
         .expect('Content-Type', 'text/html; charset=UTF-8')
         .end(function(err, res) {
           if (err) throw err;
