@@ -14,7 +14,7 @@
   },
   "main": "service",
   "dependencies": {
-    "as-token": "https://github.com/cesine/as-token.git",
+    "as-token": "https://github.com/cesine/as-token-javascript.git",
     "bcrypt": "^0.8.7",
     "bluebird": "^3.4.1",
     "body-parser": "^1.14.2",
