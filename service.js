@@ -47,6 +47,7 @@ service.use(authenticationMiddleware.jwt);
 /**
  * Routes
  */
+service.use('/bower_components', express.static(__dirname + '/public/components/as-ui-auth/bower_components'));
 service.use('/authentication', authenticationRoutes);
 service.use('/oauth', oauthRoutes);
 service.use('/v1/users', userRoutes);
