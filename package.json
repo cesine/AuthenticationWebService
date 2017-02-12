@@ -2,7 +2,7 @@
   "name": "FieldDBAuthenticationService",
   "version": "1.28.1",
   "dependencies": {
-    "express": "latest",
+    "express": "3.x.x",
     "bcrypt": "latest",
     "forever": "latest",
     "nano": "latest",
