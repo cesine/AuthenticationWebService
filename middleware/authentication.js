@@ -81,6 +81,15 @@ function requireAuthentication(req, res, next) {
   next();
 }
 
+function redirectAuthenticatedUser(req, res, next) {
+  if (req.app.locals.user) {
+    console.log('redirectAuthenticatedUser', req.url, '/v1/users/' + req.app.locals.user.username);
+    return res.redirect('/v1/users/' + req.app.locals.user.username);
+  }
+
+  next();
+}
+
 function requireAuthenticationPassportJWT(req, res, next) {
   debug('requireAuthentication', req.user);
   debug('requireAuthentication', req.app.locals);
@@ -99,4 +108,5 @@ module.exports.jwt = jwt;
 // https: //github.com/themikenicholson/passport-jwt/blob/master/test/extrators-test.js#L8
 module.exports.extractor = opts.jwtFromRequest;
 module.exports.requireAuthentication = requireAuthentication;
+module.exports.redirectAuthenticatedUser = redirectAuthenticatedUser;
 module.exports.requireAuthenticationPassportJWT = requireAuthenticationPassportJWT;

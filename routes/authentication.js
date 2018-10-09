@@ -7,16 +7,18 @@ var express = require('express');
 var sequelize = require('sequelize');
 var util = require('util');
 
-var User = require('./../models/user');
+var User = require('../models/user');
+var authenticationMiddleware = require('../middleware/authentication');
 
 var router = express.Router();
 
 /**
  * Render UI pages
  */
-router.use('/', express.static(__dirname +
+router.use('/', authenticationMiddleware.redirectAuthenticatedUser, express.static(__dirname +
   '/../public/components/as-ui-auth/components'));
-router.use('/register', express.static(__dirname +
+router.use('/register', authenticationMiddleware.redirectAuthenticatedUser,
+  express.static(__dirname +
   '/../public/components/as-ui-auth/components/signup'));
 
 /**
