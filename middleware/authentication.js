@@ -83,8 +83,9 @@ function requireAuthentication(req, res, next) {
 
 function redirectAuthenticatedUser(req, res, next) {
   if (req.app.locals.user) {
-    console.log('redirectAuthenticatedUser', req.url, '/v1/users/' + req.app.locals.user.username);
-    return res.redirect('/v1/users/' + req.app.locals.user.username);
+    var redirectUri = req.query.redirect || req.query.redirect_uri || '/v1/users/' + req.app.locals.user.username;
+    debug('redirectAuthenticatedUser', req.url, redirectUri);
+    return res.redirect(redirectUri);
   }
 
   next();
