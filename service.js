@@ -32,7 +32,7 @@ service.use(bodyParser.urlencoded({
  * Cross Origin Resource Sharing
  * (permits client sides which are not hosted on the same domain)
  */
-service.use(cors());
+service.use(cors({credentials: true, origin: 'https://localhost:8011'}));
 
 /**
  * Middleware

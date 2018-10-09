@@ -41,7 +41,7 @@ function jwt(req, res, next) {
     debug('used header', req.headers.authorization);
   } else if (req && req.headers && req.headers.cookie &&
     req.headers.cookie.indexOf('Authorization=Bearer ') > -1) {
-    debug(req.headers.cookie);
+    debug('used cookie', req.headers.cookie);
     tokenString = req.headers.cookie.split(';').filter(function(cookie) {
       return cookie.indexOf('Authorization') > -1;
     }).map(function(cookie) {
@@ -61,6 +61,8 @@ function jwt(req, res, next) {
     } catch (err) {
       // Often this is because it has expired or it was mutated
       debug(err);
+      req.app.locals.user = req.user = AsToken.decode(tokenString);
+      req.app.locals.user.expired = true;
       return next();
     }
   }
@@ -76,12 +78,17 @@ function requireAuthentication(req, res, next) {
     err.status = 403;
     return next(err, req, res, next);
   }
+  if (req.app.locals.user.expired) {
+    var err = new Error('Your session has expired, you must login to access this data');
+    err.status = 403;
+    return next(err, req, res, next);
+  }
 
   next();
 }
 
 function redirectAuthenticatedUser(req, res, next) {
-  if (req.app.locals.user) {
+  if (req.app.locals.user && !req.app.locals.user.expired) {
     debug('redirectAuthenticatedUser user', req.app.locals.user);
     var redirectUri = req.query.redirect || req.query.redirect_uri || '/v1/users/username';
     redirectUri = redirectUri.replace('username', req.app.locals.user.username);
