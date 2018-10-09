@@ -38,6 +38,7 @@ function getCurrentUser(req, res, next) {
     if (err) {
       return next(err, req, res, next);
     }
+    profile.token = req.app.locals.token;
     res.json(profile);
   });
 }
