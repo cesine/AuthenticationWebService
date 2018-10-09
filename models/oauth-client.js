@@ -7,7 +7,6 @@ var Sequelize = require('sequelize');
 var Promise = require('bluebird');
 var uuid = require('node-uuid');
 
-var config = require('./../config');
 var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
 var User = require('./user');
@@ -299,7 +298,7 @@ var getUser = function(username, password, callback) {
 var saveAccessToken = function(token, client, user) {
   return new Promise(function(resolve, reject) {
     if (!token || !client || !user) {
-      return callback(new Error('Invalid Options'));
+      return reject(new Error('Invalid Options'));
     }
 
     OAuthToken.create({

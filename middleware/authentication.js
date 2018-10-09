@@ -35,10 +35,12 @@ passport.use(new JwtStrategy(opts, function(jwtPayload, done) {
 
 function jwt(req, res, next) {
   var tokenString;
-  if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ') > -1) {
+  if (req && req.headers && req.headers.authorization &&
+    req.headers.authorization.indexOf('Bearer ') > -1) {
     tokenString = req.headers.authorization;
     debug('used header', req.headers.authorization);
-  } else if (req && req.headers && req.headers.cookie && req.headers.cookie.indexOf('Authorization=Bearer ') > -1) {
+  } else if (req && req.headers && req.headers.cookie &&
+    req.headers.cookie.indexOf('Authorization=Bearer ') > -1) {
     debug(req.headers.cookie);
     tokenString = req.headers.cookie.split(';').filter(function(cookie) {
       return cookie.indexOf('Authorization') > -1;
@@ -97,3 +99,4 @@ module.exports.jwt = jwt;
 // https: //github.com/themikenicholson/passport-jwt/blob/master/test/extrators-test.js#L8
 module.exports.extractor = opts.jwtFromRequest;
 module.exports.requireAuthentication = requireAuthentication;
+module.exports.requireAuthenticationPassportJWT = requireAuthenticationPassportJWT;

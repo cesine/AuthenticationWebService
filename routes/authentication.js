@@ -7,7 +7,6 @@ var express = require('express');
 var sequelize = require('sequelize');
 var util = require('util');
 
-var config = require('./../config');
 var User = require('./../models/user');
 
 var router = express.Router();
@@ -15,8 +14,10 @@ var router = express.Router();
 /**
  * Render UI pages
  */
-router.use('/', express.static(__dirname + '/../public/components/as-ui-auth/components'));
-router.use('/register', express.static(__dirname + '/../public/components/as-ui-auth/components/signup'));
+router.use('/', express.static(__dirname +
+  '/../public/components/as-ui-auth/components'));
+router.use('/register', express.static(__dirname +
+  '/../public/components/as-ui-auth/components/signup'));
 
 /**
  * Log in

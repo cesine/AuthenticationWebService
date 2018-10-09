@@ -4,7 +4,6 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var AsToken = require('as-token');
 
-var config = require('./../../config');
 var service = require('./../../');
 var User = require('./../../models/user');
 
@@ -133,10 +132,12 @@ describe('/authentication', function() {
       supertest(service)
         .post('/authentication/login')
         .send({
+          /*jshint camelcase: false */
           client_id: 'abc-li-12-li',
           redirect_uri: 'http://localhost:8011/some/place/users?with=other-stuff',
           username: 'test-user',
           password: 'aje24wersdfgs324rfe+woe'
+          /*jshint camelcase: true */
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -341,10 +342,12 @@ describe('/authentication', function() {
       supertest(service)
         .post('/authentication/register')
         .send({
+          /*jshint camelcase: false */
           client_id: 'abc-li-12-li',
           redirect_uri: 'http://localhost:8011/some/place/users?with=other-stuff',
           username: 'test-' + Date.now(),
           password: 'aje24wersdfgs324rfe+woe'
+          /*jshint camelcase: true */
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')

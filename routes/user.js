@@ -51,11 +51,8 @@ function getList(req, res, next) {
  * @param  {Function} next
  */
 function putUser(req, res, next) {
-  var json = {
-    username: req.params.username
-  };
-
-  if (req.params.username !== req.body.username || req.params.username !== req.app.locals.user.username){
+  if (req.params.username !== req.body.username ||
+    req.params.username !== req.app.locals.user.username){
     debug(req.params, req.body);
     var err = new Error('Username does not match, you can only update your own details');
     err.status = 403;
