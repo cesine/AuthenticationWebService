@@ -42,7 +42,7 @@ describe('/authentication', function() {
       supertest(service)
         .get('/authentication/login/login.js')
         .expect(200)
-        .expect('Content-Type', 'application/javascript')
+        .expect('Content-Type', 'application/javascript; charset=UTF-8')
         .end(function(err, res) {
           if (err) throw err;
 
@@ -203,7 +203,7 @@ describe('/authentication', function() {
       supertest(service)
         .get('/authentication/signup/signup.js')
         .expect(200)
-        .expect('Content-Type', 'application/javascript')
+        .expect('Content-Type', 'application/javascript; charset=UTF-8')
         .end(function(err, res) {
           if (err) throw err;
 
