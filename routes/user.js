@@ -64,7 +64,7 @@ function getList(req, res, next) {
  * @param  {Function} next
  */
 function putUser(req, res, next) {
-  if (req.params.username !== req.body.username ||
+  if ((req.body.username && req.params.username !== req.body.username) ||
     req.params.username !== req.app.locals.user.username){
     debug(req.params, req.body);
     var err = new Error('Username does not match, you can only update your own details');
@@ -73,6 +73,7 @@ function putUser(req, res, next) {
     return next(err, req, res, next);
   }
 
+  req.body.username = req.app.locals.user.username;
   User.save(req.body, function(err, profile) {
     if (err) {
       return next(err, req, res, next);
