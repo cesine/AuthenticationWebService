@@ -61,8 +61,7 @@ function jwt(req, res, next) {
     } catch (err) {
       // Often this is because it has expired or it was mutated
       debug(err);
-      err.status = 403;
-      return next(err, req, res, next);
+      return next();
     }
   }
 
@@ -83,7 +82,9 @@ function requireAuthentication(req, res, next) {
 
 function redirectAuthenticatedUser(req, res, next) {
   if (req.app.locals.user) {
-    var redirectUri = req.query.redirect || req.query.redirect_uri || '/v1/users/' + req.app.locals.user.username;
+    debug('redirectAuthenticatedUser user', req.app.locals.user);
+    var redirectUri = req.query.redirect || req.query.redirect_uri || '/v1/users/username';
+    redirectUri = redirectUri.replace('username', req.app.locals.user.username);
     debug('redirectAuthenticatedUser', req.url, redirectUri);
     return res.redirect(redirectUri);
   }

@@ -29,6 +29,19 @@ function getUser(req, res, next) {
   });
 }
 
+function getCurrentUser(req, res, next) {
+  var json = {
+    username: req.app.locals.user.username,
+  };
+
+  User.read(json, function(err, profile) {
+    if (err) {
+      return next(err, req, res, next);
+    }
+    res.json(profile);
+  });
+}
+
 /**
  * Get a list of users
  * @param  {Request} req
@@ -73,6 +86,7 @@ router.get('/:username', authenticationMiddleware.requireAuthentication, getUser
 router.put('/:username', authenticationMiddleware.requireAuthentication, putUser);
 
 module.exports.getUser = getUser;
+module.exports.getCurrentUser = getCurrentUser;
 module.exports.putUser = putUser;
 
 module.exports.getList = getList;

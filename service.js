@@ -11,7 +11,7 @@ var oauthRoutes = require('./routes/oauth').router;
 var authenticationMiddleware = require('./middleware/authentication');
 var errorsMiddleware = require('./middleware/error');
 var routes = require('./routes/index').router;
-var userRoutes = require('./routes/user').router;
+var userRoutes = require('./routes/user');
 
 var service = express();
 
@@ -49,7 +49,8 @@ service.use('/bower_components', express.static(__dirname +
   '/public/components/as-ui-auth/bower_components'));
 service.use('/authentication', authenticationRoutes);
 service.use('/oauth', oauthRoutes);
-service.use('/v1/users', userRoutes);
+service.use('/v1/users', userRoutes.router);
+service.use('/v1/user', authenticationMiddleware.requireAuthentication, userRoutes.getCurrentUser);
 service.use('/', routes);
 
 /**
