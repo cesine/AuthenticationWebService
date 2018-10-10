@@ -39,6 +39,9 @@ function postLogin(req, res, next) {
       return next(err, req, res, next);
     }
 
+    delete user.hash;
+    delete user.deletedAt;
+    delete user.deletedReason;
     var token = AsToken.sign(user, 60 * 24);
     debug('token', token);
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
