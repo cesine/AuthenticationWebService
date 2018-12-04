@@ -10,7 +10,6 @@ var crossOriginResourceSharing = require('cors');
 var expressWebServer = require('express');
 var favicon = require("serve-favicon");
 var logger = require("morgan");
-var methodOverride = require("method-override");
 var session = require("express-session");
 var bodyParser = require("body-parser");
 var errorHandler = require("errorhandler");
@@ -78,7 +77,7 @@ authWebService.use(bodyParser.json());
 authWebService.use(bodyParser.urlencoded({
   extended: true
 }));
-authWebService.use(methodOverride());
+// authWebService.use(methodOverride());
 // authWebService.use(authWebService.router);
 
 /*
