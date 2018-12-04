@@ -1,51 +1,66 @@
-var sw = require("swagger-node-express/Common/node/swagger.js");
+var swagger = require('swagger-node-express');
 var param = require("swagger-node-express/Common/node/paramTypes.js");
-var url = require("url");
-var swe = sw.errors;
 
-var corpusData = require("./../lib/corpusData.js");
+var corpusData = require("./../lib/corpus.js");
+var appVersion = require('../package.json').version;
 
-function writeResponse (res, data) {
-  sw.setHeaders(res);
-  res.send(JSON.stringify(data));
-}
-
-exports.addCorpus = {
+exports.getCorpora = {
   'spec': {
-    path : "/corpus",
-    notes : "adds a corpus to the store",
-    summary : "Add a new corpus to the store",
-    method: "POST",
-    parameters : [param.body("Corpus", "Corpus object that needs to be added to the store", "Corpus")],
-    responseMessages : [swe.invalid('input')],
-    nickname : "addCorpus"
-  },  
-  'action': function(req, res) {
+    'path': '/corpora/{dbname}',
+    'description': 'Operations about corpora',
+    'notes': 'Requests corpora details if authenticated',
+    'summary': 'Retrieves corpus(s)',
+    'method': 'GET',
+    'parameters': [param.path('dbname', 'requested dbname of the corpus', 'string')],
+    'responseClass': 'User',
+    'errorResponses': [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
+    'nickname': 'getCorpora'
+  },
+  'action': function(req, res, next) {
+    res.send({});
+  }
+};
+
+exports.postCorpora = {
+  'spec': {
+    'path': '/corpora/{dbname}',
+    'description': 'Operations about corpora',
+    'notes': 'Creates a corpus for a given dbname',
+    'summary': 'Creates a corpus(s)',
+    'method': 'POST',
+    'parameters': [param.path('dbname', 'requested dbname of the corpus', 'string')],
+    'responseClass': 'User',
+    'errorResponses': [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
+    'nickname': 'postCorpora'
+  },
+  'action': function(req, res, next) {
     var body = req.body;
     if(!body || !body.id){
-      throw swe.invalid('corpus');
+      throw swagger.errors.invalid('corpus');
     }
     else{
       corpusData.addCorpus(body);
       res.send(200);
-    }  
+    }
   }
 };
 
-exports.updateCorpus = {
+exports.putCorpora = {
   'spec': {
-    path : "/corpus",
-    notes : "updates a corpus in the store",
-    method: "PUT",    
-    summary : "Update an existing corpus",
-    parameters : [param.body("Corpus", "Corpus object that needs to be updated in the store", "Corpus")],
-    responseMessages : [swe.invalid('id'), swe.notFound('corpus'), swe.invalid('input')],
-    nickname : "addCorpus"
-  },  
-  'action': function(req, res) {
+    'path': '/corpora/{dbname}',
+    'description': 'Operations about corpora',
+    'notes': 'Updates corpora details if authenticated',
+    'summary': 'Updates a corpus detail(s)',
+    'method': 'PUT',
+    'parameters': [param.path('dbname', 'requested dbname of the corpus', 'string')],
+    'responseClass': 'User',
+    'errorResponses': [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
+    'nickname': 'putCorpora'
+  },
+  'action': function(req, res, next) {
     var body = req.body;
     if(!body || !body.id){
-      throw swe.invalid('corpus');
+      throw swagger.errors.invalid('corpus');
     }
     else {
       corpusData.addCorpus(body);
@@ -54,19 +69,38 @@ exports.updateCorpus = {
   }
 };
 
-exports.deleteCorpus = {
+exports.deleteCorpora = {
   'spec': {
-    path : "/corpus/{id}",
-    notes : "removes a corpus from the store",
-    method: "DELETE",
-    summary : "Remove an existing corpus",
-    parameters : [param.path("id", "ID of corpus that needs to be removed", "string")],
-    responseMessages : [swe.invalid('id'), swe.notFound('corpus')],
-    nickname : "deleteCorpus" 
-  },  
-  'action': function(req, res) {
+    'path': '/corpora/{dbname}',
+    'description': 'Operations about corpora',
+    'notes': 'Deletes corpus if authenticated',
+    'summary': 'Deletes corpus(s)',
+    'method': 'DELETE',
+    'parameters': [param.path('dbname', 'requested dbname of the corpus', 'string')],
+    'responseClass': 'User',
+    'errorResponses': [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
+    'nickname': 'deleteCorpora'
+  },
+  'action': function(req, res, next) {
     var id = parseInt(req.params.id);
     corpusData.deleteCorpus(id)
     res.send(204);
+  }
+};
+
+exports.searchCorpora = {
+  'spec': {
+    'path': '/corpora/{dbname}',
+    'description': 'Operations about corpora',
+    'notes': 'Search corpus if authenticated',
+    'summary': 'Deletes corpus(s)',
+    'method': 'SEARCH',
+    'parameters': [param.path('dbname', 'requested dbname of the corpus', 'string')],
+    'responseClass': 'User',
+    'errorResponses': [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
+    'nickname': 'searchCorpora'
+  },
+  'action': function(req, res, next) {
+    res.send({});
   }
 };

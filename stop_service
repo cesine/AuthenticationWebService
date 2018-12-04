@@ -1,6 +1,4 @@
 #!/bin/bash
 
-forever stop service.js
+forever stop auth_service.js
 
-cd $FIELDDB_HOME/AuthenticationWebService
-NODE_DEPLOY_TARGET="local"

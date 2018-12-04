@@ -1,66 +1,141 @@
 /* Load modules provided by $ npm install, see package.json for details */
 var swagger = require('swagger-node-express');
 var param = require('../node_modules/swagger-node-express/Common/node/paramTypes.js');
-var diacritics = require('diacritics');
-
-/* Load modules provided by this codebase */
-var UserLib = require('../../FieldDB/api/user/UserGeneric');
-var CorpusConnectionLib = require('../../FieldDB/api/corpus/CorpusConnection');
 var appVersion = require('../package.json').version;
 
-
-var defaultCorpusConnectionFactory = new CorpusConnectionLib({
-	'dbname': 'public-firstcorpus'
-}, diacritics);
-var UserFactory = new UserLib(appVersion, defaultCorpusConnectionFactory, diacritics);
-
-
-/* export functions which can be used as API routes */
-
-exports.appVersion = appVersion;
-exports.UserSchema = UserFactory.baseSchema;
-exports.CorpusConnectionSchema = defaultCorpusConnectionFactory.baseSchema;
-
-exports.createUserByUsername = {
+exports.getUsers = {
 	'spec': {
-		'path': '/user/{username}',
+		'path': '/users/{username}',
+		'description': 'Operations about users accounts',
+		'notes': 'Requests users details if authenticated',
+		'summary': 'Retrieves user(s)',
+		'method': 'GET',
+		'parameters': [param.path('username', 'requested username of the user', 'string')],
+		'responseClass': 'User',
+		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
+		'nickname': 'getUsers'
+	},
+	'action': function(req, res, next) {
+		res.send({});
+	}
+};
+
+exports.postUsers = {
+	'spec': {
+		'path': '/users/{username}',
 		'description': 'Operations about users accounts',
 		'notes': 'Registers a user for a given username',
 		'summary': 'Register user(s)',
 		'method': 'POST',
-		'params': [param.path('username', 'requested username of the user to be created', 'string'),
-			param.post('object', 'additional user datails', '{"password":"AewrawR"}')
-		],
+		'parameters': [param.path('username', 'requested username of the user to be created', 'string')],
 		'responseClass': 'User',
 		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
-		'nickname': 'createUserByUsername'
+		'nickname': 'postUsers'
 	},
 	'action': function(req, res, next) {
-		console.log('Request for register.');
-		if (!req.params.username) {
-			throw swagger.errors.invalid('username');
-		}
-		var username = req.params.username;
-		try {
+		res.send({});
+	}
+};
 
-			var newUsersCorpusConnection = defaultCorpusConnectionFactory.set(null, {
-				dbname: username + '-firstcorpus'
-			});
+exports.putUsers = {
+	'spec': {
+		'path': '/users/{username}',
+		'description': 'Operations about users accounts',
+		'notes': 'Updates users details if authenticated',
+		'summary': 'Updates user(s)',
+		'method': 'PUT',
+		'parameters': [param.path('username', 'requested username of the user to be updated', 'string')],
+		'responseClass': 'User',
+		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
+		'nickname': 'putUsers'
+	},
+	'action': function(req, res, next) {
+		res.send({});
+	}
+};
 
-			var user = UserFactory.set(null, {
-				username: username
-			}, newUsersCorpusConnection);
+exports.deleteUsers = {
+	'spec': {
+		'path': '/users/{username}',
+		'description': 'Operations about users accounts',
+		'notes': 'Deletes user acount if authenticated',
+		'summary': 'Deletes user(s)',
+		'method': 'PUT',
+		'parameters': [param.path('username', 'requested username of the user to be deleted', 'string')],
+		'responseClass': 'User',
+		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
+		'nickname': 'deleteUsers'
+	},
+	'action': function(req, res, next) {
+		res.send({});
+	}
+};
 
-			if (user) {
-				console.log(new Date() + ' Registered new user ' + user.username);
-				res.send(user);
-			} else {
-				throw swagger.errors.notFound('user');
-			}
 
-		} catch (e) {
-			console.log('hi');
-			throw swagger.errors.invalid('username');
-		}
+exports.getUserGravatars = {
+	'spec': {
+		'path': '/users/{username}/gravatar',
+		'description': 'Operations about users gravatars',
+		'notes': 'Requests users gravatar image if authenticated',
+		'summary': 'Retrieves users gravatar',
+		'method': 'GET',
+		'parameters': [param.path('username', 'requested username of the users gravatar', 'string')],
+		'responseClass': 'UserGravatar',
+		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
+		'nickname': 'getUserGravatars'
+	},
+	'action': function(req, res, next) {
+		res.send({});
+	}
+};
+
+exports.postUserGravatars = {
+	'spec': {
+		'path': '/users/{username}/gravatar',
+		'description': 'Operations about users gravatars',
+		'notes': 'Saves a users gravatar for a given username',
+		'summary': 'Save users gravatar',
+		'method': 'POST',
+		'parameters': [param.path('username', 'requested username of the users gravatar to be created', 'string')],
+		'responseClass': 'UserGravatar',
+		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
+		'nickname': 'postUserGravatars'
+	},
+	'action': function(req, res, next) {
+		res.send({});
+	}
+};
+
+exports.putUserGravatars = {
+	'spec': {
+		'path': '/users/{username}/gravatar',
+		'description': 'Operations about users gravatars',
+		'notes': 'Updates users gravatars details if authenticated',
+		'summary': 'Updates users gravatar',
+		'method': 'PUT',
+		'parameters': [param.path('username', 'requested username of the users gravatar to be updated', 'string')],
+		'responseClass': 'UserGravatar',
+		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
+		'nickname': 'putUserGravatars'
+	},
+	'action': function(req, res, next) {
+		res.send({});
+	}
+};
+
+exports.deleteUserGravatars = {
+	'spec': {
+		'path': '/users/{username}/gravatar',
+		'description': 'Operations about users gravatars',
+		'notes': 'Deletes users gravatar acount if authenticated',
+		'summary': 'Deletes users gravatar',
+		'method': 'PUT',
+		'parameters': [param.path('username', 'requested username of the users gravatar to be deleted', 'string')],
+		'responseClass': 'UserGravatar',
+		'errorResponses': [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
+		'nickname': 'deleteUserGravatars'
+	},
+	'action': function(req, res, next) {
+		res.send({});
 	}
 };

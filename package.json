@@ -1,20 +1,20 @@
 {
   "name": "fielddb-auth",
-  "version": "2.0.1",
+  "version": "4.16.14",
   "description": "Authentication web services for FieldDB.",
-  "homepage": "https://github.com/OpenSourceFieldlinguistics/FieldDB/issues/milestones?state=closed",
+  "homepage": "https://github.com/FieldDB/FieldDB/issues/milestones?state=closed",
   "repository": {
     "type": "git",
-    "url": "git://github.com/OpenSourceFieldlinguistics/AuthenticationWebService.git"
+    "url": "git://github.com/FieldDB/AuthenticationWebService.git"
   },
   "bugs": {
-    "url": "https://github.com/OpenSourceFieldlinguistics/FieldDB/issues"
+    "url": "https://github.com/FieldDB/FieldDB/issues"
   },
   "keywords": [
     "fielddb",
     "api"
   ],
-  "author": "cesine <cesine@yahoo.com>",
+  "author": "FieldDB contributors <opensource@fielddb.org>",
   "contributors": [
     "cesine <cesine@yahoo.com>",
     "Tobin Skinner <tobin.skinner@gmail.com>",
@@ -23,35 +23,41 @@
     "Fieldlinguist <info@fieldlinguist.com>"
   ],
   "dependencies": {
-    "swagger-node-express": "^2.0.1",
-    "express": "3.x",
-    "cors": "^2.2.0",
-    "body-parser": "^1.0.2",
-    "diacritics": "^1.1.0"
+    "bcrypt": "0.8.7",
+    "body-parser": "^1.15.0",
+    "cors": "2.7.1",
+    "cradle": "0.6.9",
+    "errorhandler": "^1.4.3",
+    "express": "4.13.3",
+    "express-session": "^1.13.0",
+    "fielddb": "git://github.com/fielddb/fielddb.git",
+    "md5": "2.0.0",
+    "method-override": "^2.3.5",
+    "morgan": "^1.7.0",
+    "nano": "6.1.5",
+    "nodemailer": "1.10.0",
+    "q": "1.4.1",
+    "serve-favicon": "^2.3.0",
+    "swagger-node-express": "git://github.com/cesine/swagger-node-express.git#search",
+    "underscore": "1.8.3",
+    "uuid": "2.0.1"
   },
-  "peerDependencies": {
-    "fielddb-api": "*",
-    "fielddb-web": "*",
-    "fielddb-audio": "*",
-    "fielddb-lexicon": "*",
-    "fielddb-spider": "*"
-  },
-  "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-nodeunit": "*",
-    "grunt-contrib-jshint": "*",
-    "grunt-contrib-watch": "*",
-    "nodeunit": "*"
-  },
-  "main": "./service.js",
+  "peerDependencies": {},
+  "devDependencies": {},
+  "main": "./auth_service.js",
   "bin": {
-    "fielddb-auth": "./service.js"
+    "fielddb-auth": "./auth_service.js"
   },
   "engines": {
-    "node": "~0.8 || ~0.10"
+    "node": ">8.x.x"
   },
   "scripts": {
-    "test": "grunt nodeunit"
+    "test": "jasmine-node test",
+    "test:deprecated": "bash test/routes/deprecated.sh",
+    "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
+    "test:travis": "npm test",
+    "test:production": "ls lib/nodeconfig_production.js && ls lib/couchkeys_production.js && ls lib/mailconfig_production.js",
+    "start": "node auth_service.js"
   },
-  "license": "Apache 2.0"
+  "license": "Apache-2.0"
 }

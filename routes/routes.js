@@ -3,8 +3,18 @@ var swagger = require('swagger-node-express');
 
 /* Load modules provided by this codebase */
 var userRoutes = require('./user');
+var corporaRoutes = require('./corpora');
+var utterancesRoutes = require('./utterances');
+var filesRoutes = require('./files');
+var dataRoutes = require('./data');
+var eLanguagesRoutes = require('./elanguages');
+var morphologicalParsesRoutes = require('./morphologicalparses');
 
-var setup = function(api) {
+var deploy_target = process.env.NODE_ENV || "localhost";
+var config = require('./../lib/nodeconfig_' + deploy_target);
+
+
+var setup = function(api, apiVersion) {
 
 	swagger.configureSwaggerPaths('', '/api', '');
 	swagger.setAppHandler(api);
@@ -13,13 +23,47 @@ var setup = function(api) {
 	var APIModelShema = {};
 	APIModelShema.models = {
 		'User': userRoutes.UserSchema,
-		'CouchConnection': userRoutes.CorpusConnectionSchema
+		'Connection': userRoutes.ConnectionSchema
 	};
 	swagger.addModels(APIModelShema);
 
 	/* Declare available APIs */
-	swagger.addPost(userRoutes.createUserByUsername);
+	swagger.addGet(userRoutes.getUsers);
+	swagger.addPost(userRoutes.postUsers);
+	swagger.addPut(userRoutes.putUsers);
+	swagger.addDelete(userRoutes.deleteUsers);
 
-	swagger.configure('https://localhost:3183', userRoutes.appVersion);
+	swagger.addGet(corporaRoutes.getCorpora);
+	swagger.addPost(corporaRoutes.postCorpora);
+	swagger.addPut(corporaRoutes.putCorpora);
+	swagger.addDelete(corporaRoutes.deleteCorpora);
+	swagger.addSearch(corporaRoutes.searchCorpora);
+
+	swagger.addGet(dataRoutes.getData);
+	swagger.addPost(dataRoutes.postData);
+	swagger.addPut(dataRoutes.putData);
+	swagger.addDelete(dataRoutes.deleteData);
+
+	swagger.addGet(utterancesRoutes.getUtterances);
+	swagger.addPost(utterancesRoutes.postUtterances);
+	swagger.addPut(utterancesRoutes.putUtterances);
+	swagger.addDelete(utterancesRoutes.deleteUtterances);
+
+	swagger.addGet(filesRoutes.getFiles);
+	swagger.addPost(filesRoutes.postFiles);
+	swagger.addPut(filesRoutes.putFiles);
+	swagger.addDelete(filesRoutes.deleteFiles);
+
+	swagger.addGet(eLanguagesRoutes.getELanguages);
+	swagger.addPost(eLanguagesRoutes.postELanguages);
+	swagger.addPut(eLanguagesRoutes.putELanguages);
+	swagger.addDelete(eLanguagesRoutes.deleteELanguages);
+
+	swagger.addGet(morphologicalParsesRoutes.getMorphologicalParses);
+	swagger.addPost(morphologicalParsesRoutes.postMorphologicalParses);
+	swagger.addPut(morphologicalParsesRoutes.putMorphologicalParses);
+	swagger.addDelete(morphologicalParsesRoutes.deleteMorphologicalParses);
+
+	swagger.configure(config.externalOrigin + '/' + apiVersion, apiVersion.replace("v", ""));
 };
 exports.setup = setup;
