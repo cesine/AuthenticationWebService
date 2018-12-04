@@ -42,6 +42,73 @@ fi
 echo ""
 echo "Using $SERVER"
 
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should register wordcloud users"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "anonymouswordclouduser1401365327718", 
+"password": "testtest",
+"email": "",
+"firstname": "",
+"lastname": "",
+"appbrand": "ilanguagecloud"}' \
+$SERVER/register `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+    echo "  success"
+    if [[ $result =~ "Username anonymouswordclouduser1401365327718 already exists, try a different username"  ]]
+      then {
+        echo "   server provided an informative message";
+      } else {
+       TESTFAILED=$[TESTFAILED + 1]
+       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+     }
+   fi
+ } else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+}
+fi 
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should register phophlo users"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "testingphophlo", 
+"password": "test",
+"email": "",
+"firstname": "",
+"lastname": "",
+"appbrand": "phophlo"}' \
+$SERVER/register `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+    echo "  success"
+    if [[ $result =~ "Username testingphophlo already exists, try a different username"  ]]
+      then {
+        echo "   server provided an informative message";
+      } else {
+       TESTFAILED=$[TESTFAILED + 1]
+       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+     }
+   fi
+ } else {
+  TESTFAILED=$[TESTFAILED + 1]
+  TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+}
+fi 
+
+exit
+
 echo "-------------------------------------------------------------"
 TESTNAME="It should return username or password invalid"
 echo "$TESTNAME"

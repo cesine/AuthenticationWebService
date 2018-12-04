@@ -136,3 +136,5 @@ if (!module.parent) {
 } else {
   module.exports = authWebService;
 }
+
+exports.AuthWebService = AuthWebService;

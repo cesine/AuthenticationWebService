@@ -44,7 +44,9 @@
     "uuid": "2.0.1"
   },
   "peerDependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "jasmine-node": "^1.16.2"
+  },
   "main": "./auth_service.js",
   "bin": {
     "fielddb-auth": "./auth_service.js"
