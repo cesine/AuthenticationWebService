@@ -12,7 +12,7 @@
   },
   "keywords": [
     "fielddb",
-    "authentication"
+    "api"
   ],
   "author": "FieldDB contributors <opensource@fielddb.org>",
   "contributors": [
@@ -49,7 +49,7 @@
     "fielddb-auth": "./auth_service.js"
   },
   "engines": {
-    "node": ">4.2.2"
+    "node": ">8.x.x"
   },
   "scripts": {
     "test": "jasmine-node test",

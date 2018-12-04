@@ -1,6 +1,7 @@
-/* Load modules provided by $ npm install, see package.json for details */
 var swagger = require('swagger-node-express');
-var param = require('../node_modules/swagger-node-express/Common/node/paramTypes.js');
+var param = require("swagger-node-express/Common/node/paramTypes.js");
+
+var corpusData = require("./../lib/corpus.js");
 var appVersion = require('../package.json').version;
 
 exports.getCorpora = {
@@ -33,7 +34,14 @@ exports.postCorpora = {
     'nickname': 'postCorpora'
   },
   'action': function(req, res, next) {
-    res.send({});
+    var body = req.body;
+    if(!body || !body.id){
+      throw swagger.errors.invalid('corpus');
+    }
+    else{
+      corpusData.addCorpus(body);
+      res.send(200);
+    }
   }
 };
 
@@ -50,7 +58,14 @@ exports.putCorpora = {
     'nickname': 'putCorpora'
   },
   'action': function(req, res, next) {
-    res.send({});
+    var body = req.body;
+    if(!body || !body.id){
+      throw swagger.errors.invalid('corpus');
+    }
+    else {
+      corpusData.addCorpus(body);
+      res.send(200);
+    }
   }
 };
 
@@ -67,7 +82,9 @@ exports.deleteCorpora = {
     'nickname': 'deleteCorpora'
   },
   'action': function(req, res, next) {
-    res.send({});
+    var id = parseInt(req.params.id);
+    corpusData.deleteCorpus(id)
+    res.send(204);
   }
 };
 
