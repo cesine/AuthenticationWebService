@@ -1,6 +1,4 @@
 #!/bin/bash
 
-$HOME/fielddbworkspace/AuthenticationWebService/node_modules/forever/bin/forever stop service.js
+forever stop auth_service.js
 
-cd $HOME/fielddbworkspace/AuthenticationWebService
-bash switch_to_develop_easy_setup.sh

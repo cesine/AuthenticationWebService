@@ -1,11 +1,11 @@
 #!/bin/bash
 
-cd $HOME/fielddbworkspace/AuthenticationWebService
-bash switch_to_producti.sh 
+cd $FIELDDB_HOME/AuthenticationWebService
 
-$HOME/fielddbworkspace/AuthenticationWebService/node_modules/forever/bin/forever \
+
+forever \
 start \
--al $HOME/fielddbworkspace/logs/fielddbauth.log \
--ao $HOME/fielddbworkspace/logs/fielddbauthout.log \
--ae $HOME/fielddbworkspace/logs/fielddbautherr.log \
-service.js
+-al $FIELDDB_HOME/logs/fielddbauth.log \
+-ao $FIELDDB_HOME/logs/fielddbauthout.log \
+-ae $FIELDDB_HOME/logs/fielddbautherr.log \
+auth_service.js

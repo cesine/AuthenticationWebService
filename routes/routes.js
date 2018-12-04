@@ -1,48 +1,69 @@
-var setup = function(api, handlers) {
-	api.post('/users/:username', handlers.users.createUsers);
-	api.put('/users/:username', handlers.users.updateUsers);
-	api.get('/users/:username', handlers.users.getUsers);
-	api.del('/users/:username', handlers.users.deleteUsers);
+/* Load modules provided by $ npm install, see package.json for details */
+var swagger = require('swagger-node-express');
 
-	api.post('/users/:username/:roles', handlers.users.addUserRoles);
-	api.put('/users/:username/:roles', handlers.users.updateUserRoles);
-	api.get('/users/:username/:roles', handlers.users.getUserRoles);
-	api.del('/users/:username/:roles', handlers.users.deleteUserRoles);
+/* Load modules provided by this codebase */
+var userRoutes = require('./user');
+var corporaRoutes = require('./corpora');
+var utterancesRoutes = require('./utterances');
+var filesRoutes = require('./files');
+var dataRoutes = require('./data');
+var eLanguagesRoutes = require('./elanguages');
+var morphologicalParsesRoutes = require('./morphologicalparses');
 
-
-	api.post('/fielddbs/:dbidentifier', handlers.fielddb.createFieldDBs);
-	api.put('/fielddbs/:dbidentifier', handlers.fielddb.updateFieldDBs);
-	api.get('/fielddbs/:dbidentifier', handlers.fielddb.getFieldDBs);
-	api.del('/fielddbs/:dbidentifier', handlers.fielddb.deleteFieldDBs);
-
-	api.post('/fielddbs/:dbidentifier/:roles/:username', handlers.fielddb.addFieldDBTeamMembers);
-	api.put('/fielddbs/:dbidentifier/:roles/:username', handlers.fielddb.updateFieldDBTeamMembers);
-	api.get('/fielddbs/:dbidentifier/:roles/:username', handlers.fielddb.getFieldDBTeamMembers);
-	api.del('/fielddbs/:dbidentifier/:roles/:username', handlers.fielddb.deleteFieldDBTeamMembers);
+var deploy_target = process.env.NODE_ENV || "localhost";
+var config = require('./../lib/nodeconfig_' + deploy_target);
 
 
-	api.post('/corpora/:dbidentifier', handlers.fielddb.createFieldDBs);
-	api.put('/corpora/:dbidentifier', handlers.fielddb.updateFieldDBs);
-	api.get('/corpora/:dbidentifier', handlers.fielddb.getFieldDBs);
-	api.del('/corpora/:dbidentifier', handlers.fielddb.deleteFieldDBs);
+var setup = function(api, apiVersion) {
 
-	api.post('/corpora/:dbidentifier/:roles/:username', handlers.fielddb.addFieldDBTeamMembers);
-	api.put('/corpora/:dbidentifier/:roles/:username', handlers.fielddb.updateFieldDBTeamMembers);
-	api.get('/corpora/:dbidentifier/:roles/:username', handlers.fielddb.getFieldDBTeamMembers);
-	api.del('/corpora/:dbidentifier/:roles/:username', handlers.fielddb.deleteFieldDBTeamMembers);
+	swagger.configureSwaggerPaths('', '/api', '');
+	swagger.setAppHandler(api);
 
-	api.get('/api', handlers.app.getApiDocs);
-	api.get('/api/version', handlers.app.getVersion);
-	api.get('/api/install', handlers.app.installFieldDB);
+	/* Prepare models for the API Schema info using the info the routes provide */
+	var APIModelShema = {};
+	APIModelShema.models = {
+		'User': userRoutes.UserSchema,
+		'Connection': userRoutes.ConnectionSchema
+	};
+	swagger.addModels(APIModelShema);
 
-	/* backward compatability */
-	api.post('/register', handlers.users.createUsers);
-	api.post('/login', handlers.users.updateUsers);
-	api.post('/corpusteam', handlers.fielddb.getFieldDBTeamMembers);
-	api.post('/addroletouser', handlers.fielddb.addFieldDBTeamMembers);
-	api.post('/newcorpus', handlers.fielddb.createFieldDBs);
-	api.post('/updateroles', handlers.fielddb.createFieldDBs);
-	api.get('/', handlers.app.getApiDocs);
+	/* Declare available APIs */
+	swagger.addGet(userRoutes.getUsers);
+	swagger.addPost(userRoutes.postUsers);
+	swagger.addPut(userRoutes.putUsers);
+	swagger.addDelete(userRoutes.deleteUsers);
 
+	swagger.addGet(corporaRoutes.getCorpora);
+	swagger.addPost(corporaRoutes.postCorpora);
+	swagger.addPut(corporaRoutes.putCorpora);
+	swagger.addDelete(corporaRoutes.deleteCorpora);
+	swagger.addSearch(corporaRoutes.searchCorpora);
+
+	swagger.addGet(dataRoutes.getData);
+	swagger.addPost(dataRoutes.postData);
+	swagger.addPut(dataRoutes.putData);
+	swagger.addDelete(dataRoutes.deleteData);
+
+	swagger.addGet(utterancesRoutes.getUtterances);
+	swagger.addPost(utterancesRoutes.postUtterances);
+	swagger.addPut(utterancesRoutes.putUtterances);
+	swagger.addDelete(utterancesRoutes.deleteUtterances);
+
+	swagger.addGet(filesRoutes.getFiles);
+	swagger.addPost(filesRoutes.postFiles);
+	swagger.addPut(filesRoutes.putFiles);
+	swagger.addDelete(filesRoutes.deleteFiles);
+
+	swagger.addGet(eLanguagesRoutes.getELanguages);
+	swagger.addPost(eLanguagesRoutes.postELanguages);
+	swagger.addPut(eLanguagesRoutes.putELanguages);
+	swagger.addDelete(eLanguagesRoutes.deleteELanguages);
+
+	swagger.addGet(morphologicalParsesRoutes.getMorphologicalParses);
+	swagger.addPost(morphologicalParsesRoutes.postMorphologicalParses);
+	swagger.addPut(morphologicalParsesRoutes.putMorphologicalParses);
+	swagger.addDelete(morphologicalParsesRoutes.deleteMorphologicalParses);
+
+	swagger.configure(config.externalOrigin + '/' + apiVersion, apiVersion.replace("v", ""));
 };
 exports.setup = setup;
