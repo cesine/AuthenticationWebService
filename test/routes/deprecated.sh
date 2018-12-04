@@ -27,12 +27,14 @@ echo "============================================================="
 TESTCOUNT=0;
 TESTFAILED=0;
 TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 TESTPASSED=0;
 TESTCOUNTEXPECTED=32;
+echo "" > test_errors.log
 
 # Production server is using http behind nginx
 SERVER="https://localhost:3183";
-if [ "$NODE_DEPLOY_TARGET" == "production" ]; then
+if [ "$NODE_ENV" == "production" ]; then
   SERVER="http://localhost:3183";
 fi
 # SERVER="https://auth.lingsync.org";
@@ -121,6 +123,7 @@ if [[ $result =~ "stack" ]]
   then {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   echo "$TESTSFAILEDSTRING $result " >> test_errors.log
  } else {
   if [[ $result =~ "Username or password is invalid. Please try again" ]]
     then {
@@ -129,10 +132,11 @@ if [[ $result =~ "stack" ]]
     } else  {
      TESTFAILED=$[TESTFAILED + 1]
      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+     echo "$TESTSFAILEDSTRING $result " >> test_errors.log
    }
-  fi 
+  fi
  }
-fi 
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should tell users why they are disabled"
@@ -148,6 +152,7 @@ if [[ $result =~ "stack" ]]
   then {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   echo "$TESTSFAILEDSTRING $result " >> test_errors.log
  } else {
   # if [[ $result =~ "This username has been disabled. Please contact us at  if you would like to reactivate this username. Reasons: This username was reported to us as a suspicously fictitous username.This username was reported to us as a suspicously fictitous username" ]]
   if [[ $result =~ "This username was reported to us as a suspicously fictitous username" ]]
@@ -157,10 +162,11 @@ if [[ $result =~ "stack" ]]
     } else  {
      TESTFAILED=$[TESTFAILED + 1]
      TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+     echo "$TESTSFAILEDSTRING $result " >> test_errors.log
    }
-  fi 
+  fi
  }
-fi 
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should return (upgraded) user details upon successful login"
@@ -176,9 +182,10 @@ if [[ $result =~ userFriendlyErrors ]]
   then {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   echo "$TESTSFAILEDSTRING $result should not have userFriendlyErrors " >> test_errors.log
  }
-fi 
-if [[ $result =~ "\"prefs\": " ]]
+fi
+if [[ $result =~ "\"prefs\":" ]]
   then {
     echo "Details recieved, you can use this user object in your app settings for this user."
     echo "   success";
@@ -186,20 +193,22 @@ if [[ $result =~ "\"prefs\": " ]]
     # echo "Response: $result";
     echo "  $result" | grep -C 4 "corpuses";
     echo "  $result" | grep -C 4 "corpora";
-    if [[ $result =~ "\"corpuses\": " ]]
+    if [[ $result =~ "\"corpuses\":" ]]
       then {
        TESTFAILED=$[TESTFAILED + 1]
        TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+       echo "$TESTSFAILEDSTRING Should not have corpuses: $result " >> test_errors.log
       } else  {
         echo "Upgraded users corpuses to corpora."
         echo "   success";
      }
-    fi 
+    fi
   } else  {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   echo "$TESTSFAILEDSTRING $result should have prefs " >> test_errors.log
  }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -221,13 +230,15 @@ if [[ $result =~ userFriendlyErrors ]]
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -243,19 +254,21 @@ echo "Response: $result" | grep -C 4 prefs;
 if [[ $result =~ userFriendlyErrors ]]
   then {
     echo " success"
-    if [[ $result =~ "Maybe your username is ninoberidze?"  ]] 
+    if [[ $result =~ "Maybe your username is ninoberidze?"  ]]
      then {
-       echo "   server provided an informative message"; 
+       echo "   server provided an informative message";
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -285,6 +298,7 @@ if [[ $result =~ "You have 2 more attempts"  ]]
   } else {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   echo "$TESTSFAILEDSTRING $result " >> test_errors.log
  }
 fi
 result="`curl -kX POST \
@@ -298,6 +312,7 @@ if [[ $result =~ "You have 1 more attempts"  ]]
   } else {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   echo "$TESTSFAILEDSTRING $result " >> test_errors.log
  }
 fi
 result="`curl -kX POST \
@@ -311,6 +326,7 @@ if [[ $result =~ "You have tried to log in"  ]]
   } else {
    TESTFAILED=$[TESTFAILED + 1]
    TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+   echo "$TESTSFAILEDSTRING $result " >> test_errors.log
  }
 fi
 
@@ -320,7 +336,7 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
+-d '{"username": "jenkins",
 "password": "phoneme",
 "appbrand": "learnx"}' \
 $SERVER/register `"
@@ -335,13 +351,65 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
        TESTFAILED=$[TESTFAILED + 1]
        TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+       echo "$TESTSFAILEDSTRING $result " >> test_errors.log
      }
    fi
  } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
+
+echo "-------------------------------------------------------------"
+TESTNAME="It should register a new user"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "testingv3_32",
+"password": "test"}' \
+$SERVER/register `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+   echo "   success"
+ } else {
+    sleep 1
+    result="`curl -kX GET \
+      -H "Content-Type: application/json" \
+      https://testingv3_32:test@localhost:6984/testingv3_32-firstcorpus/_design/lexicon/_view/lexiconNodes `"
+
+    echo "Should replicate lexicon: $result";
+    if [[ $result =~ "{\"rows\":" ]]
+      then {
+        echo "Response: $result" | grep -C 2 rows;
+        echo "    lexicon was replicated"
+
+        result="`curl -kX GET \
+          -H "Content-Type: application/json" \
+          https://testingv3_32:test@localhost:6984/_session `"
+
+        echo "Should have user types: $result";
+        if [[ $result =~ "[\"testingv3_32-firstcorpus_admin\",\"testingv3_32-firstcorpus_writer\",\"testingv3_32-firstcorpus_reader\",\"testingv3_32-firstcorpus_commenter\",\"public-firstcorpus_reader\",\"fielddbuser\",\"lingsync_betauser\"]" ]]
+          then {
+            echo "Response: $result" | grep -C 2 roles;
+            echo "    user types set correctly"
+          } else {
+            TESTFAILED=$[TESTFAILED + 1]
+            TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+            echo "$TESTSFAILEDSTRING $result " >> test_errors.log
+          }
+        fi
+      } else {
+        TESTFAILED=$[TESTFAILED + 1]
+        TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
+      }
+    fi
+}
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should refuse to register short usernames"
@@ -362,13 +430,15 @@ if [[ $result =~ userFriendlyErrors ]]
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should accept changepassword"
@@ -383,21 +453,23 @@ if [[ $result =~ userFriendlyErrors ]]
     echo "$result"
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     echo " success"
     echo "Response: $result" | grep -C 4 prefs;
     echo "   server provided an user details";
-    echo "Response: $result" | grep -C 4 password;
+    # echo "Response: $result" | grep -C 4 password;
     if [[ $result =~ "Your password has succesfully been updated"  ]]
      then {
        echo "   server provided an informative message";
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -419,13 +491,15 @@ if [[ $result =~ userFriendlyErrors ]]
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -447,13 +521,15 @@ if [[ $result =~ userFriendlyErrors ]]
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -471,7 +547,7 @@ $SERVER/forgotpassword `"
 echo ""
 echo "Response: $result";
 if [[ $result =~ userFriendlyErrors ]]
-  then {  
+  then {
   echo "   success"
   if [[ $result =~ "there are no users who have failed to login who have the email you provided"  ]]
    then {
@@ -479,13 +555,15 @@ if [[ $result =~ userFriendlyErrors ]]
    } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
 fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -506,7 +584,7 @@ $SERVER/forgotpassword `"
 echo ""
 echo "Response: $result";
 if [[ $result =~ userFriendlyErrors ]]
-  then {  
+  then {
   echo "   success"
   if [[ $result =~ "Please report this 2823"  ]]
    then {
@@ -514,13 +592,15 @@ if [[ $result =~ userFriendlyErrors ]]
    } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
 fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -542,13 +622,15 @@ if [[ $result =~ userFriendlyErrors ]]
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -570,13 +652,15 @@ if [[ $result =~ userFriendlyErrors ]]
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -595,8 +679,8 @@ $SERVER/addroletouser `"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "testingprototype", 
-"password": "test", 
+-d '{"username": "testingprototype",
+"password": "test",
 "connection": {
   "dbname": "jenkins-firstcorpus"
 } }' \
@@ -612,13 +696,15 @@ if [[ $result =~ userFriendlyErrors ]]
      } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
   fi
 } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -636,10 +722,10 @@ echo ""
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
-"connection": 
-{"dbname": 
+-d '{"username": "jenkins",
+"password": "phoneme",
+"connection":
+{"dbname":
 "jenkins-firstcorpus"} }' \
 $SERVER/corpusteam `"
 echo ""
@@ -648,6 +734,7 @@ if [[ $result =~ userFriendlyErrors ]]
     echo "Response: $result";
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     if [[ $result =~ readers ]]
       then {
@@ -656,10 +743,11 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -676,9 +764,9 @@ echo ""
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
-"serverCode": "localhost", 
+-d '{"username": "jenkins",
+"password": "phoneme",
+"serverCode": "localhost",
 "dbname": "jenkins-firstcorpus"}' \
 $SERVER/corpusteam `"
 echo ""
@@ -687,6 +775,7 @@ if [[ $result =~ userFriendlyErrors ]]
     echo "Response: $result";
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     if [[ $result =~ readers ]]
       then {
@@ -695,10 +784,11 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -720,13 +810,15 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -749,13 +841,15 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
-fi 
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should refuse to addroletouser if the user(s) to modify are missing"
@@ -763,8 +857,8 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
+-d '{"username": "jenkins",
+"password": "phoneme",
 "connection": {
   "dbname":
   "jenkins-firstcorpus"
@@ -781,13 +875,15 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -813,13 +909,15 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -841,6 +939,7 @@ if [[ $result =~ userFriendlyErrors ]]
   then {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     echo "   success"
     if [[ $result =~ "was removed from" ]]
@@ -853,22 +952,24 @@ if [[ $result =~ userFriendlyErrors ]]
         -d '{"username": "testingprototype", "password": "test"}' \
         $SERVER/login `"
         echo "Response: $result" | grep -C 4 dbname;
-        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
+        if [[ $result =~ "\"dbname\":\"jenkins-firstcorpus\"" ]]
           then {
             TESTFAILED=$[TESTFAILED + 1]
             TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+            echo "$TESTSFAILEDSTRING $result " >> test_errors.log
           } else {
             echo "    sever made sure the corpus was removed in the user too"
           }
-        fi 
+        fi
 
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -891,6 +992,7 @@ if [[ $result =~ userFriendlyErrors ]]
   then {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result should not have userFriendlyErrors " >> test_errors.log
   } else {
     echo "   success"
     if [[ $result =~ "has reader commenter access" ]]
@@ -900,26 +1002,28 @@ if [[ $result =~ userFriendlyErrors ]]
         echo "   Checking if corpus was added to the user"
         result="`curl -kX POST \
         -H "Content-Type: application/json" \
-        -d '{"username": "testingprototype", 
+        -d '{"username": "testingprototype",
         "password": "test"}' \
         $SERVER/login `"
         echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
+        if [[ $result =~ "\"dbname\":\"jenkins-firstcorpus\"" ]]
           then {
             echo "    sever made sure the corpus was listed in this user too"
           } else {
             TESTFAILED=$[TESTFAILED + 1]
             TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+            echo "$TESTSFAILEDSTRING $result should jenkins-firstcorpus " >> test_errors.log
           }
-        fi 
+        fi
 
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result should say has reader commenter access " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -948,13 +1052,15 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
-fi 
+fi
 
 sleep 1
 
@@ -981,29 +1087,29 @@ result="`curl -kX POST \
 }],
 "connection": {"dbname": "jenkins-firstcorpus"} }' \
 $SERVER/addroletouser `"
-echo '{' 
-echo '  "username": "jenkins",' 
-echo '  "password": "phoneme",' 
-echo '  "connection": {' 
-echo '    "dbname": "jenkins-firstcorpus"' 
-echo '  },' 
-echo '  "users": [{' 
-echo '    "username": "testingspreadsheet",' 
-echo '    "add": [' 
-echo '      "reader",' 
+echo '{'
+echo '  "username": "jenkins",'
+echo '  "password": "phoneme",'
+echo '  "connection": {'
+echo '    "dbname": "jenkins-firstcorpus"'
+echo '  },'
+echo '  "users": [{'
+echo '    "username": "testingspreadsheet",'
+echo '    "add": ['
+echo '      "reader",'
 echo '      "exporter"'
-echo '    ],' 
-echo '    "remove": [' 
-echo '      "admin",' 
-echo '      "writer"' 
-echo '    ]' 
-echo '  }, {' 
-echo '    "username": "testingprototype",' 
-echo '    "add": [' 
+echo '    ],'
+echo '    "remove": ['
+echo '      "admin",'
 echo '      "writer"'
-echo '    ]' 
-echo '  }]' 
-echo '}' 
+echo '    ]'
+echo '  }, {'
+echo '    "username": "testingprototype",'
+echo '    "add": ['
+echo '      "writer"'
+echo '    ]'
+echo '  }]'
+echo '}'
 echo ''
 echo ""
 TESTCOUNT=$[TESTCOUNT + 1]
@@ -1026,6 +1132,7 @@ if [[ $result =~ userFriendlyErrors ]]
   then {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     echo "   success"
     if [[ $result =~ "has reader exporter access" ]]
@@ -1035,41 +1142,44 @@ if [[ $result =~ userFriendlyErrors ]]
         echo " Checking if corpus was added to the first user"
         result="`curl -kX POST \
         -H "Content-Type: application/json" \
-        -d '{"username": "testingspreadsheet", 
+        -d '{"username": "testingspreadsheet",
         "password": "test"}' \
         $SERVER/login `"
         echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-        if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
+        if [[ $result =~ "\"dbname\":\"jenkins-firstcorpus\"" ]]
           then {
             echo "    sever added corpus to the first user too"
             echo " Checking if corpus was added to the second user"
             result="`curl -kX POST \
             -H "Content-Type: application/json" \
-            -d '{"username": "testingprototype", 
+            -d '{"username": "testingprototype",
             "password": "test"}' \
             $SERVER/login `"
             echo "Response: $result" | grep -C 2 "jenkins-firstcorpus";
-            if [[ $result =~ "\"dbname\": \"jenkins-firstcorpus\"" ]]
+            if [[ $result =~ "\"dbname\":\"jenkins-firstcorpus\"" ]]
               then {
                 echo "    sever added corpus to the second user too"
               } else {
                 TESTFAILED=$[TESTFAILED + 1]
                 TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+                echo "$TESTSFAILEDSTRING $result " >> test_errors.log
               }
-            fi 
+            fi
           } else {
             TESTFAILED=$[TESTFAILED + 1]
             TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+            echo "$TESTSFAILEDSTRING $result " >> test_errors.log
           }
-        fi 
+        fi
 
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -1097,10 +1207,10 @@ $SERVER/addroletouser `"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
-"userToAddToRole": "testingprototype", 
-"roles": ["reader","commenter"], 
+-d '{"username": "jenkins",
+"password": "phoneme",
+"userToAddToRole": "testingprototype",
+"roles": ["reader","commenter"],
 "connection": {
   "dbname": "jenkins-firstcorpus"
 } }' \
@@ -1111,6 +1221,7 @@ if [[ $result =~ userFriendlyErrors ]]
   then {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     echo "   success"
     if [[ $result =~ "testingprototype now has reader commenter access to jenkins-firstcorpus" ]]
@@ -1120,10 +1231,11 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -1146,14 +1258,57 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   } else {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   }
-fi 
+fi
 
+echo "-------------------------------------------------------------"
+TESTNAME="It should create a corpus"
+echo "$TESTNAME"
+TESTCOUNT=$[TESTCOUNT + 1]
+result="`curl -kX POST \
+-H "Content-Type: application/json" \
+-d '{"username": "jenkins",
+"password": "phoneme",
+"newCorpusName": "Testing v3.32.01"}' \
+$SERVER/newcorpus `"
+echo ""
+echo "Response: $result";
+if [[ $result =~ userFriendlyErrors ]]
+  then {
+   echo "   success"
+ } else {
+  if [[ $result =~ "already exists, no need to create it" ]]
+    then {
+      echo "Response: $result" | grep -C 2 testing;
+      echo "    server replied with a 302 status saying it existed."
+    } else {
+      sleep 1
+      result="`curl -kX GET \
+      -H "Content-Type: application/json" \
+      https://jenkins:phoneme@localhost:6984/jenkins-testing_v3_32_01/_design/lexicon/_view/lexiconNodes `"
+
+      echo "Should replicate lexicon: $result";
+      if [[ $result =~ "{\"rows\":" ]]
+        then {
+          echo "Response: $result" | grep -C 2 testing;
+          echo "    lexicon was replicated"
+        } else {
+          TESTFAILED=$[TESTFAILED + 1]
+          TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+          echo "$TESTSFAILEDSTRING $result " >> test_errors.log
+        }
+      fi
+    }
+  fi
+}
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should not complain if users tries to recreate a newcorpus"
@@ -1161,8 +1316,8 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
+-d '{"username": "jenkins",
+"password": "phoneme",
 "newCorpusName": "Testing v3.0.19"}' \
 $SERVER/newcorpus `"
 echo ""
@@ -1178,10 +1333,11 @@ if [[ $result =~ userFriendlyErrors ]]
     } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
-  fi 
+  fi
 }
-fi 
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should create branded corpora"
@@ -1189,8 +1345,8 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
+-d '{"username": "jenkins",
+"password": "phoneme",
 "appbrand": "georgiantogether",
 "newCorpusName": "Georgian"}' \
 $SERVER/newcorpus `"
@@ -1207,10 +1363,11 @@ if [[ $result =~ userFriendlyErrors ]]
     } else {
       TESTFAILED=$[TESTFAILED + 1]
       TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+      echo "$TESTSFAILEDSTRING $result " >> test_errors.log
     }
-  fi 
+  fi
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -1219,11 +1376,11 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
-"syncDetails": true, 
-"syncUserDetails": { 
-  "newCorpusConnections": [{"dbname": "jenkins-firstcorpus"},{},{"dbname": "someoneelsesdb-shouldnt_be_creatable"},{"dbname": "jenkins-an_offline_corpus_created_in_the_prototype"},{"dbname": "jenkins-firstcorpus"}] 
+-d '{"username": "jenkins",
+"password": "phoneme",
+"syncDetails": true,
+"syncUserDetails": {
+  "newCorpusConnections": [{"dbname": "jenkins-firstcorpus"},{},{"dbname": "someoneelsesdb-shouldnt_be_creatable"},{"dbname": "jenkins-an_offline_corpus_created_in_the_prototype"},{"dbname": "jenkins-firstcorpus"}]
 }}' \
 $SERVER/login `"
 echo ""
@@ -1234,8 +1391,9 @@ if [[ $result =~ corpora ]]
  } else {
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+  echo "$TESTSFAILEDSTRING $result " >> test_errors.log
 }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -1270,7 +1428,7 @@ echo '     }'
 # # echo '            cant see each others data.'
 # # echo ''
 # # echo '            Probably the clients wanted the spreadsheet roles to appear implicative since its more common.'
-# # echo '            see https://github.com/OpenSourceFieldlinguistics/FieldDB/issues/1113'
+# # echo '            see https://github.com/FieldDB/FieldDB/issues/1113'
 # # echo '          */'
 # # echo '      case "admin":'
 # # echo '        newUserRoles.admin = true;'
@@ -1332,16 +1490,16 @@ result="`curl -kX POST \
 $SERVER/addroletouser `"
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
-"serverCode": "localhost", 
+-d '{"username": "jenkins",
+"password": "phoneme",
+"serverCode": "localhost",
 "userRoleInfo": {
-  "usernameToModify": "testingspreadsheet", 
-  "dbname": "jenkins-firstcorpus", 
-  "admin": false, 
-  "writer": true, 
-  "reader": true, 
-  "commenter": true 
+  "usernameToModify": "testingspreadsheet",
+  "dbname": "jenkins-firstcorpus",
+  "admin": false,
+  "writer": true,
+  "reader": true,
+  "commenter": true
 }}' \
 $SERVER/updateroles `"
 echo ""
@@ -1350,6 +1508,7 @@ if [[ $result =~ userFriendlyErrors ]]
   then {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     echo "   success"
     if [[ $result =~ "now has writer reader commenter access" ]]
@@ -1359,10 +1518,11 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo "-------------------------------------------------------------"
@@ -1393,13 +1553,13 @@ echo '    '
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "jenkins", 
-"password": "phoneme", 
-"serverCode": "localhost", 
-"dbname": "jenkins-firstcorpus", 
+-d '{"username": "jenkins",
+"password": "phoneme",
+"serverCode": "localhost",
+"dbname": "jenkins-firstcorpus",
 "users": [{
-  "username": "testingspreadsheet", 
-  "add":["writer","commenter","reader"], 
+  "username": "testingspreadsheet",
+  "add":["writer","commenter","reader"],
   "remove": ["admin"]
 } ] }' \
 $SERVER/updateroles `"
@@ -1409,6 +1569,7 @@ if [[ $result =~ userFriendlyErrors ]]
   then {
     TESTFAILED=$[TESTFAILED + 1]
     TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+    echo "$TESTSFAILEDSTRING $result " >> test_errors.log
   } else {
     echo "   success"
     if [[ $result =~ "testingspreadsheet now has writer commenter reader access" ]]
@@ -1418,10 +1579,11 @@ if [[ $result =~ userFriendlyErrors ]]
       } else {
         TESTFAILED=$[TESTFAILED + 1]
         TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
+        echo "$TESTSFAILEDSTRING $result " >> test_errors.log
       }
-    fi 
+    fi
   }
-fi 
+fi
 
 
 echo;
@@ -1446,14 +1608,15 @@ fi
 
 echo "============================================================="
 
+cat test_errors.log
 if [ $TESTPASSED -eq $TESTCOUNT ]
-  then 
+  then
   exit $TESTFAILED;
 else
   exit $TESTFAILED;
 fi
 # ls noqata_tusunayawami.mp3 || {
-# 	result="`curl -O --retry 999 --retry-max-time 0 -C - https://github.com/OpenSourceFieldlinguistics/FieldDB/blob/master/sample_data/noqata_tusunayawami.mp3?raw=true
+# 	result="`curl -O --retry 999 --retry-max-time 0 -C - https://github.com/FieldDB/FieldDB/blob/master/sample_data/noqata_tusunayawami.mp3?raw=true
 # 	mv "noqata_tusunayawami.mp3?raw=true" noqata_tusunayawami.mp3
 # }
 

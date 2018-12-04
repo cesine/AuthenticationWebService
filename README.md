@@ -1,4 +1,4 @@
-# fieldb-auth [![Build Status](https://secure.travis-ci.org/OpenSourceFieldlinguistics/AuthenticationWebService.png?branch=master)](http://travis-ci.org/OpenSourceFieldlinguistics/AuthenticationWebService)
+# fieldb-auth [![Build Status](https://secure.travis-ci.org/FieldDB/AuthenticationWebService.png?branch=master)](http://travis-ci.org/FieldDB/AuthenticationWebService)
 
 Authentication web services for FieldDB
 
