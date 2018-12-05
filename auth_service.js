@@ -9,7 +9,7 @@ var path = require("path");
 var crossOriginResourceSharing = require('cors');
 var expressWebServer = require('express');
 var favicon = require("serve-favicon");
-var logger = require("morgan");
+var bunyan = require('express-bunyan-logger');
 var session = require("express-session");
 var bodyParser = require("body-parser");
 var errorHandler = require("errorhandler");
@@ -67,7 +67,13 @@ authWebService.use(function(req, res, next) {
   next();
 });
 authWebService.use(favicon(__dirname + "/public/favicon.ico"));
-authWebService.use(logger("common"));
+authWebService.use(bunyan({
+  name: 'fielddb-auth',
+  streams: [{
+    level: process.env.BUNYAN_LOG_LEVEL || 'warn',
+    stream: process.stdout
+  }]
+}));
 authWebService.use(session({
   resave: true,
   saveUninitialized: true,
