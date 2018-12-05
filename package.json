@@ -45,7 +45,8 @@
   },
   "peerDependencies": {},
   "devDependencies": {
-    "jasmine-node": "^1.16.2",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
     "supertest": "^3.3.0"
   },
   "main": "./auth_service.js",
@@ -56,7 +57,7 @@
     "node": ">8.x.x"
   },
   "scripts": {
-    "test": "jasmine-node test",
+    "test": "mocha --recursive test",
     "test:deprecated": "bash test/routes/deprecated.sh",
     "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
     "test:travis": "npm test",
