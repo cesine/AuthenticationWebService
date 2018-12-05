@@ -45,7 +45,8 @@
   },
   "peerDependencies": {},
   "devDependencies": {
-    "jasmine-node": "^1.16.2"
+    "jasmine-node": "^1.16.2",
+    "supertest": "^3.3.0"
   },
   "main": "./auth_service.js",
   "bin": {
