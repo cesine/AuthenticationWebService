@@ -1,44 +1,26 @@
-// var authWebService = require('./../../auth_service').authWebService;
-var CORS = require("fielddb/api/CORSNode").CORS;
-var maxSpecTime = 5000;
+var supertest = require("supertest");
 
-var SERVER = "https://localhost:3183";
-if (process.env.NODE_DEPLOY_TARGET === "production") {
-  SERVER = "http://localhost:3183";
-}
+var authWebService = require('./../../auth_service');
 
 describe("Corpus REST API", function() {
-
-  xit("should load", function() {
-    expect(authWebService).toBeDefined();
-  });
 
   describe("login", function() {
 
     it("should accept options", function(done) {
 
-      CORS.makeCORSRequest({
-        url:  'https://localhost:3183/login',
-        method: 'POST',
-        // dataType: 'json',
-        data: {
-          username: 'testingprototype',
-          password: 'test'
-        }
-      }).then(function(response) {
-        expect(response).toBeDefined();
-        return response;
-      }, function(reason) {
-        console.log(reason);
-        expect(reason).toBeUndefined();
-        return reason;
-      }).fail(function(error) {
-        console.log(error);
-        expect(excpetion).toBeUndefined();
-        return error;
-      }).done(done);
+      return supertest(authWebService)
+      .post('/login')
+      .send({
+        username: 'testinglogin',
+        password: 'test'
+      })
+      .then(function(response) {
+        expect(response.body.userFriendlyErrors).toEqual(['Username or password is invalid. Please try again.']);
+        done();
+      })
+      .catch(done);
 
-    }, maxSpecTime);
+    });
 
   });
 });

@@ -135,5 +135,3 @@ if (!module.parent) {
 } else {
   module.exports = authWebService;
 }
-
-exports.authWebService = authWebService;
