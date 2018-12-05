@@ -1,4 +1,4 @@
-var AuthWebService = require('./../../auth_service').AuthWebService;
+var authWebService = require('./../../auth_service').authWebService;
 var CORS = require("fielddb/api/CORSNode").CORS;
 var maxSpecTime = 5000;
 
@@ -10,7 +10,7 @@ if (process.env.NODE_DEPLOY_TARGET === "production") {
 describe("Corpus REST API", function() {
 
   it("should load", function() {
-    expect(AuthWebService).toBeDefined();
+    expect(authWebService).toBeDefined();
   });
 
   describe("delete", function() {
