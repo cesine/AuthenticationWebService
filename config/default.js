@@ -28,6 +28,11 @@ Connection.knownConnections.dyslexdisorth.userFriendlyServerName = "DyslexDisort
 Connection.knownConnections.dyslexdisorth.brandLowerCase = "dyslexdisorth";
 Connection.knownConnections.dyslexdisorth.serverLabel = "dyslexdisorth";
 
+Connection.knownConnections.ilanguagecloud = Connection.knownConnections.thisserver.clone();
+Connection.knownConnections.ilanguagecloud.userFriendlyServerName = "wordcloud.ca";
+Connection.knownConnections.ilanguagecloud.brandLowerCase = "ilanguagecloud";
+Connection.knownConnections.ilanguagecloud.serverLabel = "ilanguagecloud";
+
 Connection.knownConnections.wordcloud = Connection.knownConnections.thisserver.clone();
 Connection.knownConnections.wordcloud.userFriendlyServerName = "wordcloud.ca";
 Connection.knownConnections.wordcloud.brandLowerCase = "wordcloud";

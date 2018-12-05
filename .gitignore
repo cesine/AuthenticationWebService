@@ -5,8 +5,9 @@ compiled_handlebars.js
 
 #ignore private config files
 *_production*
+config/production.*
 
-# Ignore natural lib 
+# Ignore natural lib
 public/libs/natural/
 
 .wav
