@@ -49,7 +49,7 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "anonymouswordclouduser1401365327718", 
+-d '{"username": "anonymouswordclouduser1401365327719",
 "password": "testtest",
 "email": "",
 "firstname": "",
@@ -61,7 +61,7 @@ echo "Response: $result";
 if [[ $result =~ userFriendlyErrors ]]
   then {
     echo "  success"
-    if [[ $result =~ "Username anonymouswordclouduser1401365327718 already exists, try a different username"  ]]
+    if [[ $result =~ "Username anonymouswordclouduser1401365327719 already exists, try a different username"  ]]
       then {
         echo "   server provided an informative message";
       } else {
@@ -73,7 +73,7 @@ if [[ $result =~ userFriendlyErrors ]]
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 }
-fi 
+fi
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should register phophlo users"
@@ -81,7 +81,7 @@ echo "$TESTNAME"
 TESTCOUNT=$[TESTCOUNT + 1]
 result="`curl -kX POST \
 -H "Content-Type: application/json" \
--d '{"username": "testingphophlo", 
+-d '{"username": "testingphophlo",
 "password": "test",
 "email": "",
 "firstname": "",
@@ -105,9 +105,9 @@ if [[ $result =~ userFriendlyErrors ]]
   TESTFAILED=$[TESTFAILED + 1]
   TESTSFAILEDSTRING="$TESTSFAILEDSTRING : $TESTNAME"
 }
-fi 
+fi
 
-exit
+# exit
 
 echo "-------------------------------------------------------------"
 TESTNAME="It should return username or password invalid"
