@@ -9,8 +9,7 @@ var path = require("path");
 var crossOriginResourceSharing = require('cors');
 var expressWebServer = require('express');
 var favicon = require("serve-favicon");
-var logger = require("morgan");
-var methodOverride = require("method-override");
+var bunyan = require('express-bunyan-logger');
 var session = require("express-session");
 var bodyParser = require("body-parser");
 var errorHandler = require("errorhandler");
@@ -68,7 +67,13 @@ authWebService.use(function(req, res, next) {
   next();
 });
 authWebService.use(favicon(__dirname + "/public/favicon.ico"));
-authWebService.use(logger("common"));
+authWebService.use(bunyan({
+  name: 'fielddb-auth',
+  streams: [{
+    level: process.env.BUNYAN_LOG_LEVEL || 'warn',
+    stream: process.stdout
+  }]
+}));
 authWebService.use(session({
   resave: true,
   saveUninitialized: true,
@@ -78,7 +83,7 @@ authWebService.use(bodyParser.json());
 authWebService.use(bodyParser.urlencoded({
   extended: true
 }));
-authWebService.use(methodOverride());
+// authWebService.use(methodOverride());
 // authWebService.use(authWebService.router);
 
 /*
@@ -136,5 +141,3 @@ if (!module.parent) {
 } else {
   module.exports = authWebService;
 }
-
-exports.AuthWebService = AuthWebService;

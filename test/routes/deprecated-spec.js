@@ -1,44 +1,29 @@
-// var AuthWebService = require('./../../auth_service').AuthWebService;
-var CORS = require("fielddb/api/CORSNode").CORS;
-var maxSpecTime = 5000;
+var expect = require('chai').expect;
+var supertest = require("supertest");
 
-var SERVER = "https://localhost:3183";
-if (process.env.NODE_DEPLOY_TARGET === "production") {
-  SERVER = "http://localhost:3183";
-}
+var authWebService = require('./../../auth_service');
 
 describe("Corpus REST API", function() {
 
-  xit("should load", function() {
-    expect(AuthWebService).toBeDefined();
-  });
-
   describe("login", function() {
 
-    it("should accept options", function(done) {
+    it("should accept options", function() {
 
-      CORS.makeCORSRequest({
-        url:  'https://localhost:3183/login',
-        method: 'POST',
-        // dataType: 'json',
-        data: {
-          username: 'testingprototype',
-          password: 'test'
+      return supertest(authWebService)
+      .post('/login')
+      .send({
+        username: 'testinglogin',
+        password: 'test'
+      })
+      .then(function(response) {
+        if (process.env.TRAVIS) {
+          expect(response.body.userFriendlyErrors).to.deep.equal(['Server is not responding to request. Please report this error 8913.']);
+        } else {
+          expect(response.body.userFriendlyErrors).to.deep.equal(['Username or password is invalid. Please try again.']);
         }
-      }).then(function(response) {
-        expect(response).toBeDefined();
-        return response;
-      }, function(reason) {
-        console.log(reason);
-        expect(reason).toBeUndefined();
-        return reason;
-      }).fail(function(error) {
-        console.log(error);
-        expect(excpetion).toBeUndefined();
-        return error;
-      }).done(done);
+      });
 
-    }, maxSpecTime);
+    });
 
   });
 });
