@@ -21,14 +21,14 @@ var deprecatedRoutes = require('./routes/deprecated');
  * You can control aspects of the deployment by using Environment Variables
  *
  * Examples:
- * $ NODE_ENV=production        # uses lib/nodeconfig_production.js
- * $ NODE_ENV=devserver         # uses lib/nodeconfig_devserver.js
- * $ NODE_ENV=localhost             # uses lib/nodeconfig_localhost.js
- * $ NODE_ENV=yoursecretconfig  # uses lib/nodeconfig_yoursecretconfig.js
+ * $ NODE_ENV=production        # uses config/production.js
+ * $ NODE_ENV=test              # uses config/test.js
+ * $ NODE_ENV=development       # uses config/development.js
+ * $ NODE_ENV=local             # uses config/local.js
+ * $ NODE_ENV=yoursecretconfig  # uses config/yoursecretconfig.js
  */
-var deploy_target = process.env.NODE_ENV || "localhost";
 console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-var config = require('./lib/nodeconfig_' + deploy_target);
+var config = require('config');
 var apiVersion = "v" + parseInt(require("./package.json").version, 10);
 console.log("Accepting api version " + apiVersion);
 

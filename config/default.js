@@ -18,6 +18,11 @@ exports.usersDbConnection = {
   "path": ""
 };
 
+exports.couchKeys = {
+  username: "admin",
+  password: "none"
+};
+
 Connection.knownConnections.thisserver = Connection.knownConnections[deploy_target];
 exports.externalOrigin = Connection.knownConnections.thisserver.authUrls[0];
 

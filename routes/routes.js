@@ -1,5 +1,6 @@
 /* Load modules provided by $ npm install, see package.json for details */
 var swagger = require('swagger-node-express');
+var config = require('config');
 
 /* Load modules provided by this codebase */
 var userRoutes = require('./user');
@@ -9,9 +10,6 @@ var filesRoutes = require('./files');
 var dataRoutes = require('./data');
 var eLanguagesRoutes = require('./elanguages');
 var morphologicalParsesRoutes = require('./morphologicalparses');
-
-var deploy_target = process.env.NODE_ENV || "localhost";
-var config = require('./../lib/nodeconfig_' + deploy_target);
 
 
 var setup = function(api, apiVersion) {
@@ -40,7 +38,7 @@ var setup = function(api, apiVersion) {
 	swagger.addSearch(corporaRoutes.searchCorpora);
 
 	// api.delete('/corpus/:corpusid', corporaRoutes.deleteCorpora.action);
-	
+
 	swagger.addGet(dataRoutes.getData);
 	swagger.addPost(dataRoutes.postData);
 	swagger.addPut(dataRoutes.putData);
