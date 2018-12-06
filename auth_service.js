@@ -85,7 +85,7 @@ authWebService.use(bodyParser.urlencoded({
  * we are still serving a user interface for the api sandbox in the public folder
  */
 authWebService.use(expressWebServer.static(path.join(__dirname, 'public')));
-authWebService.options('*', function (req, res) {
+authWebService.options('*', function options(req, res) {
   if (req.method === 'OPTIONS') {
     debug('responding to OPTIONS request');
     res.send(204);
@@ -121,7 +121,7 @@ if (!module.parent) {
   } else {
     config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
     config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
-    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function () {
+    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function afterListen() {
       debug('Listening on https port %d', config.httpsOptions.port);
     });
   }
