@@ -1,9 +1,7 @@
 var swagger = require('swagger-node-express');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
-
 var corpusData = require('./../lib/corpus.js');
 var appVersion = require('../package.json').version;
-
 exports.getCorpora = {
   spec: {
     path: '/corpora/{dbname}',
@@ -20,7 +18,6 @@ exports.getCorpora = {
     res.send({});
   }
 };
-
 exports.postCorpora = {
   spec: {
     path: '/corpora/{dbname}',
@@ -43,7 +40,6 @@ exports.postCorpora = {
     }
   }
 };
-
 exports.putCorpora = {
   spec: {
     path: '/corpora/{dbname}',
@@ -66,7 +62,6 @@ exports.putCorpora = {
     }
   }
 };
-
 exports.deleteCorpora = {
   spec: {
     path: '/corpora/{dbname}',
@@ -85,7 +80,6 @@ exports.deleteCorpora = {
     res.send(204);
   }
 };
-
 exports.searchCorpora = {
   spec: {
     path: '/corpora/{dbname}',

@@ -2,7 +2,6 @@
 var swagger = require('swagger-node-express');
 var param = require('../node_modules/swagger-node-express/Common/node/paramTypes.js');
 var appVersion = require('../package.json').version;
-
 exports.getUtterances = {
   spec: {
     path: '/corpora/{dbname}/utterances/{filename}',
@@ -19,7 +18,6 @@ exports.getUtterances = {
     res.send({});
   }
 };
-
 exports.postUtterances = {
   spec: {
     path: '/corpora/{dbname}/utterances/{filename}',
@@ -36,7 +34,6 @@ exports.postUtterances = {
     res.send({});
   }
 };
-
 exports.putUtterances = {
   spec: {
     path: '/corpora/{dbname}/utterances/{filename}',
@@ -53,7 +50,6 @@ exports.putUtterances = {
     res.send({});
   }
 };
-
 exports.deleteUtterances = {
   spec: {
     path: '/corpora/{dbname}/utterances/{filename}',

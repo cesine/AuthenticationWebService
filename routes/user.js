@@ -2,7 +2,6 @@
 var swagger = require('swagger-node-express');
 var param = require('../node_modules/swagger-node-express/Common/node/paramTypes.js');
 var appVersion = require('../package.json').version;
-
 exports.getUsers = {
   spec: {
     path: '/users/{username}',
@@ -19,7 +18,6 @@ exports.getUsers = {
     res.send({});
   }
 };
-
 exports.postUsers = {
   spec: {
     path: '/users/{username}',
@@ -36,7 +34,6 @@ exports.postUsers = {
     res.send({});
   }
 };
-
 exports.putUsers = {
   spec: {
     path: '/users/{username}',
@@ -53,7 +50,6 @@ exports.putUsers = {
     res.send({});
   }
 };
-
 exports.deleteUsers = {
   spec: {
     path: '/users/{username}',
@@ -70,8 +66,6 @@ exports.deleteUsers = {
     res.send({});
   }
 };
-
-
 exports.getUserGravatars = {
   spec: {
     path: '/users/{username}/gravatar',
@@ -88,7 +82,6 @@ exports.getUserGravatars = {
     res.send({});
   }
 };
-
 exports.postUserGravatars = {
   spec: {
     path: '/users/{username}/gravatar',
@@ -105,7 +98,6 @@ exports.postUserGravatars = {
     res.send({});
   }
 };
-
 exports.putUserGravatars = {
   spec: {
     path: '/users/{username}/gravatar',
@@ -122,7 +114,6 @@ exports.putUserGravatars = {
     res.send({});
   }
 };
-
 exports.deleteUserGravatars = {
   spec: {
     path: '/users/{username}/gravatar',

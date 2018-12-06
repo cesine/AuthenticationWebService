@@ -2,7 +2,6 @@
 var swagger = require('swagger-node-express');
 var param = require('../node_modules/swagger-node-express/Common/node/paramTypes.js');
 var appVersion = require('../package.json').version;
-
 exports.getFiles = {
   spec: {
     path: '/corpora/{dbname}/files/{filename}',
@@ -19,7 +18,6 @@ exports.getFiles = {
     res.send({});
   }
 };
-
 exports.postFiles = {
   spec: {
     path: '/corpora/{dbname}/files/{filename}',
@@ -36,7 +34,6 @@ exports.postFiles = {
     res.send({});
   }
 };
-
 exports.putFiles = {
   spec: {
     path: '/corpora/{dbname}/files/{filename}',
@@ -53,7 +50,6 @@ exports.putFiles = {
     res.send({});
   }
 };
-
 exports.deleteFiles = {
   spec: {
     path: '/corpora/{dbname}/files/{filename}',

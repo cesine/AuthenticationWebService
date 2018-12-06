@@ -1,10 +1,8 @@
 #!/usr/local/bin/node
-
 /* Load modules provided by Node */
 var https = require('https');
 var FileSystem = require('fs');
 var path = require('path');
-
 /* Load modules provided by $ npm install, see package.json for details */
 var crossOriginResourceSharing = require('cors');
 var expressWebServer = require('express');
@@ -13,7 +11,6 @@ var bunyan = require('express-bunyan-logger');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var errorHandler = require('errorhandler');
-
 /* Load modules provided by this codebase */
 var authWebServiceRoutes = require('./routes/routes');
 var deprecatedRoutes = require('./routes/deprecated');
@@ -31,7 +28,6 @@ console.log('process.env.NODE_ENV', process.env.NODE_ENV);
 var config = require('config');
 var apiVersion = 'v' + parseInt(require('./package.json').version, 10);
 console.log('Accepting api version ' + apiVersion);
-
 var corsOptions = {
   credentials: true,
   maxAge: 86400,
@@ -52,7 +48,6 @@ var corsOptions = {
     callback(null, originIsWhitelisted);
   }
 };
-
 /**
  * Use Express to create the authWebService see http://expressjs.com/ for more details
  */
@@ -84,30 +79,25 @@ authWebService.use(bodyParser.urlencoded({
 }));
 // authWebService.use(methodOverride());
 // authWebService.use(authWebService.router);
-
 /*
  * Although this is mostly a webservice used by machines (not a websserver used by humans)
  * we are still serving a user interface for the api sandbox in the public folder
  */
 authWebService.use(expressWebServer.static(path.join(__dirname, 'public')));
-
 authWebService.options('*', function (req, res) {
   if (req.method === 'OPTIONS') {
     console.log('responding to OPTIONS request');
     res.send(204);
   }
 });
-
 /**
  * Set up all the available URL authWebServiceRoutes see routes/routes.js for more details
  */
 authWebServiceRoutes.setup(authWebService, apiVersion);
-
 /**
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
 deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
-
 /*
  * Error handling middleware should be loaded after the loading the routes
  */
@@ -119,12 +109,10 @@ if (authWebService.get('env') === 'production') {
     showStack: true
   }));
 }
-
 /**
  * Read in the specified filenames for this config's security key and certificates,
  * and then ask https to turn on the webservice
  */
-
 if (!module.parent) {
   if (process.env.NODE_ENV === 'production') {
     authWebService.listen(config.httpsOptions.port);
@@ -132,7 +120,6 @@ if (!module.parent) {
   } else {
     config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
     config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
-
     https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function () {
       console.log('Listening on https port %d', config.httpsOptions.port);
     });

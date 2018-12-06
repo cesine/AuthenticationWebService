@@ -2,7 +2,6 @@
 var swagger = require('swagger-node-express');
 var param = require('../node_modules/swagger-node-express/Common/node/paramTypes.js');
 var appVersion = require('../package.json').version;
-
 exports.getMorphologicalParses = {
   spec: {
     path: '/elanguages/{iso_code}/parses/{utterance}',
@@ -19,7 +18,6 @@ exports.getMorphologicalParses = {
     res.send({});
   }
 };
-
 exports.postMorphologicalParses = {
   spec: {
     path: '/elanguages/{iso_code}/parses/{utterance}',
@@ -36,7 +34,6 @@ exports.postMorphologicalParses = {
     res.send({});
   }
 };
-
 exports.putMorphologicalParses = {
   spec: {
     path: '/elanguages/{iso_code}/parses/{utterance}',
@@ -53,7 +50,6 @@ exports.putMorphologicalParses = {
     res.send({});
   }
 };
-
 exports.deleteMorphologicalParses = {
   spec: {
     path: '/elanguages/{iso_code}/parses/{utterance}',

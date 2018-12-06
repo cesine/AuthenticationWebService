@@ -2,7 +2,6 @@
 var swagger = require('swagger-node-express');
 var param = require('../node_modules/swagger-node-express/Common/node/paramTypes.js');
 var appVersion = require('../package.json').version;
-
 exports.getELanguages = {
   spec: {
     path: '/elanguages/{iso_code}',
@@ -19,7 +18,6 @@ exports.getELanguages = {
     res.send({});
   }
 };
-
 exports.postELanguages = {
   spec: {
     path: '/elanguages/{iso_code}',
@@ -36,7 +34,6 @@ exports.postELanguages = {
     res.send({});
   }
 };
-
 exports.putELanguages = {
   spec: {
     path: '/elanguages/{iso_code}',
@@ -53,7 +50,6 @@ exports.putELanguages = {
     res.send({});
   }
 };
-
 exports.deleteELanguages = {
   spec: {
     path: '/elanguages/{iso_code}',
@@ -70,7 +66,6 @@ exports.deleteELanguages = {
     res.send({});
   }
 };
-
 exports.searchELanguages = {
   spec: {
     path: '/elanguages/{iso_code}',
