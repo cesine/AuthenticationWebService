@@ -14,7 +14,7 @@ exports.getUtterances = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'getUtterances'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -30,7 +30,7 @@ exports.postUtterances = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'postUtterances'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -46,7 +46,7 @@ exports.putUtterances = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'putUtterances'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -62,7 +62,7 @@ exports.deleteUtterances = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'deleteUtterances'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };

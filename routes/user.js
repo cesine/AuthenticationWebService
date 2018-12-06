@@ -14,7 +14,7 @@ exports.getUsers = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'getUsers'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -30,7 +30,7 @@ exports.postUsers = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'postUsers'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -46,7 +46,7 @@ exports.putUsers = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'putUsers'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -62,7 +62,7 @@ exports.deleteUsers = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'deleteUsers'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -78,7 +78,7 @@ exports.getUserGravatars = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'getUserGravatars'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -94,7 +94,7 @@ exports.postUserGravatars = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'postUserGravatars'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -110,7 +110,7 @@ exports.putUserGravatars = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'putUserGravatars'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -126,7 +126,7 @@ exports.deleteUserGravatars = {
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'deleteUserGravatars'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };

@@ -9,7 +9,7 @@ var filesRoutes = require('./files');
 var dataRoutes = require('./data');
 var eLanguagesRoutes = require('./elanguages');
 var morphologicalParsesRoutes = require('./morphologicalparses');
-var setup = function (api, apiVersion) {
+var setup = function setup(api, apiVersion) {
   swagger.configureSwaggerPaths('', '/api', '');
   swagger.setAppHandler(api);
   /* Prepare models for the API Schema info using the info the routes provide */

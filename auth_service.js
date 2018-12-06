@@ -34,7 +34,7 @@ var corsOptions = {
   maxAge: 86400,
   methods: 'HEAD, POST, GET, PUT, PATCH, DELETE',
   allowedHeaders: 'Access-Control-Allow-Origin, access-control-request-headers, accept, accept-charset, accept-encoding, accept-language, authorization, content-length, content-type, host, origin, proxy-connection, referer, user-agent, x-requested-with',
-  origin: function (origin, callback) {
+  origin: function origin(origin, callback) {
     var originIsWhitelisted = false;
     if (/* permit curl */ origin === undefined || /* permit android */ origin === 'null' || origin === null || !origin) {
       originIsWhitelisted = true;
@@ -55,7 +55,7 @@ var corsOptions = {
 var authWebService = expressWebServer();
 authWebService.use(crossOriginResourceSharing(corsOptions));
 // Accept versions
-authWebService.use(function (req, res, next) {
+authWebService.use(function versionMiddleware(req, res, next) {
   if (req.url.indexOf('/' + apiVersion) === 0) {
     req.url = req.url.replace('/' + apiVersion, '');
   }

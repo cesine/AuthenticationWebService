@@ -5,7 +5,7 @@ var util = require('util');
 var authenticationfunctions = require('./../lib/userauthentication.js');
 var corpus = require('./../lib/corpus');
 
-var cleanErrorStatus = function (status) {
+var cleanErrorStatus = function cleanErrorStatus(status) {
   if (status) {
     return parseInt(status, 10);
   }
@@ -17,13 +17,13 @@ var cleanErrorStatus = function (status) {
  *
  * @param {[type]} app [description]
  */
-var addDeprecatedRoutes = function (app) {
+var addDeprecatedRoutes = function addDeprecatedRoutes(app) {
   /**
    * Responds to requests for login, if sucessful replies with the user's details
    * as json
    */
-  app.post('/login', function (req, res, next) {
-    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function (err, user, info) {
+  app.post('/login', function postLogin(req, res, next) {
+    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function afterAuthenticateUser(err, user, info) {
       var returndata = {};
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
@@ -47,7 +47,7 @@ var addDeprecatedRoutes = function (app) {
       res.send(returndata);
     });
   });
-  app.get('/login', function (req, res, next) {
+  app.get('/login', function getLogin(req, res, next) {
     res.send({
       info: 'Service is running normally.'
     });
@@ -71,8 +71,8 @@ var addDeprecatedRoutes = function (app) {
    * Finally the returndata json is sent to the calling application via the
    * response.
    */
-  app.post('/register', function (req, res) {
-    authenticationfunctions.registerNewUser('local', req, function (err, user, info) {
+  app.post('/register', function postRegister(req, res) {
+    authenticationfunctions.registerNewUser('local', req, function afterRegisterNewUser(err, user, info) {
       var returndata = {};
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
@@ -90,7 +90,7 @@ var addDeprecatedRoutes = function (app) {
       res.send(returndata);
     });
   });
-  app.get('/register', function (req, res, next) {
+  app.get('/register', function getRegister(req, res, next) {
     res.send({});
   });
   /**
@@ -112,7 +112,7 @@ var addDeprecatedRoutes = function (app) {
    * Finally the returndata json is sent to the calling application via the
    * response.
    */
-  app.post('/changepassword', function (req, res) {
+  app.post('/changepassword', function postChangePassword(req, res) {
     var oldpassword = req.body.password;
     var newpassword = req.body.newpassword;
     var confirmpassword = req.body.confirmpassword;
@@ -125,7 +125,7 @@ var addDeprecatedRoutes = function (app) {
       });
       return;
     }
-    authenticationfunctions.setPassword(oldpassword, newpassword, username, function (err, user, info) {
+    authenticationfunctions.setPassword(oldpassword, newpassword, username, function afterSetPassword(err, user, info) {
       var returndata = {};
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
@@ -144,7 +144,7 @@ var addDeprecatedRoutes = function (app) {
       res.send(returndata);
     });
   });
-  app.get('/changepassword', function (req, res, next) {
+  app.get('/changepassword', function getChangePassword(req, res, next) {
     res.send({});
   });
   /**
@@ -166,9 +166,9 @@ var addDeprecatedRoutes = function (app) {
    * Finally the returndata json is sent to the calling application via the
    * response.
    */
-  app.post('/forgotpassword', function (req, res) {
+  app.post('/forgotpassword', function postForgotPassword(req, res) {
     var email = req.body.email;
-    authenticationfunctions.forgotPassword(email, function (err, forgotPasswordResults, info) {
+    authenticationfunctions.forgotPassword(email, function afterForgotPassword(err, forgotPasswordResults, info) {
       var returndata = {};
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
@@ -183,17 +183,17 @@ var addDeprecatedRoutes = function (app) {
       res.send(returndata);
     });
   });
-  app.get('/forgotpassword', function (req, res, next) {
+  app.get('/forgotpassword', function getForgotPassword(req, res, next) {
     res.send({});
   });
   /**
    * Responds to requests for a list of team members on a corpus, if successful replies with a list of
    * usernames as json
    */
-  app.post('/corpusteam', function (req, res, next) {
+  app.post('/corpusteam', function postCorpusTeam(req, res, next) {
     var returndata = {};
     req.body.dbname = req.body.dbname || req.body.pouchname;
-    authenticationfunctions.fetchCorpusPermissions(req, function (err, users, info) {
+    authenticationfunctions.fetchCorpusPermissions(req, function afterFetchCorpusPermissions(err, users, info) {
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
         returndata.status = cleanErrorStatus(err.statusCode || err.status) || 400;
@@ -215,9 +215,9 @@ var addDeprecatedRoutes = function (app) {
       res.send(returndata);
     });
   });
-  app.post('/corpusteamwhichrequiresvalidauthentication', function (req, res, next) {
+  app.post('/corpusteamwhichrequiresvalidauthentication', function postCorpusTeamWhichRequiresValidAuthentication(req, res, next) {
     var returndata = {};
-    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function (err, user, info) {
+    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function afterAuthenticateUser(err, user, info) {
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
         returndata.status = cleanErrorStatus(err.statusCode || err.status) || 400;
@@ -226,7 +226,7 @@ var addDeprecatedRoutes = function (app) {
         res.send(returndata);
         return;
       }
-      authenticationfunctions.fetchCorpusPermissions(req, function (err, users, info) {
+      authenticationfunctions.fetchCorpusPermissions(req, function afterFetchCorpusPermissions(err, users, info) {
         if (err) {
           res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
           returndata.status = cleanErrorStatus(err.statusCode || err.status) || 400;
@@ -249,14 +249,14 @@ var addDeprecatedRoutes = function (app) {
       });
     });
   });
-  app.get('/corpusteam', function (req, res, next) {
+  app.get('/corpusteam', function getCorpusTeam(req, res, next) {
     res.send({});
   });
   /**
    * Responds to requests for adding a corpus role/permission to a user, if successful replies with the user's details
    * as json
    */
-  var addroletouser = function (req, res, next) {
+  var addroletouser = function addroletouser(req, res, next) {
     var returndata = {};
     if (!req.body.username) {
       res.status(412);
@@ -270,7 +270,7 @@ var addDeprecatedRoutes = function (app) {
       res.send(returndata);
       return;
     }
-    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function (err, user, info) {
+    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function afterAuthenticateUser(err, user, info) {
       var returndata = {};
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
@@ -327,7 +327,7 @@ var addDeprecatedRoutes = function (app) {
         return;
       }
       // Add a role to the user
-      authenticationfunctions.addRoleToUser(req, function (err, userPermissionSet, optionalInfo) {
+      authenticationfunctions.addRoleToUser(req, function afterAddRoleToUser(err, userPermissionSet, optionalInfo) {
         req.log.debug('Getting back the results of authenticationfunctions.addRoleToUser ');
         // req.log.debug(err);
         // req.log.debug(userPermissionSet);
@@ -348,7 +348,7 @@ var addDeprecatedRoutes = function (app) {
           userPermissionSet = [userPermissionSet];
         }
         req.log.debug(userPermissionSet);
-        var info = userPermissionSet.map(function (userPermission) {
+        var info = userPermissionSet.map(function collectErrors(userPermission) {
           if (!userPermission) {
             return '';
           }
@@ -380,14 +380,14 @@ var addDeprecatedRoutes = function (app) {
     });
   };
   app.post('/addroletouser', addroletouser);
-  app.get('/addroletouser', function (req, res, next) {
+  app.get('/addroletouser', function getAddroletouser(req, res, next) {
     res.send({});
   });
   /**
    * Responds to requests for adding a corpus to a user, if successful replies with the dbname of the new corpus in a string and a corpusaded = true
    */
-  app.post('/newcorpus', function (req, res, next) {
-    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function (err, user, info) {
+  app.post('/newcorpus', function postNewCorpus(req, res, next) {
+    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function afterAuthenticateUser(err, user, info) {
       var returndata = {};
       if (err) {
         res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
@@ -420,7 +420,7 @@ var addDeprecatedRoutes = function (app) {
           username: req.body.username,
           title: req.body.newCorpusTitle,
           connection: connection
-        }, function (err, corpus, info) {
+        }, function afterCreateNewCorpus(err, corpus, info) {
           if (err) {
             res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
             returndata.status = cleanErrorStatus(err.statusCode || err.status) || 400;
@@ -452,7 +452,7 @@ var addDeprecatedRoutes = function (app) {
      * Responds to requests for adding a user in a role to a corpus, if successful replies with corpusadded =true and an info string containgin the roles
      TODO return something useful as json
      */
-  app.post('/updateroles', function (req, res, next) {
+  app.post('/updateroles', function postUpdateRoles(req, res, next) {
     /* convert spreadhseet data into data which the addroletouser api can read */
     req.body.userRoleInfo = req.body.userRoleInfo || {};
     req.body.userRoleInfo.dbname = req.body.userRoleInfo.dbname || req.body.userRoleInfo.pouchname;
@@ -480,8 +480,8 @@ var addDeprecatedRoutes = function (app) {
      * Responds to requests for adding a user in a role to a corpus, if successful replies with corpusadded =true and an info string containgin the roles
      TODO return something useful as json
      */
-  app.post('/updaterolesdeprecateddoesnotsupportemailingusers', function (req, res, next) {
-    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function (err, user, info) {
+  app.post('/updaterolesdeprecateddoesnotsupportemailingusers', function postUpdateRolesDeprecatedDoesNotSupportEmailingUsers(req, res, next) {
+    authenticationfunctions.authenticateUser(req.body.username, req.body.password, req, function afterAuthenticateUser(err, user, info) {
       var returndata = {
         depcrecated: true
       };
@@ -499,7 +499,7 @@ var addDeprecatedRoutes = function (app) {
         returndata.corpusadded = true;
         returndata.info = [info.message];
         // Update user roles for corpus
-        corpus.updateRoles(req, function (err, roles, info) {
+        corpus.updateRoles(req, function afterUpdateRoles(err, roles, info) {
           if (err) {
             res.status(cleanErrorStatus(err.statusCode || err.status) || 400);
             returndata.status = cleanErrorStatus(err.statusCode || err.status) || 400;

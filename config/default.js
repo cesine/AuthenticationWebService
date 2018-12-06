@@ -57,7 +57,7 @@ module.exports = {
       pass: ''
     }
   },
-  newUserMailOptions: function () {
+  newUserMailOptions: function newUserMailOptions() {
     return {
       from: 'none@localhost', // sender address
       to: '', // list of receivers
@@ -66,7 +66,7 @@ module.exports = {
       html: 'Your username is: '
     };
   },
-  welcomeToCorpusTeamMailOptions: function () {
+  welcomeToCorpusTeamMailOptions: function welcomeToCorpusTeamMailOptions() {
     return {
       from: 'none@localhost', // sender address
       to: '', // list of receivers
@@ -75,7 +75,7 @@ module.exports = {
       html: "The new corpus's identifier is: "
     };
   },
-  suspendedUserMailOptions: function () {
+  suspendedUserMailOptions: function suspendedUserMailOptions() {
     return {
       from: 'none@localhost', // sender address
       to: '', // list of receivers
@@ -84,7 +84,7 @@ module.exports = {
       html: 'Your username is: '
     };
   },
-  newUserMailOptionsPhophlo: function () {
+  newUserMailOptionsPhophlo: function newUserMailOptionsPhophlo() {
     return {
       from: 'none@localhost', // sender address
       to: '', // list of receivers
@@ -93,7 +93,7 @@ module.exports = {
       html: 'Your username is: '
     };
   },
-  welcomeToCorpusTeamMailOptionsPhophlo: function () {
+  welcomeToCorpusTeamMailOptionsPhophlo: function welcomeToCorpusTeamMailOptionsPhophlo() {
     return {
       from: 'none@localhost', // sender address
       to: '', // list of receivers
@@ -102,7 +102,7 @@ module.exports = {
       html: "The new corpus's identifier is: "
     };
   },
-  suspendedUserMailOptionsPhophlo: function () {
+  suspendedUserMailOptionsPhophlo: function suspendedUserMailOptionsPhophlo() {
     return {
       from: 'none@localhost', // sender address
       to: '', // list of receivers
