@@ -47,6 +47,9 @@
   "peerDependencies": {},
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
     "supertest": "^3.3.0"
   },
@@ -58,6 +61,7 @@
     "node": ">8.x.x"
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "mocha --recursive test",
     "test:deprecated": "bash test/routes/deprecated.sh",
     "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
