@@ -77,7 +77,7 @@ authWebService.use(bunyan({
 authWebService.use(session({
   resave: true,
   saveUninitialized: true,
-  secret: config.session_key
+  secret: config.sessionKey
 }));
 authWebService.use(bodyParser.json());
 authWebService.use(bodyParser.urlencoded({
