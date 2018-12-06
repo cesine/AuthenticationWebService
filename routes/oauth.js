@@ -1,9 +1,11 @@
-var express = require('express'),
-  oauthserver = require('node-oauth2-server'); // Would be: 'node-oauth2-server'
+var express = require('express');
+
+
+var oauthserver = require('node-oauth2-server'); // Would be: 'node-oauth2-server'
 
 var app = express();
 
-app.configure(function() {
+app.configure(function () {
   app.oauth = oauthserver({
     model: require('./lib/oauthmodel'),
     grants: ['auth_code', 'password'],
@@ -19,8 +21,8 @@ app.all('/oauth/token', app.oauth.grant());
 app.get('/oauth/authorise', function (req, res, next) {
   if (!req.session.user) {
     // If they aren't logged in, send them to your own login implementation
-    return res.redirect('/login?redirect=' + req.path + '&client_id=' +
-        req.query.client_id + '&redirect_uri=' + req.query.redirect_uri);
+    return res.redirect('/login?redirect=' + req.path + '&client_id='
+        + req.query.client_id + '&redirect_uri=' + req.query.redirect_uri);
   }
 
   res.render('authorise', {
@@ -32,8 +34,8 @@ app.get('/oauth/authorise', function (req, res, next) {
 // Handle authorise
 app.post('/oauth/authorise', function (req, res, next) {
   if (!req.session.user) {
-    return res.redirect('/login?client_id=' + req.query.client_id +
-      '&redirect_uri=' + req.query.redirect_uri);
+    return res.redirect('/login?client_id=' + req.query.client_id
+      + '&redirect_uri=' + req.query.redirect_uri);
   }
 
   next();
@@ -65,8 +67,8 @@ app.post('/login', function (req, res, next) {
   } else {
     // Successful logins should send the user back to the /oauth/authorise
     // with the client_id and redirect_uri (you could store these in the session)
-    return res.redirect((req.body.redirect || '/home') + '?client_id=' +
-        req.body.client_id + '&redirect_uri=' + req.body.redirect_uri);
+    return res.redirect((req.body.redirect || '/home') + '?client_id='
+        + req.body.client_id + '&redirect_uri=' + req.body.redirect_uri);
   }
 });
 

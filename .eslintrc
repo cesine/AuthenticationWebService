@@ -6,11 +6,5 @@
   "parserOptions": {
     "ecmaVersion": 5,
     "sourceType": "script"
-  },
-  "rules": {
-    "quotes": [
-      "error",
-      "double"
-    ]
   }
 }

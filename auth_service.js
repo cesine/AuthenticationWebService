@@ -3,16 +3,16 @@
 /* Load modules provided by Node */
 var https = require('https');
 var FileSystem = require('fs');
-var path = require("path");
+var path = require('path');
 
 /* Load modules provided by $ npm install, see package.json for details */
 var crossOriginResourceSharing = require('cors');
 var expressWebServer = require('express');
-var favicon = require("serve-favicon");
+var favicon = require('serve-favicon');
 var bunyan = require('express-bunyan-logger');
-var session = require("express-session");
-var bodyParser = require("body-parser");
-var errorHandler = require("errorhandler");
+var session = require('express-session');
+var bodyParser = require('body-parser');
+var errorHandler = require('errorhandler');
 
 /* Load modules provided by this codebase */
 var authWebServiceRoutes = require('./routes/routes');
@@ -29,24 +29,23 @@ var deprecatedRoutes = require('./routes/deprecated');
  */
 console.log('process.env.NODE_ENV', process.env.NODE_ENV);
 var config = require('config');
-var apiVersion = "v" + parseInt(require("./package.json").version, 10);
-console.log("Accepting api version " + apiVersion);
+var apiVersion = 'v' + parseInt(require('./package.json').version, 10);
+console.log('Accepting api version ' + apiVersion);
 
 var corsOptions = {
   credentials: true,
   maxAge: 86400,
   methods: 'HEAD, POST, GET, PUT, PATCH, DELETE',
   allowedHeaders: 'Access-Control-Allow-Origin, access-control-request-headers, accept, accept-charset, accept-encoding, accept-language, authorization, content-length, content-type, host, origin, proxy-connection, referer, user-agent, x-requested-with',
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     var originIsWhitelisted = false;
-    if ( /* permit curl */ origin === undefined || /* permit android */ origin === "null" || origin === null || !origin) {
+    if (/* permit curl */ origin === undefined || /* permit android */ origin === 'null' || origin === null || !origin) {
       originIsWhitelisted = true;
-    } else if (origin.search(/^https?:\/\/.*\.lingsync.org$/) > -1 ||
-      origin.search(/^https?:\/\/.*\.phophlo.ca$/) > -1 ||
-      origin.search(/^https?:\/\/(localhost|127.0.0.1):[0-9]*$/) > -1 ||
-      origin.search(/^chrome-extension:\/\/[^\/]*$/) > -1 ||
-      origin.search(/^https?:\/\/.*\.jrwdunham.com$/) > -1) {
-
+    } else if (origin.search(/^https?:\/\/.*\.lingsync.org$/) > -1
+      || origin.search(/^https?:\/\/.*\.phophlo.ca$/) > -1
+      || origin.search(/^https?:\/\/(localhost|127.0.0.1):[0-9]*$/) > -1
+      || origin.search(/^chrome-extension:\/\/[^\/]*$/) > -1
+      || origin.search(/^https?:\/\/.*\.jrwdunham.com$/) > -1) {
       originIsWhitelisted = true;
     }
     // console.log(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
@@ -60,13 +59,13 @@ var corsOptions = {
 var authWebService = expressWebServer();
 authWebService.use(crossOriginResourceSharing(corsOptions));
 // Accept versions
-authWebService.use(function(req, res, next) {
-  if (req.url.indexOf("/" + apiVersion) === 0) {
-    req.url = req.url.replace("/" + apiVersion, "");
+authWebService.use(function (req, res, next) {
+  if (req.url.indexOf('/' + apiVersion) === 0) {
+    req.url = req.url.replace('/' + apiVersion, '');
   }
   next();
 });
-authWebService.use(favicon(__dirname + "/public/favicon.ico"));
+authWebService.use(favicon(__dirname + '/public/favicon.ico'));
 authWebService.use(bunyan({
   name: 'fielddb-auth',
   streams: [{
@@ -90,9 +89,9 @@ authWebService.use(bodyParser.urlencoded({
  * Although this is mostly a webservice used by machines (not a websserver used by humans)
  * we are still serving a user interface for the api sandbox in the public folder
  */
-authWebService.use(expressWebServer.static(path.join(__dirname, "public")));
+authWebService.use(expressWebServer.static(path.join(__dirname, 'public')));
 
-authWebService.options('*', function(req, res) {
+authWebService.options('*', function (req, res) {
   if (req.method === 'OPTIONS') {
     console.log('responding to OPTIONS request');
     res.send(204);
@@ -112,7 +111,7 @@ deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
 /*
  * Error handling middleware should be loaded after the loading the routes
  */
-if ("production" === authWebService.get("env")) {
+if (authWebService.get('env') === 'production') {
   authWebService.use(errorHandler());
 } else {
   authWebService.use(errorHandler({
@@ -127,15 +126,15 @@ if ("production" === authWebService.get("env")) {
  */
 
 if (!module.parent) {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === 'production') {
     authWebService.listen(config.httpsOptions.port);
-    console.log("Running in production mode behind an Nginx proxy, Listening on http port %d", config.httpsOptions.port);
+    console.log('Running in production mode behind an Nginx proxy, Listening on http port %d', config.httpsOptions.port);
   } else {
     config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
     config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
 
-    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function() {
-      console.log("Listening on https port %d", config.httpsOptions.port);
+    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function () {
+      console.log('Listening on https port %d', config.httpsOptions.port);
     });
   }
 } else {
