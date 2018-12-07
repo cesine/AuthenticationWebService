@@ -1,5 +1,3 @@
-'use strict';
-
 var debug = require('debug')('middleware:error');
 
 var cleanErrorStatus = function (status) {
@@ -9,25 +7,20 @@ var cleanErrorStatus = function (status) {
   return '';
 };
 
-/* jshint -W098 */
 var errorHandler = function (err, req, res, next) {
-  /* jshint +W098 */
   var data;
-
-  if (['development', 'test', 'local'].indexOf(process.env.NODE_ENV) > -1) {
+  var NODE_ENV = process.env.NODE_ENV;
+  if (['development', 'test', 'local'].indexOf(NODE_ENV) > -1) {
     // expose stack traces
-    data = {
-      message: err.message,
-      error: err
-    };
-    if (err.details && err.details.url) {
-      delete err.details.url;
+    data = err;
+    if (data.details && data.details.url) {
+      delete data.details.url;
     }
   } else {
     // production error handler
+    debug('using production error handler', NODE_ENV);
     data = {
-      message: err.message,
-      error: {}
+      message: err.message
     };
   }
   data.status = cleanErrorStatus(err.statusCode || err.status) || 500;
@@ -55,14 +48,18 @@ var errorHandler = function (err, req, res, next) {
     // see also https://github.com/request/request/issues/418
     data.userFriendlyErrors = ['Server erred, please report this 23829'];
   } else {
-    console.log('The server erred in an unkwnown way  ');
+    data.userFriendlyErrors = ['Server erred, please report this 816'];
   }
 
   res.status(data.status);
 
   if (data.status >= 500) {
-    console.log(new Date() + 'There was an error ' + process.env.NODE_ENV + req.url, err);
+    data.stack = data.stack.toString();
+    data.message = 'Internal server error';
+    console.log(new Date() + 'There was an unexpected error ' + process.env.NODE_ENV + req.url, err);
   }
+
+  req.log.fields.err = err;
 
   if (req.headers['x-requested-with'] === 'XMLHttpRequest' || /application\/json/.test(req.headers['content-type'])) {
     return res.json(data);

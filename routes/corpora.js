@@ -86,7 +86,7 @@ exports.deleteCorpora = {
     // Remove the corpus from the user's list of corpora and add it to the deleted list
     var id = parseInt(req.params.id);
     corpusData.deleteCorpus(id);
-    res.send(204);
+    res.status(204);
   }
 };
 exports.searchCorpora = {

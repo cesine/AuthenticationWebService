@@ -54,6 +54,7 @@ var corsOptions = {
  * Use Express to create the authWebService see http://expressjs.com/ for more details
  */
 var authWebService = expressWebServer();
+authWebService.use(errorHandler);
 authWebService.use(crossOriginResourceSharing(corsOptions));
 // Accept versions
 authWebService.use(function versionMiddleware(req, res, next) {
@@ -100,7 +101,6 @@ authWebServiceRoutes.setup(authWebService, apiVersion);
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
 deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
-authWebService.use(errorHandler);
 /**
  * Read in the specified filenames for this config's security key and certificates,
  * and then ask https to turn on the webservice

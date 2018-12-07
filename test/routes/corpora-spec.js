@@ -14,9 +14,12 @@ describe('Corpus REST API', function () {
         })
         .then(function (response) {
           expect(response.body).to.deep.equal({
-            message: 'unknown error',
-            code: 500
+            message: 'Internal server error',
+            stack: response.body.stack,
+            status: 500,
+            userFriendlyErrors: ['Server erred, please report this 816']
           });
+          expect(response.body.stack).to.contain('corpusData.deleteCorpus is not a function');
         });
     });
   });

@@ -1,16 +1,22 @@
 /* Load modules provided by $ npm install, see package.json for details */
 var swagger = require('swagger-node-express');
 var config = require('config');
+
 /* Load modules provided by this codebase */
 var userRoutes = require('./user');
 var corporaRoutes = require('./corpora');
+var errorHandler = require('../middleware/error-handler').errorHandler;
 var utterancesRoutes = require('./utterances');
 var filesRoutes = require('./files');
 var dataRoutes = require('./data');
 var eLanguagesRoutes = require('./elanguages');
 var morphologicalParsesRoutes = require('./morphologicalparses');
+
 var setup = function setup(api, apiVersion) {
   swagger.configureSwaggerPaths('', '/api', '');
+  swagger.setErrorHandler(function (req, res, error) {
+    return errorHandler(error, req, res);
+  });
   swagger.setAppHandler(api);
   /* Prepare models for the API Schema info using the info the routes provide */
   var APIModelShema = {};
