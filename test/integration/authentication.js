@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var AsToken = require('as-token');
 
-var service = require('./../../');
+var service = require('./../../service');
 var User = require('./../../models/user');
 
 describe('/authentication', function() {
@@ -76,12 +76,11 @@ describe('/authentication', function() {
         .end(function(err, res) {
           if (err) throw err;
 
+          console.log('res.body', JSON.stringify(res.body));
           expect(res.body).to.deep.equal({
-            message: 'Please provide a username and a password',
-            error: res.body.error,
-            status: 403
+            "status": 403,
+            "userFriendlyErrors": ["Please provide a username and a password"],
           });
-
           done();
         });
     });
@@ -98,8 +97,9 @@ describe('/authentication', function() {
           if (err) throw err;
 
           expect(res.body).to.deep.equal({
-            message: 'Please provide a username and a password',
-            error: res.body.error,
+            "message": "Please provide a username and a password",
+            "userFriendlyErrors": ["Please provide a username and a password"],
+            stack: res.body.stack,
             status: 403
           });
 
@@ -119,8 +119,9 @@ describe('/authentication', function() {
           if (err) throw err;
 
           expect(res.body).to.deep.equal({
-            message: 'Please provide a username and a password',
-            error: res.body.error,
+            "message": "Please provide a username and a password",
+            "userFriendlyErrors": ["Please provide a username and a password"],
+            stack: res.body.stack,
             status: 403
           });
 
@@ -151,13 +152,13 @@ describe('/authentication', function() {
             '&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
 
           var token = res.headers.authorization.replace(/Bearer v1\//, '');
-          expect(token).exists;
+          expect(token).to.not.equal(undefined);
 
           var decoded = AsToken.decode(token);
           expect(decoded).to.deep.equal({
             name: {
               givenName: '',
-              familyName: ''
+              familyName: 'Test'
             },
             id: 'test-user-efg_random_uuid',
             revision: decoded.revision,
@@ -240,9 +241,8 @@ describe('/authentication', function() {
           if (err) throw err;
 
           expect(res.body).to.deep.equal({
-            message: 'Please provide a username which is 4 characters' +
-              ' or longer and a password which is 8 characters or longer',
-            error: res.body.error,
+            userFriendlyErrors: ['Please provide a username which is 4 characters' +
+              ' or longer and a password which is 8 characters or longer'],
             status: 403
           });
 
@@ -264,7 +264,9 @@ describe('/authentication', function() {
           expect(res.body).to.deep.equal({
             message: 'Please provide a username which is 4 characters' +
               ' or longer and a password which is 8 characters or longer',
-            error: res.body.error,
+            userFriendlyErrors: ['Please provide a username which is 4 characters' +
+              ' or longer and a password which is 8 characters or longer'],
+            stack: res.body.stack,
             status: 403
           });
 
@@ -285,7 +287,8 @@ describe('/authentication', function() {
 
           expect(res.body).to.deep.equal({
             message: 'Please provide a password which is 8 characters or longer',
-            error: res.body.error,
+            userFriendlyErrors: ['Please provide a password which is 8 characters or longer'],
+            stack: res.body.stack,
             status: 403
           });
 
@@ -307,7 +310,8 @@ describe('/authentication', function() {
 
           expect(res.body).to.deep.equal({
             message: 'Please provide a password which is 8 characters or longer',
-            error: res.body.error,
+            userFriendlyErrors: ['Please provide a password which is 8 characters or longer'],
+            stack: res.body.stack,
             status: 403
           });
 
@@ -330,7 +334,8 @@ describe('/authentication', function() {
 
           expect(res.body).to.deep.equal({
             message: 'Username test-user is already taken, please try another username',
-            error: res.body.error,
+            userFriendlyErrors: ['Username test-user is already taken, please try another username'],
+            stack: res.body.stack,
             status: 403
           });
 

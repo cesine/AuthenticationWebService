@@ -1,25 +1,26 @@
 'use strict';
 
 var bodyParser = require('body-parser');
+var bunyan = require('express-bunyan-logger');
 var cors = require('cors');
 var debug = require('debug')('service');
 var express = require('express');
-var morgan = require('morgan');
 
 var authenticationRoutes = require('./routes/authentication').router;
-var oauthRoutes = require('./routes/oauth').router;
+var oauthRoutes = require('./routes/oauth2').router;
 var authenticationMiddleware = require('./middleware/authentication');
-var errorsMiddleware = require('./middleware/error-handler');
+var errorsMiddleware = require('./middleware/error-handler').errorHandler;
 var routes = require('./routes/index').router;
-var userRoutes = require('./routes/user');
+var userRoutes = require('./routes/users');
 
 var service = express();
-
-/**
- * Config
- */
-service.use(morgan('combined'));
-
+service.use(bunyan({
+  name: 'fielddb-auth',
+  streams: [{
+    level: process.env.BUNYAN_LOG_LEVEL || 'warn',
+    stream: process.stdout
+  }]
+}));
 /**
  * Body parsers
  */

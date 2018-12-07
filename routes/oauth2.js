@@ -7,7 +7,7 @@ var util = require('util');
 
 var router = express.Router();
 
-var errorMiddleware = require('./../middleware/error-handler');
+var errorMiddleware = require('./../middleware/error-handler').errorHandler;
 var oauth = require('./../middleware/oauth');
 
 /**
@@ -40,7 +40,7 @@ function getAuthorize(req, res) {
  * @param  {Function} next
  */
 function postAuthorize(req, res, next) {
-  debug('req.app.locals', req.app.locals);
+  debug('postAuthorize req.app.locals', req.app.locals);
   debug(req.headers);
   debug(req.user);
 

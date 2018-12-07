@@ -3,9 +3,15 @@
 var expect = require('chai').expect;
 var supertest = require('supertest');
 
-var service = require('./../../');
+var service = require('./../../service');
 
 describe('/v1', function() {
+  var NODE_ENV = process.env.NODE_ENV;
+
+  afterEach(function() {
+    process.env.NODE_ENV = NODE_ENV;
+  });
+
   it('should load', function() {
     expect(service).to.be.a('function');
   });
@@ -24,8 +30,7 @@ describe('/v1', function() {
           expect(res.status).to.equal(404);
 
           expect(res.body).to.deep.equal({
-            error: {},
-            message: 'Not Found',
+            userFriendlyErrors: ['Not Found'],
             status: 404
           });
 

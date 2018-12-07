@@ -129,7 +129,6 @@ build/Release
 
 # Dependency directories
 node_modules
-public/components
 
 # Optional npm cache directory
 .npm

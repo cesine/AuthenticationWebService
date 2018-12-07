@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect;
 
-var oauth = require('./../../routes/oauth');
+var oauth = require('./../../routes/oauth2');
 
 describe('oauth routes', function() {
   it('should load', function() {
@@ -20,11 +20,17 @@ describe('oauth routes', function() {
         'content-type': 'application/x-www-form-urlencoded'
       },
       method: 'POST',
-      query: {}
+      query: {},
+      log: {
+        fields: {}
+      }
     }, {
       headers: {},
       set: function() {},
       status: function() {
+        return this;
+      },
+      json: function() {
         return this;
       },
       send: function() {

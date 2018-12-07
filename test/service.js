@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect;
 
-var service = require('./../');
+var service = require('../service');
 
 describe('service', function() {
   it('should load', function() {

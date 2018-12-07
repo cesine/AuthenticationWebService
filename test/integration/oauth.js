@@ -3,7 +3,7 @@
 var expect = require('chai').expect;
 var supertest = require('supertest');
 
-var service = require('./../../');
+var service = require('./../../service');
 
 describe('/oauth', function() {
   describe('POST /oauth/authorize', function() {
@@ -51,9 +51,8 @@ describe('/oauth', function() {
           if (err) throw err;
 
           expect(res.body).to.deep.equal({
-            error: res.body.error,
             status: 401,
-            message: 'Unauthorized request: no authentication given'
+            userFriendlyErrors: ['Unauthorized request: no authentication given']
           });
 
           done();
@@ -81,9 +80,8 @@ describe('/oauth', function() {
           if (err) throw err;
 
           expect(res.body).to.deep.equal({
-            error: res.body.error,
             status: 403,
-            message: 'Code is not authorized'
+            userFriendlyErrors: ['Code is not authorized']
           });
 
           done();

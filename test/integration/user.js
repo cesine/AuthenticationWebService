@@ -3,7 +3,7 @@
 var expect = require('chai').expect;
 var supertest = require('supertest');
 
-var api = require('./../../');
+var api = require('./../../service');
 var user = require('./../../models/user');
 var fixtures = {
   user: require('./../fixtures/user.json')

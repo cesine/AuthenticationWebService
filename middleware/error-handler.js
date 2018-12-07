@@ -27,6 +27,9 @@ var errorHandler = function (err, req, res, next) {
 
   if (err.code === 'ECONNREFUSED') {
     data.userFriendlyErrors = ['Server erred, please report this 6339'];
+  } else if (err.name === 'unauthorized_request') {
+    data.status = 401;
+    data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
   } else if (err.code === 'ETIMEDOUT') {
     data.status = 500;
     data.userFriendlyErrors = ['Server timed out, please try again later'];
@@ -38,6 +41,9 @@ var errorHandler = function (err, req, res, next) {
     data.userFriendlyErrors = ['Server erred, please report this 7234'];
   } else if (data.status === 404) {
     data.status = 404;
+    data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
+  } else if (data.status === 403) {
+    data.status = 403;
     data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
   } else if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
     data.status = 500;
@@ -54,9 +60,11 @@ var errorHandler = function (err, req, res, next) {
   res.status(data.status);
 
   if (data.status >= 500) {
-    data.stack = data.stack.toString();
+    data.stack = data.stack ? data.stack.toString() : undefined;
     data.message = 'Internal server error';
     console.log(new Date() + 'There was an unexpected error ' + process.env.NODE_ENV + req.url, err);
+  } else {
+    data.message = err.message;
   }
 
   req.log.fields.err = err;
@@ -65,7 +73,7 @@ var errorHandler = function (err, req, res, next) {
     return res.json(data);
   }
 
-  return res.render(data.status + '', {
+  return res.json({
     status: data.status,
     userFriendlyErrors: data.userFriendlyErrors
   });

@@ -90,9 +90,9 @@ describe('user model', function() {
         expect(profile.username).to.equal(json.username);
         expect(profile.name.givenName).to.equal('');
         expect(profile.name.familyName).to.equal('Test');
-        expect(profile.createdAt).to.be.defined;
-        expect(profile.updatedAt).to.be.defined;
-        expect(profile.revision).to.be.defined;
+        expect(profile.createdAt).to.not.equal(undefined);
+        expect(profile.updatedAt).to.not.equal(undefined);
+        expect(profile.revision).to.not.equal(undefined);
         expect(profile.hash).length(60);
         expect(profile.deletedAt).to.be.null;
 
@@ -127,7 +127,7 @@ describe('user model', function() {
 
         expect(profile.id).length(36);
 
-        expect(profile.revision).to.be.defined;
+        expect(profile.revision).to.not.equal(undefined);
         expect(profile.revision).not.equal('notanexpectedtrevision');
 
         done();
@@ -206,9 +206,9 @@ describe('user model', function() {
         expect(profile.id).length(36);
         expect(profile.username).to.equal(json.username);
         expect(profile.name.givenName).to.equal('');
-        expect(profile.createdAt).to.be.defined;
-        expect(profile.updatedAt).to.be.defined;
-        expect(profile.revision).to.be.defined;
+        expect(profile.createdAt).to.not.equal(undefined);
+        expect(profile.updatedAt).to.not.equal(undefined);
+        expect(profile.revision).to.not.equal(undefined);
         expect(profile.deletedAt).to.be.null;
 
         done();
