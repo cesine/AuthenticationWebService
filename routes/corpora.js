@@ -15,6 +15,8 @@ exports.getCorpora = {
     nickname: 'getCorpora'
   },
   action: function action(req, res, next) {
+    // If the user has read permissions, get all details
+    // If the user doesnt have permissions, get the corpus mask
     res.send({});
   }
 };
@@ -31,6 +33,8 @@ exports.postCorpora = {
     nickname: 'postCorpora'
   },
   action: function action(req, res, next) {
+    // If the dbname is in the user's namespace
+    // Create the corpus
     var body = req.body;
     if (!body || !body.id) {
       throw swagger.errors.invalid('corpus');
@@ -53,6 +57,8 @@ exports.putCorpora = {
     nickname: 'putCorpora'
   },
   action: function action(req, res, next) {
+    // If the user has write permissions
+    // Update the corpus
     var body = req.body;
     if (!body || !body.id) {
       throw swagger.errors.invalid('corpus');
@@ -75,6 +81,9 @@ exports.deleteCorpora = {
     nickname: 'deleteCorpora'
   },
   action: function action(req, res, next) {
+    // If the user has admin permissions
+    // Flag the corpus as deleted
+    // Remove the corpus from the user's list of corpora and add it to the deleted list
     var id = parseInt(req.params.id);
     corpusData.deleteCorpus(id);
     res.send(204);
@@ -85,7 +94,7 @@ exports.searchCorpora = {
     path: '/corpora/{dbname}',
     description: 'Operations about corpora',
     notes: 'Search corpus if authenticated',
-    summary: 'Deletes corpus(s)',
+    summary: 'Searches corpus(s)',
     method: 'SEARCH',
     parameters: [param.path('dbname', 'requested dbname of the corpus', 'string')],
     responseClass: 'User',
@@ -93,6 +102,8 @@ exports.searchCorpora = {
     nickname: 'searchCorpora'
   },
   action: function action(req, res, next) {
+    // If the user has search permissions
+    // Return the search results
     res.send({});
   }
 };
