@@ -11,8 +11,9 @@ var favicon = require('serve-favicon');
 var bunyan = require('express-bunyan-logger');
 var session = require('express-session');
 var bodyParser = require('body-parser');
-var errorHandler = require('errorhandler');
+
 /* Load modules provided by this codebase */
+var errorHandler = require('./middleware/error-handler').errorHandler;
 var authWebServiceRoutes = require('./routes/routes');
 var deprecatedRoutes = require('./routes/deprecated');
 /**
@@ -99,17 +100,7 @@ authWebServiceRoutes.setup(authWebService, apiVersion);
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
 deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
-/*
- * Error handling middleware should be loaded after the loading the routes
- */
-if (authWebService.get('env') === 'production') {
-  authWebService.use(errorHandler());
-} else {
-  authWebService.use(errorHandler({
-    dumpExceptions: true,
-    showStack: true
-  }));
-}
+authWebService.use(errorHandler);
 /**
  * Read in the specified filenames for this config's security key and certificates,
  * and then ask https to turn on the webservice
