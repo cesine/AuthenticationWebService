@@ -7,7 +7,7 @@ var util = require('util');
 
 var router = express.Router();
 
-var errorMiddleware = require('./../middleware/error');
+var errorMiddleware = require('./../middleware/error-handler');
 var oauth = require('./../middleware/oauth');
 
 /**

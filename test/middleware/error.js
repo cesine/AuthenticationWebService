@@ -3,7 +3,7 @@
 var expect = require('chai').expect;
 var sinon = require('sinon');
 
-var error = require('./../../middleware/error');
+var error = require('./../../middleware/error-handler');
 
 describe('error middleware', function() {
   var err = new Error('oops');

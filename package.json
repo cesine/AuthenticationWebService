@@ -1,45 +1,90 @@
 {
-  "name": "as-auth-provider",
-  "version": "0.0.1",
-  "description": "Example auth provider for authenticated systems workshop",
-  "repository": "https://github.com/cesine/as-auth-provider.git",
-  "scripts": {
-    "coverage": "istanbul cover _mocha -- --recursive test; istanbul check-coverage  --statements 80 --functions 76 --branches 70 --lines 80",
-    "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "lint": "jshint config models middleware routes test service.js",
-    "postinstall": "bower install",
-    "start": "node ./bin/www",
-    "test": "mocha --recursive test",
-    "test:debug": "node-debug _mocha test/integration/oauth.js"
+  "name": "fielddb-auth",
+  "version": "4.16.14",
+  "description": "Authentication web services for FieldDB.",
+  "homepage": "https://github.com/FieldDB/FieldDB/issues/milestones?state=closed",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/FieldDB/AuthenticationWebService.git"
   },
-  "main": "service",
+  "bugs": {
+    "url": "https://github.com/FieldDB/FieldDB/issues"
+  },
+  "keywords": [
+    "fielddb",
+    "api"
+  ],
+  "author": "FieldDB contributors <opensource@fielddb.org>",
+  "contributors": [
+    "cesine <cesine@yahoo.com>",
+    "Tobin Skinner <tobin.skinner@gmail.com>",
+    "Josh <josh.horner@gmail.com>",
+    "hisakonog <hisakonog@gmail.com>",
+    "Fieldlinguist <info@fieldlinguist.com>"
+  ],
   "dependencies": {
     "as-token": "https://github.com/cesine/as-token-javascript.git",
-    "bcrypt": "^0.8.7",
-    "bluebird": "^3.4.1",
-    "body-parser": "^1.14.2",
-    "cors": "^2.7.1",
-    "debug": "^2.2.0",
-    "express": "^4.13.3",
+    "bcrypt": "^3.0.2",
+    "body-parser": "^1.18.3",
+    "config": "^3.0.0",
+    "cors": "^2.8.5",
+    "cradle": "^0.7.1",
+    "debug": "^4.1.0",
+    "express": "^4.16.4",
+    "express-bunyan-logger": "^1.3.3",
     "express-handlebars": "^3.0.0",
     "express-oauth-server": "https://github.com/cesine/express-oauth-server.git",
-    "morgan": "^1.6.1",
-    "node-uuid": "^1.4.7",
+    "express-session": "^1.15.6",
+    "fielddb": "git://github.com/fielddb/fielddb.git",
+    "lodash": "^4.17.11",
+    "md5": "^2.2.1",
+    "nano": "^7.1.1",
+    "node-oauth2-server": "^2.4.0",
+    "nodemailer": "^4.7.0",
     "oauth2-server": "https://github.com/cesine/node-oauth2-server.git",
     "passport": "^0.3.2",
     "passport-jwt": "^2.1.0",
     "passport-local": "^1.0.0",
+    "pg": "^7.7.1",
+    "q": "^1.5.1",
     "sequelize": "^3.23.1",
-    "sqlite3": "^3.1.3"
+    "serve-favicon": "^2.5.0",
+    "sqlite3": "^4.0.4",
+    "swagger-node-express": "git://github.com/cesine/swagger-node-express.git#search",
+    "uuid": "^3.3.2"
   },
+  "peerDependencies": {},
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.2.0",
     "coveralls": "^2.11.9",
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "istanbul": "^0.4.3",
-    "mocha": "^2.4.5",
-    "nock": "^8.0.0",
+    "mocha": "^5.2.0",
+    "nock": "^10.0.3",
+    "replay": "^2.4.0",
     "sinon": "^1.17.3",
-    "supertest": "^1.2.0"
+    "supertest": "^3.3.0"
   },
-  "license": "MIT"
+  "main": "./auth_service.js",
+  "bin": {
+    "fielddb-auth": "./auth_service.js"
+  },
+  "engines": {
+    "node": ">8.x.x"
+  },
+  "scripts": {
+    "coverage": "istanbul cover _mocha -- --recursive test; istanbul check-coverage  --statements 80 --functions 76 --branches 70 --lines 80",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "lint": "eslint .",
+    "#postinstall": "bower install",
+    "start": "node ./bin/www",
+    "test": "NODE_ENV=test mocha --recursive test",
+    "test:debug": "node-debug _mocha test/integration/oauth.js",
+    "test:deprecated": "bash test/routes/deprecated.sh",
+    "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
+    "test:production": "ls config/production.js"
+  },
+  "license": "Apache-2.0"
 }

@@ -1,0 +1,20 @@
+{
+  "env": {
+    "node": true
+  },
+  "extends": "airbnb-base/legacy",
+  "parserOptions": {
+    "ecmaVersion": 5,
+    "sourceType": "script"
+  },
+  "rules": {
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "no-multiple-empty-lines": ["error", {
+      "max": 1,
+      "maxEOF": 1
+    }]
+  }
+}

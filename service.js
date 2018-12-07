@@ -9,7 +9,7 @@ var morgan = require('morgan');
 var authenticationRoutes = require('./routes/authentication').router;
 var oauthRoutes = require('./routes/oauth').router;
 var authenticationMiddleware = require('./middleware/authentication');
-var errorsMiddleware = require('./middleware/error');
+var errorsMiddleware = require('./middleware/error-handler');
 var routes = require('./routes/index').router;
 var userRoutes = require('./routes/user');
 

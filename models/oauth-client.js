@@ -5,7 +5,7 @@ var AsToken = require('as-token');
 var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
 var Promise = require('bluebird');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 
 var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
