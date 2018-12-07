@@ -14,7 +14,7 @@ exports.getCorpora = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'getCorpora'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -30,7 +30,7 @@ exports.postCorpora = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'postCorpora'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     var body = req.body;
     if (!body || !body.id) {
       throw swagger.errors.invalid('corpus');
@@ -52,7 +52,7 @@ exports.putCorpora = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'putCorpora'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     var body = req.body;
     if (!body || !body.id) {
       throw swagger.errors.invalid('corpus');
@@ -74,7 +74,7 @@ exports.deleteCorpora = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'deleteCorpora'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     var id = parseInt(req.params.id);
     corpusData.deleteCorpus(id);
     res.send(204);
@@ -92,7 +92,7 @@ exports.searchCorpora = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'searchCorpora'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };

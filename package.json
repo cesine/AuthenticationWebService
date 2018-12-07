@@ -51,6 +51,8 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
+    "nock": "^10.0.3",
+    "replay": "^2.4.0",
     "supertest": "^3.3.0"
   },
   "main": "./auth_service.js",
@@ -62,7 +64,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha --recursive test",
+    "test": "NODE_ENV=test mocha --recursive test",
     "test:deprecated": "bash test/routes/deprecated.sh",
     "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
     "test:travis": "npm test",

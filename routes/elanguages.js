@@ -14,7 +14,7 @@ exports.getELanguages = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('elanguage')],
     nickname: 'getELanguages'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -30,7 +30,7 @@ exports.postELanguages = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('elanguage')],
     nickname: 'postELanguages'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -46,7 +46,7 @@ exports.putELanguages = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('elanguage')],
     nickname: 'putELanguages'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -62,7 +62,7 @@ exports.deleteELanguages = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('elanguage')],
     nickname: 'deleteELanguages'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -78,7 +78,7 @@ exports.searchELanguages = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('elanguage')],
     nickname: 'searchELanguages'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };

@@ -14,7 +14,7 @@ exports.getData = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'getData'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -30,7 +30,7 @@ exports.postData = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'postData'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -46,7 +46,7 @@ exports.putData = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'putData'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -62,7 +62,7 @@ exports.deleteData = {
     errorResponses: [swagger.errors.invalid('dbname'), swagger.errors.notFound('corpus')],
     nickname: 'deleteData'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };

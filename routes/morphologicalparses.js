@@ -14,7 +14,7 @@ exports.getMorphologicalParses = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('corpus')],
     nickname: 'getMorphologicalParses'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -30,7 +30,7 @@ exports.postMorphologicalParses = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('corpus')],
     nickname: 'postMorphologicalParses'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -46,7 +46,7 @@ exports.putMorphologicalParses = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('corpus')],
     nickname: 'putMorphologicalParses'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };
@@ -62,7 +62,7 @@ exports.deleteMorphologicalParses = {
     errorResponses: [swagger.errors.invalid('iso_code'), swagger.errors.notFound('corpus')],
     nickname: 'deleteMorphologicalParses'
   },
-  action: function (req, res, next) {
+  action: function action(req, res, next) {
     res.send({});
   }
 };

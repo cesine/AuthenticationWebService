@@ -1,5 +1,6 @@
 #!/usr/local/bin/node
 /* Load modules provided by Node */
+var debug = require('debug')('auth:service');
 var https = require('https');
 var FileSystem = require('fs');
 var path = require('path');
@@ -24,16 +25,16 @@ var deprecatedRoutes = require('./routes/deprecated');
  * $ NODE_ENV=local             # uses config/local.js
  * $ NODE_ENV=yoursecretconfig  # uses config/yoursecretconfig.js
  */
-console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+debug('process.env.NODE_ENV', process.env.NODE_ENV);
 var config = require('config');
 var apiVersion = 'v' + parseInt(require('./package.json').version, 10);
-console.log('Accepting api version ' + apiVersion);
+debug('Accepting api version ' + apiVersion);
 var corsOptions = {
   credentials: true,
   maxAge: 86400,
   methods: 'HEAD, POST, GET, PUT, PATCH, DELETE',
   allowedHeaders: 'Access-Control-Allow-Origin, access-control-request-headers, accept, accept-charset, accept-encoding, accept-language, authorization, content-length, content-type, host, origin, proxy-connection, referer, user-agent, x-requested-with',
-  origin: function (origin, callback) {
+  origin: function origin(origin, callback) {
     var originIsWhitelisted = false;
     if (/* permit curl */ origin === undefined || /* permit android */ origin === 'null' || origin === null || !origin) {
       originIsWhitelisted = true;
@@ -44,7 +45,7 @@ var corsOptions = {
       || origin.search(/^https?:\/\/.*\.jrwdunham.com$/) > -1) {
       originIsWhitelisted = true;
     }
-    // console.log(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
+    // debug(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
     callback(null, originIsWhitelisted);
   }
 };
@@ -54,7 +55,7 @@ var corsOptions = {
 var authWebService = expressWebServer();
 authWebService.use(crossOriginResourceSharing(corsOptions));
 // Accept versions
-authWebService.use(function (req, res, next) {
+authWebService.use(function versionMiddleware(req, res, next) {
   if (req.url.indexOf('/' + apiVersion) === 0) {
     req.url = req.url.replace('/' + apiVersion, '');
   }
@@ -84,9 +85,9 @@ authWebService.use(bodyParser.urlencoded({
  * we are still serving a user interface for the api sandbox in the public folder
  */
 authWebService.use(expressWebServer.static(path.join(__dirname, 'public')));
-authWebService.options('*', function (req, res) {
+authWebService.options('*', function options(req, res) {
   if (req.method === 'OPTIONS') {
-    console.log('responding to OPTIONS request');
+    debug('responding to OPTIONS request');
     res.send(204);
   }
 });
@@ -116,12 +117,12 @@ if (authWebService.get('env') === 'production') {
 if (!module.parent) {
   if (process.env.NODE_ENV === 'production') {
     authWebService.listen(config.httpsOptions.port);
-    console.log('Running in production mode behind an Nginx proxy, Listening on http port %d', config.httpsOptions.port);
+    debug('Running in production mode behind an Nginx proxy, Listening on http port %d', config.httpsOptions.port);
   } else {
     config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
     config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
-    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function () {
-      console.log('Listening on https port %d', config.httpsOptions.port);
+    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function afterListen() {
+      debug('Listening on https port %d', config.httpsOptions.port);
     });
   }
 } else {
