@@ -16,11 +16,36 @@ var fieldb_auth = require('fieldb-auth');
 * https://authdev.fielddb.org
 
 ## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
+In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using the scipts in package.json.
+
+### Recording tests
+
+Edit your /etc/hosts to add an entry for example.org:
+
+```bash
+127.0.0.1       localhost
+127.0.0.1       corpusdev.example.org
+```
+
+Turn on your local couchdb and make sure it is running on http://127.0.0.1:5984/_utils Record tests by adding `.only` on the tests you wish to record:
+
+```bash
+$ DEBUG=*user*,*nock*,*replay* REPLAY=record npm test
+```
+
+As a result you should see a directory corresponding to the server, and files with-in it representing the requests:
+
+```bash
+$ tree test/fixtures/
+test/fixtures/
+└── corpusdev.example.org-5984
+    └── 154417467505825257
+```
+
 
 ## Release History
-* v1.16  mongoose auth & everyauth 
-* v1.32  switched to couchdb 
+* v1.16  mongoose auth & everyauth
+* v1.32  switched to couchdb
 * v1.62  gravatars
 * v1.72  server side support for user creation for spreadsheet (without the offline prototype)
 * v1.102 support for Learn X users

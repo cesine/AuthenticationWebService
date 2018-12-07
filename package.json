@@ -64,7 +64,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha --recursive test",
+    "test": "NODE_ENV=test mocha --recursive test",
     "test:deprecated": "bash test/routes/deprecated.sh",
     "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
     "test:travis": "npm test",

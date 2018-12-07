@@ -1,4 +1,8 @@
 var deploy_target = process.env.NODE_ENV || 'localhost';
+// backward compatible
+if (deploy_target === 'test') {
+  deploy_target = 'beta';
+}
 var Connection = require('fielddb/api/corpus/Connection').Connection;
 Connection.knownConnections.thisserver = Connection.knownConnections[deploy_target];
 Connection.knownConnections.testing = Connection.knownConnections.beta;
@@ -31,11 +35,8 @@ module.exports = {
     protocol: 'https://'
   },
   usersDbConnection: {
-    protocol: 'http://',
-    domain: 'localhost',
-    port: '5984',
-    dbname: 'theuserscouch',
-    path: ''
+    url: 'http://localhost:5984',
+    dbname: 'theuserscouch'
   },
   couchKeys: {
     username: 'admin',
