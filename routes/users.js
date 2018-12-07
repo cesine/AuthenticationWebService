@@ -1,5 +1,3 @@
-'use strict';
-
 var debug = require('debug')('routes:user');
 var express = require('express');
 var router = express.Router();
@@ -21,7 +19,7 @@ function getUser(req, res, next) {
     username: req.params.username
   };
 
-  User.read(json, function(err, profile) {
+  User.read(json, function (err, profile) {
     if (err) {
       return next(err, req, res, next);
     }
@@ -31,10 +29,10 @@ function getUser(req, res, next) {
 
 function getCurrentUser(req, res, next) {
   var json = {
-    username: req.app.locals.user.username,
+    username: req.app.locals.user.username
   };
 
-  User.read(json, function(err, profile) {
+  User.read(json, function (err, profile) {
     if (err) {
       return next(err, req, res, next);
     }
@@ -50,7 +48,7 @@ function getCurrentUser(req, res, next) {
  * @param  {Function} next
  */
 function getList(req, res, next) {
-  User.list(null, function(err, miniProfiles) {
+  User.list(null, function (err, miniProfiles) {
     if (err) {
       return next(err, req, res, next);
     }
@@ -65,8 +63,8 @@ function getList(req, res, next) {
  * @param  {Function} next
  */
 function putUser(req, res, next) {
-  if ((req.body.username && req.params.username !== req.body.username) ||
-    req.params.username !== req.app.locals.user.username){
+  if ((req.body.username && req.params.username !== req.body.username)
+    || req.params.username !== req.app.locals.user.username) {
     debug(req.params, req.body);
     var err = new Error('Username does not match, you can only update your own details');
     err.status = 403;
@@ -75,7 +73,7 @@ function putUser(req, res, next) {
   }
 
   req.body.username = req.app.locals.user.username;
-  User.save(req.body, function(err, profile) {
+  User.save(req.body, function (err, profile) {
     if (err) {
       return next(err, req, res, next);
     }

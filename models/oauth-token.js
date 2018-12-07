@@ -1,6 +1,3 @@
-'use strict';
-/*jshint camelcase: false */
-
 var Sequelize = require('sequelize');
 
 var sequelize = new Sequelize('database', 'id', 'password', {
@@ -43,7 +40,7 @@ function create(options, callback) {
 
   oauthToken
     .create(options)
-    .then(function(dbToken) {
+    .then(function (dbToken) {
       callback(null, dbToken.toJSON());
     })
     .catch(callback);
@@ -73,7 +70,7 @@ function read(token, callback) {
 
   oauthToken
     .find(options)
-    .then(function(dbModel) {
+    .then(function (dbModel) {
       if (!dbModel) {
         return callback(null, null);
       }
@@ -99,12 +96,12 @@ function list(options, callback) {
 
   oauthToken
     .findAll(options)
-    .then(function(oauth_tokens) {
+    .then(function (oauth_tokens) {
       if (!oauth_tokens) {
         return callback(new Error('Unable to fetch oauthToken collection'));
       }
 
-      callback(null, oauth_tokens.map(function(dbModel) {
+      callback(null, oauth_tokens.map(function (dbModel) {
         return dbModel.toJSON();
       }));
     })

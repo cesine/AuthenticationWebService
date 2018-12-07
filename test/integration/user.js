@@ -1,5 +1,3 @@
-'use strict';
-
 var expect = require('chai').expect;
 var supertest = require('supertest');
 
@@ -9,25 +7,25 @@ var fixtures = {
   user: require('./../fixtures/user.json')
 };
 
-describe('/v1/users', function() {
-  beforeEach(function(done) {
+describe('/v1/users', function () {
+  beforeEach(function (done) {
     user
-      .create(fixtures.user, function() {
+      .create(fixtures.user, function () {
         done();
       });
   });
 
-  it('should list users', function(done) {
+  it('should list users', function (done) {
     supertest(api)
       .get('/v1/users')
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(200)
-      .end(function(err, res) {
+      .end(function (err, res) {
         if (err) {
           return done(err);
         }
 
-        expect(res.body.length > 0).to.be.true;
+        expect(res.body.length > 0).to.equal(true);
 
         var sampleUserMask = res.body[0];
         expect(sampleUserMask).to.deep.equal({
@@ -39,12 +37,12 @@ describe('/v1/users', function() {
       });
   });
 
-  it('should get a users details', function(done) {
+  it('should get a users details', function (done) {
     supertest(api)
       .get('/v1/users/test-anonymouse')
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(200)
-      .end(function(err, res) {
+      .end(function (err, res) {
         if (err) {
           return done(err);
         }

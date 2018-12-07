@@ -1,4 +1,3 @@
-'use strict';
 var AsToken = require('as-token');
 var debug = require('debug')('middleware:authentication');
 var ExtractJwt = require('passport-jwt').ExtractJwt;
@@ -15,12 +14,12 @@ var opts = {
   audience: 'anythings.net'
 };
 
-passport.use(new JwtStrategy(opts, function(jwtPayload, done) {
+passport.use(new JwtStrategy(opts, function (jwtPayload, done) {
   debug(' ', jwtPayload);
 
   user.read({
     username: jwtPayload.sub
-  }, function(err, user) {
+  }, function (err, user) {
     if (err) {
       return done(err, false);
     }
@@ -35,16 +34,16 @@ passport.use(new JwtStrategy(opts, function(jwtPayload, done) {
 
 function jwt(req, res, next) {
   var tokenString;
-  if (req && req.headers && req.headers.authorization &&
-    req.headers.authorization.indexOf('Bearer ') > -1) {
+  if (req && req.headers && req.headers.authorization
+    && req.headers.authorization.indexOf('Bearer ') > -1) {
     tokenString = req.headers.authorization;
     debug('used header', req.headers.authorization);
-  } else if (req && req.headers && req.headers.cookie &&
-    req.headers.cookie.indexOf('Authorization=Bearer ') > -1) {
+  } else if (req && req.headers && req.headers.cookie
+    && req.headers.cookie.indexOf('Authorization=Bearer ') > -1) {
     debug('used cookie', req.headers.cookie);
-    tokenString = req.headers.cookie.split(';').filter(function(cookie) {
+    tokenString = req.headers.cookie.split(';').filter(function (cookie) {
       return cookie.indexOf('Authorization') > -1;
-    }).map(function(cookie) {
+    }).map(function (cookie) {
       return cookie.replace('Authorization=', '').trim();
     }).join('');
     debug('used cookie', req.headers.cookie);

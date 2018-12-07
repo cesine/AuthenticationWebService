@@ -1,5 +1,3 @@
-'use strict';
-
 var bodyParser = require('body-parser');
 var bunyan = require('express-bunyan-logger');
 var cors = require('cors');
@@ -46,8 +44,8 @@ service.use(authenticationMiddleware.jwt);
 /**
  * Routes
  */
-service.use('/bower_components', express.static(__dirname +
-  '/public/components/as-ui-auth/bower_components'));
+service.use('/bower_components', express.static(__dirname
+  + '/public/components/as-ui-auth/bower_components'));
 service.use('/authentication', authenticationRoutes);
 service.use('/oauth', oauthRoutes);
 service.use('/v1/users', userRoutes.router);
@@ -57,7 +55,7 @@ service.use('/', routes);
 /**
  * Not found
  */
-service.use(function(req, res, next) {
+service.use(function (req, res, next) {
   debug(req.url + ' was not found');
   var err = new Error('Not Found');
   err.status = 404;

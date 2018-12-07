@@ -1,5 +1,4 @@
 (function(exports, global) {
-  'use strict';
 
   global.fetch = global.fetch || require('node-fetch');
 

@@ -1,4 +1,3 @@
-'use strict';
 var bcrypt = require('bcrypt');
 var crypto = require('crypto');
 var debug = require('debug')('user');
@@ -35,14 +34,14 @@ var FLAT_SCHEMA = {
   email: Sequelize.STRING,
   gravatar: {
     type: Sequelize.STRING,
-    get: function() {
+    get: function () {
       var gravatar = this.getDataValue('gravatar');
       if (gravatar) {
         return gravatar;
       }
       var email = this.getDataValue('email') || this.getDataValue('id') || DEFAULT_GRAVATAR;
       return crypto.createHash('md5').update(email).digest('hex');
-    },
+    }
   },
   description: Sequelize.TEXT,
   givenName: Sequelize.STRING,
@@ -69,11 +68,11 @@ function jsonToFlat(json, defaultValue) {
     }
 
     if (attr.indexOf('Name') > -1) {
-      flat[attr] = json.name[attr] !== undefined && json.name[attr] !== null ?
-        json.name[attr] : defaultValue;
+      flat[attr] = json.name[attr] !== undefined && json.name[attr] !== null
+        ? json.name[attr] : defaultValue;
     } else {
-      flat[attr] = json[attr] !== undefined && json[attr] !== null ?
-        json[attr] : defaultValue;
+      flat[attr] = json[attr] !== undefined && json[attr] !== null
+        ? json[attr] : defaultValue;
     }
   }
 
@@ -110,11 +109,11 @@ function flatToJson(flat, defaultValue) {
     }
 
     if (attr.indexOf('Name') > -1) {
-      json.name[attr] = flat[attr] !== undefined && flat[attr] !== null ?
-        flat[attr] : defaultValue;
+      json.name[attr] = flat[attr] !== undefined && flat[attr] !== null
+        ? flat[attr] : defaultValue;
     } else {
-      json[attr] = flat[attr] !== undefined && flat[attr] !== null ?
-        flat[attr] : defaultValue;
+      json[attr] = flat[attr] !== undefined && flat[attr] !== null
+        ? flat[attr] : defaultValue;
     }
   }
 
@@ -193,7 +192,7 @@ function create(profile, callback) {
 
   User
     .create(flat)
-    .then(function(data) {
+    .then(function (data) {
       var flat = data.toJSON();
       callback(null, flatToJson(flat, ''));
     })
@@ -212,7 +211,7 @@ function read(profile, callback) {
         username: profile.username
       }
     })
-    .then(function(dbUser) {
+    .then(function (dbUser) {
       if (!dbUser) {
         return callback(null, null);
       }
@@ -235,10 +234,10 @@ function verifyPassword(profile, callback) {
     .find({
       where: {
         username: profile.username
-      },
+      }
       // attributes: ['hash']
     })
-    .then(function(dbUser) {
+    .then(function (dbUser) {
       if (!dbUser) {
         return callback(new Error('User not found'));
       }
@@ -272,7 +271,7 @@ function changePassword(profile, callback) {
         username: profile.username
       }
     })
-    .then(function(dbUser) {
+    .then(function (dbUser) {
       if (!dbUser.dataValues.hash) {
         return callback(new Error('Please set the password before changing it'));
       }
@@ -287,7 +286,7 @@ function changePassword(profile, callback) {
       }
 
       dbUser.dataValues.hash = hashed.hash;
-      dbUser.save().then(function(dbUser) {
+      dbUser.save().then(function (dbUser) {
         callback(null, flatToJson(dbUser.toJSON(), ''));
       }).catch(callback);
     })
@@ -310,7 +309,7 @@ function save(profile, callback) {
         username: profile.username
       }
     })
-    .then(function(dbUser) {
+    .then(function (dbUser) {
       // Create the user
       if (!dbUser) {
         return create(profile, callback);
@@ -345,7 +344,7 @@ function save(profile, callback) {
 
       return dbUser
         .save()
-        .then(function(savedDbUser) {
+        .then(function (savedDbUser) {
           debug(savedDbUser);
           if (!savedDbUser) {
             return callback(new Error('Unable to save the user.'));
@@ -375,12 +374,12 @@ function list(options, callback) {
 
   User
     .findAll(options)
-    .then(function(users) {
+    .then(function (users) {
       if (!users) {
         return callback(new Error('Unable to fetch user collection'));
       }
 
-      callback(null, users.map(function(dbUser) {
+      callback(null, users.map(function (dbUser) {
         return dbUser.toJSON();
       }));
     })
@@ -403,7 +402,7 @@ function flagAsDeleted(profile, callback) {
         username: profile.username
       }
     })
-    .then(function(dbUser) {
+    .then(function (dbUser) {
       if (!dbUser) {
         return callback(new Error('Cannot delete user which doesn\'t exist'));
       }
@@ -413,7 +412,7 @@ function flagAsDeleted(profile, callback) {
 
       dbUser
         .save(dbUser)
-        .then(function(dbUser) {
+        .then(function (dbUser) {
           if (!dbUser) {
             return callback(new Error('Save failed'));
           }

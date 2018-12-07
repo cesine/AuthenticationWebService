@@ -1,11 +1,9 @@
-'use strict';
-
 var expect = require('chai').expect;
 
 var oauth = require('./../../middleware/oauth');
 
-describe('oauth middleware', function() {
-  it('should load', function() {
+describe('oauth middleware', function () {
+  it('should load', function () {
     expect(oauth).to.be.a('object');
     expect(oauth.server).to.be.a('object');
 

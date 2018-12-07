@@ -1,6 +1,3 @@
-'use strict';
-/*jshint camelcase: false */
-
 var AsToken = require('as-token');
 var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
@@ -51,7 +48,7 @@ function create(options, callback) {
 
   oauthClient
     .create(options)
-    .then(function(dbModel) {
+    .then(function (dbModel) {
       callback(null, dbModel.toJSON());
     })
     .catch(callback);
@@ -69,7 +66,7 @@ function read(client, callback) {
 
   oauthClient
     .find(options)
-    .then(function(dbModel) {
+    .then(function (dbModel) {
       if (!dbModel) {
         return callback(null, null);
       }
@@ -102,12 +99,12 @@ function list(options, callback) {
 
   oauthClient
     .findAll(options)
-    .then(function(oauth_clients) {
+    .then(function (oauth_clients) {
       if (!oauth_clients) {
         return callback(new Error('Unable to fetch oauthClient collection'));
       }
 
-      callback(null, oauth_clients.map(function(dbModel) {
+      callback(null, oauth_clients.map(function (dbModel) {
         return dbModel.toJSON();
       }));
     })
@@ -131,7 +128,6 @@ function init() {
   return sequelize.sync();
 }
 
-
 /*
  * OAuth2 Provider Model
  * https://github.com/oauthjs/node-oauth2-server/wiki/Model-specification
@@ -140,16 +136,15 @@ function init() {
 /*
  * Get access client.
  */
-var getAccessToken = function(bearerToken) {
-  return new Promise(function(resolve, reject) {
-
+var getAccessToken = function (bearerToken) {
+  return new Promise(function (resolve, reject) {
     if (bearerToken.indexOf(AsToken.config.jwt.prefix) === 0) {
       return reject(new OAuthError('This is a JWT token'));
     }
 
     OAuthToken.read({
       access_token: bearerToken
-    }, function(err, token) {
+    }, function (err, token) {
       if (err) {
         return reject(err);
       }
@@ -175,14 +170,14 @@ var getAccessToken = function(bearerToken) {
  * https://github.com/oauthjs/node-oauth2-server#upgrading-from-2x
  */
 var AUTHORIZATION_CODE_TRANSIENT_STORE = {};
-var getClient = function(clientId, clientSecret) {
+var getClient = function (clientId, clientSecret) {
   debug('getClient', arguments);
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     read({
       client_id: clientId,
       client_secret: clientSecret
-    }, function(err, client) {
+    }, function (err, client) {
       if (err) {
         return reject(err);
       }
@@ -208,10 +203,10 @@ var getClient = function(clientId, clientSecret) {
   });
 };
 
-var getAuthorizationCode = function(code) {
+var getAuthorizationCode = function (code) {
   debug('getAuthorizationCode', arguments, AUTHORIZATION_CODE_TRANSIENT_STORE);
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var client = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
     if (client) {
       delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
@@ -226,20 +221,20 @@ var getAuthorizationCode = function(code) {
   });
 };
 
-var revokeAuthorizationCode = function(code) {
+var revokeAuthorizationCode = function (code) {
   debug('revokeAuthorizationCode', arguments);
 
-  return new Promise(function(resolve) {
+  return new Promise(function (resolve) {
     delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
 
     resolve(true);
   });
 };
 
-var saveAuthorizationCode = function(code, value) {
+var saveAuthorizationCode = function (code, value) {
   debug('saveAuthorizationCode', arguments);
 
-  return new Promise(function(resolve) {
+  return new Promise(function (resolve) {
     AUTHORIZATION_CODE_TRANSIENT_STORE[code] = value;
     debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
 
@@ -251,10 +246,10 @@ var saveAuthorizationCode = function(code, value) {
  * Get refresh token.
  */
 
-var getRefreshToken = function(bearerToken, callback) {
+var getRefreshToken = function (bearerToken, callback) {
   OAuthToken.read({
     refresh_token: bearerToken
-  }, function(err, token) {
+  }, function (err, token) {
     if (err) {
       return callback(err);
     }
@@ -275,11 +270,11 @@ var getRefreshToken = function(bearerToken, callback) {
  * Get user.
  */
 
-var getUser = function(username, password, callback) {
+var getUser = function (username, password, callback) {
   User.verifyPassword({
     username: username,
     password: password
-  }, function(err, profile) {
+  }, function (err, profile) {
     if (err) {
       return callback(err);
     }
@@ -295,8 +290,8 @@ var getUser = function(username, password, callback) {
  * Save token.
  */
 
-var saveAccessToken = function(token, client, user) {
-  return new Promise(function(resolve, reject) {
+var saveAccessToken = function (token, client, user) {
+  return new Promise(function (resolve, reject) {
     if (!token || !client || !user) {
       return reject(new Error('Invalid Options'));
     }
@@ -308,7 +303,7 @@ var saveAccessToken = function(token, client, user) {
       refresh_token: token.refreshToken,
       refresh_token_expires_on: token.refreshTokenExpiresOn,
       user_id: user.id
-    }, function(err, token) {
+    }, function (err, token) {
       if (err) {
         return reject(err);
       }

@@ -1,13 +1,10 @@
-'use strict';
-/*jshint camelcase: false */
-
 var expect = require('chai').expect;
 
 var OAuthClient = require('./../../models/oauth-client');
 var OAuthToken = require('./../../models/oauth-token');
 var User = require('./../../models/user');
 
-describe('oauth client model', function() {
+describe('oauth client model', function () {
   var client = {
     id: 'test-client',
     client_id: 'test-client',
@@ -30,15 +27,15 @@ describe('oauth client model', function() {
     user_id: user.id
   };
 
-  before(function(done) {
+  before(function (done) {
     OAuthClient.init();
     User.init();
     OAuthToken.init();
 
-    setTimeout(function() {
-      OAuthClient.create(client, function() {
-        User.create(user, function() {
-          OAuthToken.create(token, function() {
+    setTimeout(function () {
+      OAuthClient.create(client, function () {
+        User.create(user, function () {
+          OAuthToken.create(token, function () {
             done();
           });
         });
@@ -46,14 +43,14 @@ describe('oauth client model', function() {
     }, 300);
   });
 
-  describe('persistance', function() {
-    it('should create a OAuthClient', function(done) {
+  describe('persistance', function () {
+    it('should create a OAuthClient', function (done) {
       var json = {
         client_secret: '29j3werd',
         extranious: 123
       };
 
-      OAuthClient.create(json, function(err, client) {
+      OAuthClient.create(json, function (err, client) {
         if (err) {
           return done(err);
         }
@@ -70,33 +67,33 @@ describe('oauth client model', function() {
       });
     });
 
-    it('should return null if client not found', function(done) {
+    it('should return null if client not found', function (done) {
       OAuthClient
         .read({
           client_id: 'test-nonexistant-client'
-        }, function(err, client) {
+        }, function (err, client) {
           if (err) {
             return done(err);
           }
 
-          expect(client).to.be.null;
+          expect(client).to.equal(null);
 
           done();
         });
     });
 
-    describe('existing OAuthClients', function() {
-      it('should look up a client using id and secret', function(done) {
+    describe('existing OAuthClients', function () {
+      it('should look up a client using id and secret', function (done) {
         OAuthClient
           .read({
             client_id: 'test-client',
             client_secret: 'test-secret'
-          }, function(err, client) {
+          }, function (err, client) {
             if (err) {
               return done(err);
             }
 
-            expect(client).not.to.be.null;
+            expect(client).not.to.equal(null);
 
             expect(client).to.deep.equal({
               client_id: 'test-client',
@@ -118,16 +115,16 @@ describe('oauth client model', function() {
           });
       });
 
-      it('should look up using id', function(done) {
+      it('should look up using id', function (done) {
         OAuthClient
           .read({
-            client_id: 'test-client',
-          }, function(err, client) {
+            client_id: 'test-client'
+          }, function (err, client) {
             if (err) {
               return done(err);
             }
 
-            expect(client).not.to.be.null;
+            expect(client).not.to.equal(null);
             expect(client.client_id).equal('test-client');
 
             done();
@@ -136,25 +133,25 @@ describe('oauth client model', function() {
     });
   });
 
-  describe('collection', function() {
-    beforeEach(function(done) {
+  describe('collection', function () {
+    beforeEach(function (done) {
       OAuthClient
         .create({
           client_id: 'testm-abc',
           title: 'Puppies app'
-        }, function() {
+        }, function () {
           OAuthClient
             .create({
               client_id: 'testm-hij',
               deletedAt: new Date(1341967961140),
               deletedReason: 'spidering on July 9 2012'
-            }, function() {
+            }, function () {
               done();
             });
         });
     });
 
-    it('should list an admin view of all clients', function(done) {
+    it('should list an admin view of all clients', function (done) {
       OAuthClient.list({
         where: {
           client_id: {
@@ -162,7 +159,7 @@ describe('oauth client model', function() {
           }
         },
         limit: 1000
-      }, function(err, clients) {
+      }, function (err, clients) {
         if (err) {
           return done(err);
         }
@@ -171,15 +168,15 @@ describe('oauth client model', function() {
         expect(clients).length(2);
 
         var client = clients[0];
-        expect(client.client_id).to.exist;
-        expect(client.title).to.exist;
-        expect(client.deletedReason).to.be.null;
+        expect(client.client_id).to.not.equal(undefined);
+        expect(client.title).to.not.equal(undefined);
+        expect(client.deletedReason).to.equal(null);
 
         done();
       });
     });
 
-    it('should list an admin view of deactivated clients', function(done) {
+    it('should list an admin view of deactivated clients', function (done) {
       OAuthClient.list({
         where: {
           deletedReason: {
@@ -187,7 +184,7 @@ describe('oauth client model', function() {
           }
         },
         limit: 1000
-      }, function(err, clients) {
+      }, function (err, clients) {
         if (err) {
           return done(err);
         }
@@ -196,8 +193,8 @@ describe('oauth client model', function() {
         expect(clients).length(1);
 
         var client = clients[0];
-        expect(client.client_id).to.exist;
-        expect(client.deletedReason).to.exist;
+        expect(client.client_id).to.not.equal(undefined);
+        expect(client.deletedReason).to.not.equal(undefined);
 
         done();
       });
@@ -205,13 +202,13 @@ describe('oauth client model', function() {
   });
 
   // https://github.com/oauthjs/node-oauth2-server/wiki/Model-specification
-  describe('express-oauth-server support', function() {
-    describe('tokens', function() {
-      it('should save an access token', function() {
+  describe('express-oauth-server support', function () {
+    describe('tokens', function () {
+      it('should save an access token', function () {
         return OAuthClient
           .saveAccessToken(token, client, user)
-          .then(function(token) {
-            expect(token).not.to.be.null;
+          .then(function (token) {
+            expect(token).not.to.equal(null);
             expect(token).deep.equal({
               access_token: token.access_token,
               client_id: 'test-client',
@@ -223,11 +220,11 @@ describe('oauth client model', function() {
           });
       });
 
-      it('should get an access token', function() {
+      it('should get an access token', function () {
         return OAuthClient
           .getAccessToken('test-token')
-          .then(function(token) {
-            expect(token).not.to.be.null;
+          .then(function (token) {
+            expect(token).not.to.equal(null);
             expect(token).deep.equal({
               accessToken: 'test-token',
               clientId: 'test-client',
@@ -237,13 +234,13 @@ describe('oauth client model', function() {
           });
       });
 
-      it('should get an refresh token', function(done) {
-        OAuthClient.getRefreshToken('test-refresh', function(err, token) {
+      it('should get an refresh token', function (done) {
+        OAuthClient.getRefreshToken('test-refresh', function (err, token) {
           if (err) {
             return done(err);
           }
 
-          expect(token).not.to.be.null;
+          expect(token).not.to.equal(null);
           expect(token).deep.equal({
             accessToken: 'test-token',
             clientId: 'test-client',
@@ -256,32 +253,30 @@ describe('oauth client model', function() {
       });
     });
 
-    describe('clients', function() {
-      it('should get a client', function() {
+    describe('clients', function () {
+      it('should get a client', function () {
         return OAuthClient
           .getClient('test-client', 'test-secret')
-          .then(function(client_info) {
-
-            expect(client_info).not.to.be.null;
+          .then(function (client_info) {
+            expect(client_info).not.to.equal(null);
             expect(client_info).deep.equal({
               clientId: 'test-client',
               clientSecret: 'test-secret',
               code: client_info.code,
               grants: ['authorization_code']
             });
-
           });
       });
     });
 
-    describe('users', function() {
-      it('should get a user', function(done) {
-        OAuthClient.getUser('test-user', 'aje24wersdfgs324rfe+woe', function(err, userId) {
+    describe('users', function () {
+      it('should get a user', function (done) {
+        OAuthClient.getUser('test-user', 'aje24wersdfgs324rfe+woe', function (err, userId) {
           if (err) {
             return done(err);
           }
 
-          expect(userId).not.to.be.null;
+          expect(userId).not.to.equal(null);
           expect(userId).equal('test-user-efg_random_uuid');
 
           done();

@@ -1,6 +1,3 @@
-'use strict';
-/*jshint camelcase: false */
-
 var AsToken = require('as-token');
 var debug = require('debug')('authentication');
 var express = require('express');
@@ -15,11 +12,11 @@ var router = express.Router();
 /**
  * Render UI pages
  */
-router.use('/', authenticationMiddleware.redirectAuthenticatedUser, express.static(__dirname +
-  '/../public/components/as-ui-auth/components'));
+router.use('/', authenticationMiddleware.redirectAuthenticatedUser, express.static(__dirname
+  + '/../public/components/as-ui-auth/components'));
 router.use('/register', authenticationMiddleware.redirectAuthenticatedUser,
-  express.static(__dirname +
-  '/../public/components/as-ui-auth/components/signup'));
+  express.static(__dirname
+  + '/../public/components/as-ui-auth/components/signup'));
 
 /**
  * Log in
@@ -31,7 +28,7 @@ function postLogin(req, res, next) {
   User.verifyPassword({
     password: req.body.password,
     username: req.body.username
-  }, function(err, user) {
+  }, function (err, user) {
     if (err) {
       debug('error logging in', err, user);
       err.status = 403;
@@ -47,8 +44,8 @@ function postLogin(req, res, next) {
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
     res.set('Authorization', 'Bearer ' + token);
 
-    var path = req.body.redirect ||
-      util.format('/%s?client_id=%s&redirect_uri=%s',
+    var path = req.body.redirect
+      || util.format('/%s?client_id=%s&redirect_uri=%s',
         'oauth/authorize/as',
         req.body.client_id,
         req.body.redirect_uri);
@@ -67,8 +64,8 @@ function postRegister(req, res, next) {
   var err;
 
   if (!req.body || !req.body.username || req.body.username.length < 4) {
-    err = new Error('Please provide a username which is 4 characters or longer ' +
-      'and a password which is 8 characters or longer');
+    err = new Error('Please provide a username which is 4 characters or longer '
+      + 'and a password which is 8 characters or longer');
     err.status = 403;
     return next(err, req, res, next);
   }
@@ -79,14 +76,14 @@ function postRegister(req, res, next) {
     return next(err, req, res, next);
   }
 
-  User.create(req.body, function(err, user) {
+  User.create(req.body, function (err, user) {
     if (err) {
       debug('Error registering the user', err, user);
 
-      if (err instanceof sequelize.UniqueConstraintError &&
-        err.fields && err.fields.indexOf('username') > -1) {
-        err = new Error('Username ' + req.body.username + ' is already taken,' +
-          ' please try another username');
+      if (err instanceof sequelize.UniqueConstraintError
+        && err.fields && err.fields.indexOf('username') > -1) {
+        err = new Error('Username ' + req.body.username + ' is already taken,'
+          + ' please try another username');
         err.status = 403;
       }
 
@@ -94,18 +91,16 @@ function postRegister(req, res, next) {
       return next(err, req, res, next);
     }
     // Successful logins should send the user back to /oauth/authorize.
-    var path = req.body.redirect ||
-      util.format('/%s?client_id=%s&redirect_uri=%s',
+    var path = req.body.redirect
+      || util.format('/%s?client_id=%s&redirect_uri=%s',
         'oauth/authorize/as',
         req.body.client_id,
         req.body.redirect_uri);
-
 
     var token = AsToken.sign(user, 60 * 24);
     debug('token', token);
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
     res.set('Authorization', 'Bearer ' + token);
-
 
     return res.redirect(path);
   });

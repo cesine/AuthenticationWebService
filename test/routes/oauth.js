@@ -1,11 +1,9 @@
-'use strict';
-
 var expect = require('chai').expect;
 
 var oauth = require('./../../routes/oauth2');
 
-describe('oauth routes', function() {
-  it('should load', function() {
+describe('oauth routes', function () {
+  it('should load', function () {
     expect(oauth).to.be.a('object');
     expect(oauth.router).to.be.a('function');
     expect(oauth.getAuthorize).to.be.a('function');
@@ -14,7 +12,7 @@ describe('oauth routes', function() {
     expect(oauth.postToken).to.be.a('function');
   });
 
-  it('should postToken', function() {
+  it('should postToken', function () {
     oauth.postToken({
       headers: {
         'content-type': 'application/x-www-form-urlencoded'
@@ -26,20 +24,20 @@ describe('oauth routes', function() {
       }
     }, {
       headers: {},
-      set: function() {},
-      status: function() {
+      set: function () {},
+      status: function () {
         return this;
       },
-      json: function() {
+      json: function () {
         return this;
       },
-      send: function() {
+      send: function () {
         return this;
       }
-    }, function(err, res) {
-      expect(true).to.be.true;
-      expect(err).to.be.undefined;
-      expect(res).to.be.undefined;
+    }, function (err, res) {
+      expect(true).to.equal(true);
+      expect(err).to.equal(undefined);
+      expect(res).to.equal(undefined);
     });
   });
 });
