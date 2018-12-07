@@ -6,11 +6,11 @@ var expect = require('chai').expect;
 var OauthToken = require('./../../models/oauth-token');
 
 describe('oauth token model', function() {
-  describe('persistance', function() {
-    before(function() {
-      OauthToken.init();
-    });
+  before(function() {
+    OauthToken.init();
+  });
 
+  describe('persistance', function() {
     it('should create a OauthToken', function(done) {
       var json = {
         access_token: 'test-' + Date.now(),

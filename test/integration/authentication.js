@@ -158,7 +158,7 @@ describe('/authentication', function() {
           expect(decoded).to.deep.equal({
             name: {
               givenName: '',
-              familyName: 'Test'
+              familyName: process.env.TRAVIS ? '' : 'Test'
             },
             id: 'test-user-efg_random_uuid',
             revision: decoded.revision,

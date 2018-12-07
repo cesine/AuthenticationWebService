@@ -4,8 +4,15 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 
 var service = require('./../../service');
+var OauthClient = require('./../../models/oauth-client');
+var OauthToken = require('./../../models/oauth-token');
 
 describe('/oauth', function() {
+  before(function() {
+    OauthClient.init();
+    OauthToken.init();
+  });
+
   describe('POST /oauth/authorize', function() {
     it('should redirect to login if user is not present', function(done) {
       supertest(service)
@@ -81,7 +88,7 @@ describe('/oauth', function() {
 
           expect(res.body).to.deep.equal({
             status: 403,
-            userFriendlyErrors: ['Code is not authorized']
+            userFriendlyErrors: ['Client id or Client Secret is invalid']
           });
 
           done();

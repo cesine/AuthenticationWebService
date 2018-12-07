@@ -8,6 +8,8 @@ var cleanErrorStatus = function (status) {
 };
 
 var errorHandler = function (err, req, res, next) {
+  debug('errorHandler ' + process.env.NODE_ENV + req.url, err);
+
   var data;
   var NODE_ENV = process.env.NODE_ENV;
   if (['development', 'test', 'local'].indexOf(NODE_ENV) > -1) {
@@ -43,6 +45,12 @@ var errorHandler = function (err, req, res, next) {
     data.status = 404;
     data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
   } else if (data.status === 403) {
+    data.status = 403;
+    data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
+  } else if (err.message === 'Code is not authorized') {
+    data.status = 403;
+    data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
+  } else if (err.message === 'Client id or Client Secret is invalid') {
     data.status = 403;
     data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
   } else if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
