@@ -15,6 +15,8 @@ exports.getUtterances = {
     nickname: 'getUtterances'
   },
   action: function action(req, res, next) {
+    // If the user has read permissions
+    // Gets the data
     res.send({});
   }
 };
@@ -31,6 +33,8 @@ exports.postUtterances = {
     nickname: 'postUtterances'
   },
   action: function action(req, res, next) {
+    // If the user has write permissions
+    // Uploads the data
     res.send({});
   }
 };
@@ -47,6 +51,8 @@ exports.putUtterances = {
     nickname: 'putUtterances'
   },
   action: function action(req, res, next) {
+    // If the user has write permissions
+    // Updates the data
     res.send({});
   }
 };
@@ -63,6 +69,8 @@ exports.deleteUtterances = {
     nickname: 'deleteUtterances'
   },
   action: function action(req, res, next) {
+    // If the user has write permissions
+    // Flags the data as deleted
     res.send({});
   }
 };

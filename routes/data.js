@@ -15,6 +15,8 @@ exports.getData = {
     nickname: 'getData'
   },
   action: function action(req, res, next) {
+    // If the user has read permissions
+    // Return the data
     res.send({});
   }
 };
@@ -31,6 +33,8 @@ exports.postData = {
     nickname: 'postData'
   },
   action: function action(req, res, next) {
+    // If the user has write permissions
+    // Create the data
     res.send({});
   }
 };
@@ -47,6 +51,8 @@ exports.putData = {
     nickname: 'putData'
   },
   action: function action(req, res, next) {
+    // If the user has write permissions
+    // Update the data
     res.send({});
   }
 };
@@ -63,6 +69,8 @@ exports.deleteData = {
     nickname: 'deleteData'
   },
   action: function action(req, res, next) {
+    // If the user has write permissions
+    // Update the data as deleted
     res.send({});
   }
 };
