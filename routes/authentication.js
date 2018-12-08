@@ -60,7 +60,7 @@ exports.postLogin = {
 
       var path = req.body.redirect
         || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth/authorize/as',
+          'oauth/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 
@@ -170,7 +170,7 @@ exports.postRegister = {
       // Successful logins should send the user back to /oauth/authorize.
       var path = req.body.redirect
         || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth/authorize/as',
+          'oauth/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 

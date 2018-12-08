@@ -79,11 +79,11 @@ authWebService.use(bunyan({
     stream: process.stdout
   }]
 }));
-authWebService.use(session({
-  resave: true,
-  saveUninitialized: true,
-  secret: config.sessionKey
-}));
+// authWebService.use(session({
+//   resave: true,
+//   saveUninitialized: true,
+//   secret: config.sessionKey
+// }));
 authWebService.use(bodyParser.json());
 authWebService.use(bodyParser.urlencoded({
   extended: true

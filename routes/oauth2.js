@@ -27,19 +27,16 @@ exports.getAuthorize = {
     nickname: 'getAuthorize'
   },
   action: function getAuthorize(req, res) {
-    debug('req.app.locals', req.app.locals);
+    debug('getAuthorize res.locals', res.locals);
 
     // Redirect anonymous users to login page.
-    if (!req.app.locals.user) {
+    if (!res.locals.user) {
       return res.redirect(util.format('/login?redirect=%s&client_id=%s&'
         + 'redirect_uri=%s', req.path, req.query.client_id, req.query.redirect_uri));
     }
 
-    // return res.json('authorize', {
-    //   client_id: req.query.client_id,
-    //   redirect_uri: req.query.redirect_uri
-    // });
-    res.send('TODO');
+    console.log('res.locals.user', res.locals.user);
+    return res.redirect(req.query.redirect_uri);
   }
 };
 /**
@@ -65,17 +62,19 @@ exports.postAuthorize = {
     nickname: 'postAuthorize'
   },
   action: function postAuthorize(req, res, next) {
-    debug('postAuthorize req.app.locals', req.app.locals);
-    debug(req.headers);
+    console.log('postAuthorize res.locals', res.locals);
+    console.log('req.headers', req.headers);
+    console.log('req.session', req.session);
     debug(req.user);
 
     // Redirect anonymous users to login page.
-    if (!req.app.locals.user) {
+    if (!res.locals.user) {
       debug(req.query, req.params);
       return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
         req.query.client_id, req.query.redirect_uri));
     }
 
+    console.log('res.locals.user', res.locals.user);
     var middleware = oauth.authorize({
       handleError: errorMiddleware
     });
@@ -108,7 +107,7 @@ exports.getToken = {
   },
   action: function getToken(req, res) {
     // Redirect anonymous users to login page.
-    if (!req.app.locals.user) {
+    if (!res.locals.user) {
       return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
         req.query.client_id, req.query.redirect_uri));
     }

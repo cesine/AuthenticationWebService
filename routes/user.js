@@ -57,14 +57,14 @@ exports.getCurrentUser = {
         return next(err);
       }
       var json = {
-        username: req.app.locals.user.username
+        username: res.locals.user.username
       };
 
       User.read(json, function (err, profile) {
         if (err) {
           return next(err, req, res, next);
         }
-        profile.token = req.app.locals.token;
+        profile.token = res.locals.token;
         res.json(profile);
       });
     });
@@ -139,7 +139,7 @@ exports.putUser = {
         return next(err);
       }
       if ((req.body.username && req.params.username !== req.body.username)
-        || req.params.username !== req.app.locals.user.username) {
+        || req.params.username !== res.locals.user.username) {
         debug(req.params, req.body);
         var err = new Error('Username does not match, you can only update your own details');
         err.status = 403;
@@ -147,7 +147,7 @@ exports.putUser = {
         return next(err, req, res, next);
       }
 
-      req.body.username = req.app.locals.user.username;
+      req.body.username = res.locals.user.username;
       User.save(req.body, function (err, profile) {
         if (err) {
           return next(err, req, res, next);

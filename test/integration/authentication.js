@@ -107,12 +107,10 @@ describe('/authentication', function () {
       return supertest(service)
         .post('/authentication/login')
         .send({
-
           client_id: 'abc-li-12-li',
           redirect_uri: 'http://localhost:8011/some/place/users?with=other-stuff',
           username: 'test-user',
           password: 'aje24wersdfgs324rfe+woe'
-
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -120,7 +118,7 @@ describe('/authentication', function () {
         .expect('Authorization', /Bearer v1\//)
         .then(function (res) {
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li'
+          expect(res.text).to.contain('to /oauth/authorize?client_id=abc-li-12-li'
             + '&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
 
           var token = res.headers.authorization.replace(/Bearer v1\//, '');
@@ -282,20 +280,55 @@ describe('/authentication', function () {
     });
 
     it('should register and redirect to the requested url', function () {
+      var username = 'test-' + Date.now();
       return supertest(service)
         .post('/authentication/register')
         .send({
           client_id: 'abc-li-12-li',
-          redirect_uri: 'http://localhost:8011/some/place/users?with=other-stuff',
-          username: 'test-' + Date.now(),
+          redirect_uri: '/v1/users/' + username + '?with=other-stuff',
+          username: username,
           password: 'aje24wersdfgs324rfe+woe'
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .then(function (res) {
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li&'
-            + 'redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
+          expect(res.text).to.contain('to /oauth/authorize?client_id=abc-li-12-li&'
+            + 'redirect_uri=/v1/users/' + username + '?with=other-stuff');
+
+          return supertest(service)
+            .get(res.headers.location)
+            .set('Authorization', res.headers.authorization)
+            .expect(302);
+        })
+        .then(function (res) {
+          expect(res.headers.location).to.equal('/v1/users/' + username + '?with=other-stuff');
+
+          return supertest(service)
+            .get(res.headers.location)
+            .set('Authorization', res.headers.authorization)
+            .expect(200);
+        })
+        .then(function (res) {
+          console.log('res.body', res.body);
+          expect(res.body).to.deep.equal({
+            name: {
+              givenName: '',
+              familyName: ''
+            },
+            id: res.body.id,
+            revision: res.body.revision,
+            deletedAt: null,
+            deletedReason: '',
+            username: username,
+            email: '',
+            gravatar: res.body.gravatar,
+            description: '',
+            language: '',
+            hash: res.body.hash,
+            createdAt: res.body.createdAt,
+            updatedAt: res.body.updatedAt
+          });
         });
     });
   });

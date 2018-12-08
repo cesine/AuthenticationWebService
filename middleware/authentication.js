@@ -51,33 +51,33 @@ function jwt(req, res, next) {
   if (tokenString) {
     try {
       var verified = AsToken.verify(tokenString);
-      req.app.locals.user = req.user = verified;
-      req.app.locals.token = tokenString;
+      res.locals.user = req.user = verified;
+      res.locals.token = tokenString;
       // Oauth2 is trying to use this token
       delete req.headers.authorization;
 
-      res.set('Authorization', req.app.locals.token);
+      res.set('Authorization', res.locals.token);
     } catch (err) {
       // Often this is because it has expired or it was mutated
       debug(err);
-      req.app.locals.user = req.user = AsToken.decode(tokenString);
-      req.app.locals.user.expired = true;
+      res.locals.user = req.user = AsToken.decode(tokenString);
+      res.locals.user.expired = true;
       return next();
     }
   }
 
   debug('req.user', req.user);
-  debug('req.app.locals', req.app.locals);
+  debug('res.locals', res.locals);
   next();
 }
 
 function requireAuthentication(req, res, next) {
-  if (!req.app.locals.user) {
+  if (!res.locals.user) {
     var err = new Error('You must login to access this data');
     err.status = 403;
     return next(err, req, res, next);
   }
-  if (req.app.locals.user.expired) {
+  if (res.locals.user.expired) {
     var err = new Error('Your session has expired, you must login to access this data');
     err.status = 403;
     return next(err, req, res, next);
@@ -87,10 +87,10 @@ function requireAuthentication(req, res, next) {
 }
 
 function redirectAuthenticatedUser(req, res, next) {
-  if (req.app.locals.user && !req.app.locals.user.expired) {
-    debug('redirectAuthenticatedUser user', req.app.locals.user);
+  if (res.locals.user && !res.locals.user.expired) {
+    debug('redirectAuthenticatedUser user', res.locals.user);
     var redirectUri = req.query.redirect || req.query.redirect_uri || '/v1/users/username';
-    redirectUri = redirectUri.replace('username', req.app.locals.user.username);
+    redirectUri = redirectUri.replace('username', res.locals.user.username);
     debug('redirectAuthenticatedUser', req.url, redirectUri);
     return res.redirect(redirectUri);
   }
@@ -100,7 +100,7 @@ function redirectAuthenticatedUser(req, res, next) {
 
 function requireAuthenticationPassportJWT(req, res, next) {
   debug('requireAuthentication', req.user);
-  debug('requireAuthentication', req.app.locals);
+  debug('requireAuthentication', res.locals);
   debug('requireAuthentication', req.headers);
 
   var middleware = passport.authenticate('jwt', {
