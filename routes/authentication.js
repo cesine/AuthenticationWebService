@@ -84,15 +84,9 @@ exports.getLogout = {
     nickname: 'getLogout'
   },
   action: function getLogout(req, res, next) {
-    req.session.destroy(function (err) {
-      if (err) {
-        return next(err);
-      }
-      res.set('Set-Cookie', 'connect.sid=null; path=/; Secure; HttpOnly');
-      res.set('Set-Cookie', 'Authorization=null; path=/; Secure; HttpOnly');
-      res.set('Authorization', 'null');
-      res.redirect(req.query.redirect || '/authentication/login');
-    });
+    res.set('Set-Cookie', 'Authorization=null; path=/; Secure; HttpOnly');
+    res.set('Authorization', 'null');
+    res.redirect(req.query.redirect || '/authentication/login');
   }
 };
 
