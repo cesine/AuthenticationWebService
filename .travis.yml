@@ -4,4 +4,8 @@ node_js:
   - 10
 
 script:
-  - npm run test:travis
+  - npm run lint || echo "Lint failed"
+  - npm run coverage
+
+after_script:
+  - npm run coveralls

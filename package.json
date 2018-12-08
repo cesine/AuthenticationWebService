@@ -23,6 +23,7 @@
     "Fieldlinguist <info@fieldlinguist.com>"
   ],
   "dependencies": {
+    "as-token": "git://github.com/cesine/as-token-javascript.git",
     "bcrypt": "^3.0.2",
     "body-parser": "^1.18.3",
     "config": "^3.0.0",
@@ -31,6 +32,8 @@
     "debug": "^4.1.0",
     "express": "^4.16.4",
     "express-bunyan-logger": "^1.3.3",
+    "express-handlebars": "^3.0.0",
+    "express-oauth-server": "git://github.com/cesine/express-oauth-server.git",
     "express-session": "^1.15.6",
     "fielddb": "git://github.com/fielddb/fielddb.git",
     "lodash": "^4.17.11",
@@ -38,20 +41,29 @@
     "nano": "^7.1.1",
     "node-oauth2-server": "^2.4.0",
     "nodemailer": "^4.7.0",
+    "oauth2-server": "git://github.com/cesine/node-oauth2-server.git",
+    "passport": "^0.3.2",
+    "passport-jwt": "^2.1.0",
+    "passport-local": "^1.0.0",
     "q": "^1.5.1",
+    "sequelize": "^3.23.1",
     "serve-favicon": "^2.5.0",
+    "sqlite3": "^4.0.4",
     "swagger-node-express": "git://github.com/cesine/swagger-node-express.git#search",
     "uuid": "^3.3.2"
   },
   "peerDependencies": {},
   "devDependencies": {
     "chai": "^4.2.0",
+    "coveralls": "^2.11.9",
     "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "istanbul": "^0.4.3",
     "mocha": "^5.2.0",
     "nock": "^10.0.3",
     "replay": "^2.4.0",
+    "sinon": "^1.17.3",
     "supertest": "^3.3.0"
   },
   "main": "./auth_service.js",
@@ -62,13 +74,15 @@
     "node": ">8.x.x"
   },
   "scripts": {
+    "coverage": "NODE_ENV=test istanbul cover _mocha -- --recursive test; istanbul check-coverage  --statements 33 --functions 23 --branches 18 --lines 33",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint .",
+    "start": "node ./bin/www",
     "test": "NODE_ENV=test mocha --recursive test",
+    "test:debug": "node-debug _mocha test/integration/oauth.js",
     "test:deprecated": "bash test/routes/deprecated.sh",
     "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",
-    "test:travis": "npm test",
-    "test:production": "ls config/production.js",
-    "start": "node auth_service.js"
+    "test:production": "ls config/production.js"
   },
   "license": "Apache-2.0"
 }

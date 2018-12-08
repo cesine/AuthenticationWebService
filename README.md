@@ -1,4 +1,7 @@
-# fieldb-auth [![Build Status](https://secure.travis-ci.org/FieldDB/AuthenticationWebService.png?branch=master)](http://travis-ci.org/FieldDB/AuthenticationWebService)
+[![Build Status][travis-image]][travis-url]
+[![Coverage Status][coverage-image]][coverage-url]
+
+# fieldb-auth
 
 Authentication web services for FieldDB
 
@@ -55,3 +58,9 @@ test/fixtures/
 
 ## License
 Licensed under the Apache, 2.0 licenses.
+
+
+[travis-image]: https://travis-ci.org/FieldDB/AuthenticationWebService.svg?branch=master
+[travis-url]: https://travis-ci.org/FieldDB/AuthenticationWebService
+[coverage-image]: https://coveralls.io/repos/github/FieldDB/AuthenticationWebService/badge.svg?branch=master
+[coverage-url]: https://coveralls.io/github/FieldDB/AuthenticationWebService?branch=master

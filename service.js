@@ -1,0 +1,70 @@
+var bodyParser = require('body-parser');
+var bunyan = require('express-bunyan-logger');
+var cors = require('cors');
+var debug = require('debug')('service');
+var express = require('express');
+
+var authenticationRoutes = require('./routes/authentication').router;
+var oauthRoutes = require('./routes/oauth2').router;
+var authenticationMiddleware = require('./middleware/authentication');
+var errorsMiddleware = require('./middleware/error-handler').errorHandler;
+var routes = require('./routes/index').router;
+var userRoutes = require('./routes/users');
+
+var service = express();
+service.use(bunyan({
+  name: 'fielddb-auth',
+  streams: [{
+    level: process.env.BUNYAN_LOG_LEVEL || 'warn',
+    stream: process.stdout
+  }]
+}));
+/**
+ * Body parsers
+ */
+service.use(bodyParser.json());
+service.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+/**
+ * Cross Origin Resource Sharing
+ * (permits client sides which are not hosted on the same domain)
+ */
+service.use(cors({ credentials: true, origin: 'https://localhost:8011' }));
+
+/**
+ * Middleware
+ */
+// The example attaches it to the express
+// https://github.com/oauthjs/express-oauth-server#quick-start
+// service.oauth = oauthMiddleware;
+service.use(authenticationMiddleware.jwt);
+
+/**
+ * Routes
+ */
+service.use('/bower_components', express.static(__dirname
+  + '/public/components/as-ui-auth/bower_components'));
+service.use('/authentication', authenticationRoutes);
+service.use('/oauth', oauthRoutes);
+service.use('/v1/users', userRoutes.router);
+service.use('/v1/user', authenticationMiddleware.requireAuthentication, userRoutes.getCurrentUser);
+service.use('/', routes);
+
+/**
+ * Not found
+ */
+service.use(function (req, res, next) {
+  debug(req.url + ' was not found');
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err, req, res, next);
+});
+
+/**
+ * Attach error handler
+ */
+service.use(errorsMiddleware);
+
+module.exports = service;
