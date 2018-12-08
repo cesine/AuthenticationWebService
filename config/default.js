@@ -1,9 +1,12 @@
+var AsToken = require('as-token');
+var fs = require('fs');
+var Connection = require('fielddb/api/corpus/Connection').Connection;
+
 var deploy_target = process.env.NODE_ENV || 'localhost';
 // backward compatible
 if (deploy_target === 'test') {
   deploy_target = 'beta';
 }
-var Connection = require('fielddb/api/corpus/Connection').Connection;
 Connection.knownConnections.thisserver = Connection.knownConnections[deploy_target];
 Connection.knownConnections.testing = Connection.knownConnections.beta;
 Connection.knownConnections.dyslexdisorth = Connection.knownConnections.thisserver.clone();
@@ -26,14 +29,18 @@ Connection.knownConnections.georgiantogether = Connection.knownConnections.thiss
 Connection.knownConnections.georgiantogether.userFriendlyServerName = 'Learn X';
 Connection.knownConnections.georgiantogether.brandLowerCase = 'georgiantogether';
 Connection.knownConnections.georgiantogether.serverLabel = 'georgiantogether';
+
+AsToken.config.jwt.private = fs.readFileSync(__dirname + '/jwt_debug.pem', 'utf8');
+
 module.exports = {
   sessionKey: 'uwotm8',
   httpsOptions: {
-    key: 'fielddb_debug.key',
-    cert: 'fielddb_debug.crt',
+    key: fs.readFileSync(__dirname + '/fielddb_debug.key', 'utf8'),
+    cert: fs.readFileSync(__dirname + '/fielddb_debug.crt', 'utf8'),
     port: '3183',
     protocol: 'https://'
   },
+  url: 'https://localhost:3183',
   usersDbConnection: {
     url: 'http://localhost:5984',
     dbname: 'theuserscouch'

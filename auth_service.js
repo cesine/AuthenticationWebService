@@ -2,7 +2,6 @@
 /* Load modules provided by Node */
 var debug = require('debug')('auth:service');
 var https = require('https');
-var FileSystem = require('fs');
 var path = require('path');
 /* Load modules provided by $ npm install, see package.json for details */
 var crossOriginResourceSharing = require('cors');
@@ -101,21 +100,5 @@ authWebServiceRoutes.setup(authWebService, apiVersion);
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
 deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
-/**
- * Read in the specified filenames for this config's security key and certificates,
- * and then ask https to turn on the webservice
- */
-if (!module.parent) {
-  if (process.env.NODE_ENV === 'production') {
-    authWebService.listen(config.httpsOptions.port);
-    debug('Running in production mode behind an Nginx proxy, Listening on http port %d', config.httpsOptions.port);
-  } else {
-    config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
-    config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
-    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function afterListen() {
-      debug('Listening on https port %d', config.httpsOptions.port);
-    });
-  }
-} else {
-  module.exports = authWebService;
-}
+
+module.exports = authWebService;
