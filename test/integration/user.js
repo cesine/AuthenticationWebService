@@ -15,16 +15,12 @@ describe('/v1/users', function () {
       });
   });
 
-  it('should list users', function (done) {
-    supertest(api)
+  it('should list users', function () {
+    return supertest(api)
       .get('/v1/users')
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(200)
-      .end(function (err, res) {
-        if (err) {
-          return done(err);
-        }
-
+      .then(function (res) {
         expect(res.body.length > 0).to.equal(true);
 
         var sampleUserMask = res.body[0];
@@ -33,20 +29,15 @@ describe('/v1/users', function () {
           gravatar: sampleUserMask.gravatar,
           username: sampleUserMask.username
         });
-        done();
       });
   });
 
-  it('should get a users details', function (done) {
-    supertest(api)
+  it('should get a users details', function () {
+    return supertest(api)
       .get('/v1/users/test-anonymouse')
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(200)
-      .end(function (err, res) {
-        if (err) {
-          return done(err);
-        }
-
+      .then(function (res) {
         fixtures.user.createdAt = res.body.createdAt;
         fixtures.user.updatedAt = res.body.updatedAt;
         fixtures.user.revision = res.body.revision;
@@ -54,8 +45,6 @@ describe('/v1/users', function () {
         delete fixtures.user.password;
 
         expect(res.body).to.deep.equal(fixtures.user);
-
-        done();
       });
   });
 });

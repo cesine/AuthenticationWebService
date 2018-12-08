@@ -15,42 +15,34 @@ describe('/v1', function () {
   });
 
   describe('is production ready', function () {
-    it('should handle service endpoints which are not found', function (done) {
+    it('should handle service endpoints which are not found', function () {
       process.env.NODE_ENV = 'production';
 
-      supertest(service)
+      return supertest(service)
         .get('/v1/notexistant')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(404)
-        .end(function (err, res) {
-          if (err) throw err;
-
+        .then(function (res) {
           expect(res.status).to.equal(404);
 
           expect(res.body).to.deep.equal({
             userFriendlyErrors: ['Not Found'],
             status: 404
           });
-
-          done();
         });
     });
 
-    it('should reply with healthcheck', function (done) {
+    it('should reply with healthcheck', function () {
       process.env.NODE_ENV = 'development';
 
-      supertest(service)
+      return supertest(service)
         .get('/v1/healthcheck')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200)
-        .end(function (err, res) {
-          if (err) throw err;
-
+        .then(function (res) {
           expect(res.body).to.deep.equal({
             ok: true
           });
-
-          done();
         });
     });
   });

@@ -12,8 +12,8 @@ describe('/oauth', function () {
   });
 
   describe('POST /oauth/authorize', function () {
-    it('should redirect to login if user is not present', function (done) {
-      supertest(service)
+    it('should redirect to login if user is not present', function () {
+      return supertest(service)
         .post('/oauth/authorize')
         .query({
 
@@ -25,17 +25,14 @@ describe('/oauth', function () {
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .end(function (err, res) {
-          if (err) throw err;
-
+        .then(function (res) {
           expect(res.text).to.contain('Found. Redirecting to');
           expect(res.text).to.contain('to /authentication/login?client_id=test-client&redirect_uri=http://localhost:8011/users'); // jshint ignore:line
-          done();
         });
     });
 
-    it('should return 401 if no authentication is given', function (done) {
-      supertest(service)
+    it('should return 401 if no authentication is given', function () {
+      return supertest(service)
         .post('/oauth/authorize')
         .query({
 
@@ -52,22 +49,18 @@ describe('/oauth', function () {
         //   access_token: 'foobar',
         //   token_type: 'bearer'
         // })
-        .end(function (err, res) {
-          if (err) throw err;
-
+        .then(function (res) {
           expect(res.body).to.deep.equal({
             status: 401,
             userFriendlyErrors: ['Unauthorized request: no authentication given']
           });
-
-          done();
         });
     });
   });
 
   describe('POST /oauth/token', function () {
-    it('should validate the authorization code', function (done) {
-      supertest(service)
+    it('should validate the authorization code', function () {
+      return supertest(service)
         .post('/oauth/token')
         .type('form') // content must be application/x-www-form-urlencoded
         .send({
@@ -81,15 +74,11 @@ describe('/oauth', function () {
         })
         .expect(403)
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .end(function (err, res) {
-          if (err) throw err;
-
+        .then(function (res) {
           expect(res.body).to.deep.equal({
             status: 403,
             userFriendlyErrors: ['Client id or Client Secret is invalid']
           });
-
-          done();
         });
     });
   });

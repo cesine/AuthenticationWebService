@@ -12,14 +12,14 @@ describe('Corpus REST API', function () {
           username: 'testingprototype',
           password: 'test'
         })
-        .then(function (response) {
-          expect(response.body).to.deep.equal({
+        .then(function (res) {
+          expect(res.body).to.deep.equal({
             message: 'Internal server error',
-            stack: response.body.stack,
+            stack: res.body.stack,
             status: 500,
             userFriendlyErrors: ['Server erred, please report this 816']
           });
-          expect(response.body.stack).to.contain('corpusData.deleteCorpus is not a function');
+          expect(res.body.stack).to.contain('corpusData.deleteCorpus is not a function');
         });
     });
   });
