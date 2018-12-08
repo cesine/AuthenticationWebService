@@ -1,4 +1,5 @@
 var debug = require('debug')('oauth:routes');
+var param = require('swagger-node-express/Common/node/paramTypes.js');
 var util = require('util');
 
 var errorMiddleware = require('./../middleware/error-handler').errorHandler;
@@ -17,7 +18,10 @@ exports.getAuthorize = {
     notes: 'Requests authorization',
     summary: 'Retrieves authorization',
     method: 'GET',
-    parameters: [],
+    parameters: [
+      param.query('client_id', 'client_id of the application', 'string'),
+      param.query('redirect_uri', 'requested redirect_uri after registration', 'string')
+    ],
     responseClass: 'Authorization',
     errorResponses: [],
     nickname: 'getAuthorize'
@@ -52,7 +56,10 @@ exports.postAuthorize = {
     notes: 'Requests authorize',
     summary: 'Retrieves authorize',
     method: 'POST',
-    parameters: [],
+    parameters: [
+      param.query('client_id', 'client_id of the application', 'string'),
+      param.query('redirect_uri', 'requested redirect_uri after registration', 'string')
+    ],
     responseClass: 'Token',
     errorResponses: [],
     nickname: 'postAuthorize'
@@ -91,7 +98,10 @@ exports.getToken = {
     notes: 'Requests a token',
     summary: 'Retrieves a token',
     method: 'GET',
-    parameters: [],
+    parameters: [
+      param.query('client_id', 'client_id of the application', 'string'),
+      param.query('redirect_uri', 'requested redirect_uri after registration', 'string')
+    ],
     responseClass: 'Token',
     errorResponses: [],
     nickname: 'getToken'
@@ -119,7 +129,10 @@ exports.postToken = {
     notes: 'Requests a token',
     summary: 'Retrieves a token',
     method: 'POST',
-    parameters: [],
+    parameters: [
+      param.form('client_id', 'client_id of the application', 'string'),
+      param.form('redirect_uri', 'requested redirect_uri after registration', 'string')
+    ],
     responseClass: 'Token',
     errorResponses: [],
     nickname: 'postToken'

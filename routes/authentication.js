@@ -1,5 +1,6 @@
 var AsToken = require('as-token');
 var debug = require('debug')('authentication');
+var param = require('swagger-node-express/Common/node/paramTypes.js');
 var sequelize = require('sequelize');
 var util = require('util');
 
@@ -18,7 +19,21 @@ exports.postLogin = {
     notes: 'Requests Logs in',
     summary: 'Retrieves Logs in',
     method: 'POST',
-    parameters: [],
+    parameters: [
+      param.form('username', 'username of the user', 'string'),
+      {
+        name: 'password',
+        description: 'password of the user',
+        type: 'string',
+        format: 'password',
+        minLength: 8,
+        required: true,
+        paramType: 'form'
+      },
+      param.form('client_id', 'client_id of the application', 'string'),
+      param.form('redirect', 'requested redirect after registration', 'string'),
+      param.form('redirect_uri', 'requested redirect_uri after registration', 'string')
+    ],
     responseClass: 'User',
     errorResponses: [],
     nickname: 'postLogin'
@@ -67,7 +82,30 @@ exports.postRegister = {
     notes: 'Registers a user',
     summary: 'Registers a user',
     method: 'POST',
-    parameters: [],
+    parameters: [
+      param.form('username', 'requested username of the user', 'string'),
+      {
+        name: 'password',
+        description: 'password of the user',
+        type: 'string',
+        format: 'password',
+        minLength: 8,
+        required: true,
+        paramType: 'form'
+      },
+      {
+        name: 'confirmPassword',
+        description: 'confirm password of the user',
+        type: 'string',
+        format: 'password',
+        minLength: 8,
+        required: true,
+        paramType: 'form'
+      },
+      param.form('client_id', 'client_id of the application', 'string'),
+      param.form('redirect', 'requested redirect after registration', 'string'),
+      param.form('redirect_uri', 'requested redirect_uri after registration', 'string')
+    ],
     responseClass: 'User',
     errorResponses: [],
     nickname: 'postRegister'

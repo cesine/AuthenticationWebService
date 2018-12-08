@@ -117,7 +117,10 @@ exports.putUser = {
     notes: 'Updates users details if authenticated',
     summary: 'Updates user(s)',
     method: 'PUT',
-    parameters: [param.path('username', 'requested username of the user to be updated', 'string')],
+    parameters: [
+      param.path('username', 'requested username of the user to be updated', 'string'),
+      param.body('body', 'details user to be updated', 'object')
+    ],
     responseClass: 'User',
     errorResponses: [swagger.errors.invalid('username'), swagger.errors.notFound('user')],
     nickname: 'putUser'
