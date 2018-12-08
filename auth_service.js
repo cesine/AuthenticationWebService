@@ -5,7 +5,7 @@ var https = require('https');
 var path = require('path');
 /* Load modules provided by $ npm install, see package.json for details */
 var crossOriginResourceSharing = require('cors');
-var expressWebServer = require('express');
+var express = require('express');
 var favicon = require('serve-favicon');
 var bunyan = require('express-bunyan-logger');
 var session = require('express-session');
@@ -13,6 +13,7 @@ var bodyParser = require('body-parser');
 
 /* Load modules provided by this codebase */
 var errorHandler = require('./middleware/error-handler').errorHandler;
+var authenticationMiddleware = require('./middleware/authentication');
 var authWebServiceRoutes = require('./routes/routes');
 var deprecatedRoutes = require('./routes/deprecated');
 /**
@@ -52,8 +53,7 @@ var corsOptions = {
 /**
  * Use Express to create the authWebService see http://expressjs.com/ for more details
  */
-var authWebService = expressWebServer();
-authWebService.use(errorHandler);
+var authWebService = express();
 authWebService.use(crossOriginResourceSharing(corsOptions));
 // Accept versions
 authWebService.use(function versionMiddleware(req, res, next) {
@@ -85,13 +85,22 @@ authWebService.use(bodyParser.urlencoded({
  * Although this is mostly a webservice used by machines (not a websserver used by humans)
  * we are still serving a user interface for the api sandbox in the public folder
  */
-authWebService.use(expressWebServer.static(path.join(__dirname, 'public')));
+authWebService.use(express.static(path.join(__dirname, 'public')));
 authWebService.options('*', function options(req, res) {
   if (req.method === 'OPTIONS') {
     debug('responding to OPTIONS request');
     res.send(204);
   }
 });
+
+authWebService.use('/bower_components', express.static(__dirname
+  + '/public/components/as-ui-auth/bower_components'));
+authWebService.use('/authentication', authenticationMiddleware.redirectAuthenticatedUser, express.static(__dirname
+  + '/public/components/as-ui-auth/components'));
+authWebService.use('/authentication/register', authenticationMiddleware.redirectAuthenticatedUser,
+  express.static(__dirname
+  + '/public/components/as-ui-auth/components/signup'));
+
 /**
  * Set up all the available URL authWebServiceRoutes see routes/routes.js for more details
  */
@@ -100,5 +109,6 @@ authWebServiceRoutes.setup(authWebService, apiVersion);
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
 deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
+authWebService.use(errorHandler);
 
 module.exports = authWebService;

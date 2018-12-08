@@ -4,6 +4,8 @@ var config = require('config');
 
 /* Load modules provided by this codebase */
 var userRoutes = require('./user');
+var authenticationRoutes = require('./authentication');
+var oauthRoutes = require('./oauth2');
 var corporaRoutes = require('./corpora');
 var errorHandler = require('../middleware/error-handler').errorHandler;
 var utterancesRoutes = require('./utterances');
@@ -26,6 +28,12 @@ var setup = function setup(api, apiVersion) {
   };
   swagger.addModels(APIModelShema);
   /* Declare available APIs */
+  swagger.addPost(authenticationRoutes.postLogin);
+  swagger.addPost(authenticationRoutes.postRegister);
+  swagger.addGet(oauthRoutes.getAuthorize);
+  swagger.addPost(oauthRoutes.postAuthorize);
+  swagger.addGet(oauthRoutes.getToken);
+  swagger.addPost(oauthRoutes.postToken);
   swagger.addGet(userRoutes.getUsers);
   swagger.addPost(userRoutes.postUsers);
   swagger.addPut(userRoutes.putUsers);

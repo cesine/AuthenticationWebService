@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var AsToken = require('as-token');
 
-var service = require('./../../service');
+var service = require('./../../auth_service');
 var User = require('./../../models/user');
 
 describe('/authentication', function () {
