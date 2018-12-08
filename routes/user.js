@@ -21,16 +21,20 @@ exports.getUser = {
     nickname: 'getUser'
   },
   action: function getUser(req, res, next) {
-    // TODO authenticationMiddleware.requireAuthentication
-    var json = {
-      username: req.params.username
-    };
-
-    User.read(json, function (err, profile) {
+    return authenticationMiddleware.requireAuthentication(req, res, function (err) {
       if (err) {
-        return next(err, req, res, next);
+        return next(err);
       }
-      res.json(profile);
+      var json = {
+        username: req.params.username
+      };
+
+      User.read(json, function (err, profile) {
+        if (err) {
+          return next(err, req, res, next);
+        }
+        res.json(profile);
+      });
     });
   }
 };
@@ -48,17 +52,21 @@ exports.getCurrentUser = {
     nickname: 'getCurrentUser'
   },
   action: function getCurrentUser(req, res, next) {
-    // TODO authenticationMiddleware.requireAuthentication
-    var json = {
-      username: req.app.locals.user.username
-    };
-
-    User.read(json, function (err, profile) {
+    return authenticationMiddleware.requireAuthentication(req, res, function (err) {
       if (err) {
-        return next(err, req, res, next);
+        return next(err);
       }
-      profile.token = req.app.locals.token;
-      res.json(profile);
+      var json = {
+        username: req.app.locals.user.username
+      };
+
+      User.read(json, function (err, profile) {
+        if (err) {
+          return next(err, req, res, next);
+        }
+        profile.token = req.app.locals.token;
+        res.json(profile);
+      });
     });
   }
 };
@@ -126,25 +134,30 @@ exports.putUser = {
     nickname: 'putUser'
   },
   action: function putUser(req, res, next) {
-    // TODO authenticationMiddleware.requireAuthentication
-    if ((req.body.username && req.params.username !== req.body.username)
-      || req.params.username !== req.app.locals.user.username) {
-      debug(req.params, req.body);
-      var err = new Error('Username does not match, you can only update your own details');
-      err.status = 403;
-
-      return next(err, req, res, next);
-    }
-
-    req.body.username = req.app.locals.user.username;
-    User.save(req.body, function (err, profile) {
+    return authenticationMiddleware.requireAuthentication(req, res, function (err) {
       if (err) {
+        return next(err);
+      }
+      if ((req.body.username && req.params.username !== req.body.username)
+        || req.params.username !== req.app.locals.user.username) {
+        debug(req.params, req.body);
+        var err = new Error('Username does not match, you can only update your own details');
+        err.status = 403;
+
         return next(err, req, res, next);
       }
-      res.json(profile);
+
+      req.body.username = req.app.locals.user.username;
+      User.save(req.body, function (err, profile) {
+        if (err) {
+          return next(err, req, res, next);
+        }
+        res.json(profile);
+      });
     });
   }
 };
+
 exports.deleteUsers = {
   spec: {
     path: '/v1/users/{username}',

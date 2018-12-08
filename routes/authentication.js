@@ -69,6 +69,33 @@ exports.postLogin = {
   }
 };
 
+exports.getLogout = {
+  spec: {
+    path: '/logout',
+    description: 'Operations about authentication',
+    notes: 'Logs user out',
+    summary: 'Logs user out',
+    method: 'GET',
+    parameters: [
+      param.query('redirect', 'requested redirect after logout', 'string')
+    ],
+    responseClass: 'User',
+    errorResponses: [],
+    nickname: 'getLogout'
+  },
+  action: function getLogout(req, res, next) {
+    req.session.destroy(function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.set('Set-Cookie', 'connect.sid=null; path=/; Secure; HttpOnly');
+      res.set('Set-Cookie', 'Authorization=null; path=/; Secure; HttpOnly');
+      res.set('Authorization', 'null');
+      res.redirect(req.query.redirect || '/authentication/login');
+    });
+  }
+};
+
 /**
  * Register or Signup using the local strategy
  * @param  {Request} req

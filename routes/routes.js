@@ -48,6 +48,7 @@ var setup = function setup(api, apiVersion) {
   });
 
   swagger.addPost(authenticationRoutes.postLogin);
+  swagger.addGet(authenticationRoutes.getLogout);
   swagger.addPost(authenticationRoutes.postRegister);
   swagger.addGet(oauthRoutes.getAuthorize);
   swagger.addPost(oauthRoutes.postAuthorize);
