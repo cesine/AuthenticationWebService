@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var supertest = require('supertest');
 
-var service = require('./../../service');
+var service = require('./../../auth_service');
 
 describe('/v1', function () {
   var NODE_ENV = process.env.NODE_ENV;
@@ -40,7 +40,7 @@ describe('/v1', function () {
       process.env.NODE_ENV = 'development';
 
       supertest(service)
-        .get('/healthcheck')
+        .get('/v1/healthcheck')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200)
         .end(function (err, res) {

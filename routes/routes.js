@@ -28,15 +28,36 @@ var setup = function setup(api, apiVersion) {
   };
   swagger.addModels(APIModelShema);
   /* Declare available APIs */
+  swagger.addGet({
+    spec: {
+      path: '/v1/healthcheck',
+      description: 'Operations about healthcheck',
+      notes: 'Requests healthcheck',
+      summary: 'Retrieves healthcheck',
+      method: 'GET',
+      parameters: [],
+      responseClass: 'User',
+      errorResponses: [],
+      nickname: 'getHealthcheck'
+    },
+    action: function getHealthcheck(req, res) {
+      res.json({
+        ok: true
+      });
+    }
+  });
+
   swagger.addPost(authenticationRoutes.postLogin);
   swagger.addPost(authenticationRoutes.postRegister);
   swagger.addGet(oauthRoutes.getAuthorize);
   swagger.addPost(oauthRoutes.postAuthorize);
   swagger.addGet(oauthRoutes.getToken);
   swagger.addPost(oauthRoutes.postToken);
-  swagger.addGet(userRoutes.getUsers);
+  swagger.addGet(userRoutes.getUser);
+  swagger.addGet(userRoutes.getCurrentUser);
+  swagger.addGet(userRoutes.getList);
   swagger.addPost(userRoutes.postUsers);
-  swagger.addPut(userRoutes.putUsers);
+  swagger.addPut(userRoutes.putUser);
   swagger.addDelete(userRoutes.deleteUsers);
   swagger.addGet(corporaRoutes.getCorpora);
   swagger.addPost(corporaRoutes.postCorpora);
@@ -64,6 +85,6 @@ var setup = function setup(api, apiVersion) {
   swagger.addPost(morphologicalParsesRoutes.postMorphologicalParses);
   swagger.addPut(morphologicalParsesRoutes.putMorphologicalParses);
   swagger.addDelete(morphologicalParsesRoutes.deleteMorphologicalParses);
-  swagger.configure(config.externalOrigin + '/' + apiVersion, apiVersion.replace('v', ''));
+  swagger.configure(config.externalOrigin);// + '/' + apiVersion, apiVersion.replace('v', ''));
 };
 exports.setup = setup;

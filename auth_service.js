@@ -28,7 +28,7 @@ var deprecatedRoutes = require('./routes/deprecated');
  */
 debug('process.env.NODE_ENV', process.env.NODE_ENV);
 var config = require('config');
-var apiVersion = 'v' + parseInt(require('./package.json').version, 10);
+var apiVersion = 'v1'; // 'v' + parseInt(require('./package.json').version, 10);
 debug('Accepting api version ' + apiVersion);
 var corsOptions = {
   credentials: true,
@@ -56,12 +56,21 @@ var corsOptions = {
 var authWebService = express();
 authWebService.use(crossOriginResourceSharing(corsOptions));
 // Accept versions
-authWebService.use(function versionMiddleware(req, res, next) {
-  if (req.url.indexOf('/' + apiVersion) === 0) {
-    req.url = req.url.replace('/' + apiVersion, '');
-  }
-  next();
-});
+// authWebService.use(function versionMiddleware(req, res, next) {
+//   if (req.url.indexOf('/' + apiVersion) === 0) {
+//     req.url = req.url.replace('/' + apiVersion, '');
+//   }
+//   next();
+// });
+
+/**
+ * Middleware
+ */
+// The example attaches it to the express
+// https://github.com/oauthjs/express-oauth-server#quick-start
+// service.oauth = oauthMiddleware;
+authWebService.use(authenticationMiddleware.jwt);
+
 authWebService.use(favicon(__dirname + '/public/favicon.ico'));
 authWebService.use(bunyan({
   name: 'fielddb-auth',
@@ -104,11 +113,22 @@ authWebService.use('/authentication/register', authenticationMiddleware.redirect
 /**
  * Set up all the available URL authWebServiceRoutes see routes/routes.js for more details
  */
-authWebServiceRoutes.setup(authWebService, apiVersion);
+authWebServiceRoutes.setup(authWebService);
 /**
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
 deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
+
+/**
+ * Not found
+ */
+authWebService.use(function notFoundMiddleware(req, res, next) {
+  debug(req.url + ' was not found');
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err, req, res, next);
+});
+
 authWebService.use(errorHandler);
 
 module.exports = authWebService;
