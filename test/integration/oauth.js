@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var supertest = require('supertest');
 
-var service = require('./../../service');
+var service = require('./../../auth_service');
 var OauthClient = require('./../../models/oauth-client');
 var OauthToken = require('./../../models/oauth-token');
 

@@ -74,7 +74,7 @@
     "node": ">8.x.x"
   },
   "scripts": {
-    "coverage": "NODE_ENV=test istanbul cover _mocha -- --recursive test; istanbul check-coverage  --statements 33 --functions 23 --branches 18 --lines 33",
+    "coverage": "NODE_ENV=test istanbul cover _mocha --include-all-sources -- --recursive test; istanbul check-coverage  --statements 31 --functions 24 --branches 21 --lines 32",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint .",
     "start": "node ./bin/www",

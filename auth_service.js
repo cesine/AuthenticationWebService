@@ -2,11 +2,10 @@
 /* Load modules provided by Node */
 var debug = require('debug')('auth:service');
 var https = require('https');
-var FileSystem = require('fs');
 var path = require('path');
 /* Load modules provided by $ npm install, see package.json for details */
 var crossOriginResourceSharing = require('cors');
-var expressWebServer = require('express');
+var express = require('express');
 var favicon = require('serve-favicon');
 var bunyan = require('express-bunyan-logger');
 var session = require('express-session');
@@ -14,6 +13,7 @@ var bodyParser = require('body-parser');
 
 /* Load modules provided by this codebase */
 var errorHandler = require('./middleware/error-handler').errorHandler;
+var authenticationMiddleware = require('./middleware/authentication');
 var authWebServiceRoutes = require('./routes/routes');
 var deprecatedRoutes = require('./routes/deprecated');
 /**
@@ -28,7 +28,7 @@ var deprecatedRoutes = require('./routes/deprecated');
  */
 debug('process.env.NODE_ENV', process.env.NODE_ENV);
 var config = require('config');
-var apiVersion = 'v' + parseInt(require('./package.json').version, 10);
+var apiVersion = 'v1'; // 'v' + parseInt(require('./package.json').version, 10);
 debug('Accepting api version ' + apiVersion);
 var corsOptions = {
   credentials: true,
@@ -53,16 +53,24 @@ var corsOptions = {
 /**
  * Use Express to create the authWebService see http://expressjs.com/ for more details
  */
-var authWebService = expressWebServer();
-authWebService.use(errorHandler);
+var authWebService = express();
 authWebService.use(crossOriginResourceSharing(corsOptions));
 // Accept versions
-authWebService.use(function versionMiddleware(req, res, next) {
-  if (req.url.indexOf('/' + apiVersion) === 0) {
-    req.url = req.url.replace('/' + apiVersion, '');
-  }
-  next();
-});
+// authWebService.use(function versionMiddleware(req, res, next) {
+//   if (req.url.indexOf('/' + apiVersion) === 0) {
+//     req.url = req.url.replace('/' + apiVersion, '');
+//   }
+//   next();
+// });
+
+/**
+ * Middleware
+ */
+// The example attaches it to the express
+// https://github.com/oauthjs/express-oauth-server#quick-start
+// service.oauth = oauthMiddleware;
+authWebService.use(authenticationMiddleware.jwt);
+
 authWebService.use(favicon(__dirname + '/public/favicon.ico'));
 authWebService.use(bunyan({
   name: 'fielddb-auth',
@@ -86,36 +94,41 @@ authWebService.use(bodyParser.urlencoded({
  * Although this is mostly a webservice used by machines (not a websserver used by humans)
  * we are still serving a user interface for the api sandbox in the public folder
  */
-authWebService.use(expressWebServer.static(path.join(__dirname, 'public')));
+authWebService.use(express.static(path.join(__dirname, 'public')));
 authWebService.options('*', function options(req, res) {
   if (req.method === 'OPTIONS') {
     debug('responding to OPTIONS request');
     res.send(204);
   }
 });
+
+authWebService.use('/bower_components', express.static(__dirname
+  + '/public/components/as-ui-auth/bower_components'));
+authWebService.use('/authentication', authenticationMiddleware.redirectAuthenticatedUser, express.static(__dirname
+  + '/public/components/as-ui-auth/components'));
+authWebService.use('/authentication/register', authenticationMiddleware.redirectAuthenticatedUser,
+  express.static(__dirname
+  + '/public/components/as-ui-auth/components/signup'));
+
 /**
  * Set up all the available URL authWebServiceRoutes see routes/routes.js for more details
  */
-authWebServiceRoutes.setup(authWebService, apiVersion);
+authWebServiceRoutes.setup(authWebService);
 /**
  * Set up all the old routes until all client apps have migrated to the v2+ api
  */
 deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
+
 /**
- * Read in the specified filenames for this config's security key and certificates,
- * and then ask https to turn on the webservice
+ * Not found
  */
-if (!module.parent) {
-  if (process.env.NODE_ENV === 'production') {
-    authWebService.listen(config.httpsOptions.port);
-    debug('Running in production mode behind an Nginx proxy, Listening on http port %d', config.httpsOptions.port);
-  } else {
-    config.httpsOptions.key = FileSystem.readFileSync(config.httpsOptions.key);
-    config.httpsOptions.cert = FileSystem.readFileSync(config.httpsOptions.cert);
-    https.createServer(config.httpsOptions, authWebService).listen(config.httpsOptions.port, function afterListen() {
-      debug('Listening on https port %d', config.httpsOptions.port);
-    });
-  }
-} else {
-  module.exports = authWebService;
-}
+authWebService.use(function notFoundMiddleware(req, res, next) {
+  debug(req.url + ' was not found');
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err, req, res, next);
+});
+
+authWebService.use(errorHandler);
+
+module.exports = authWebService;

@@ -1,14 +1,22 @@
 #!/usr/bin/env node
-var url = require('url');
+
+var config = require('config');
 var https = require('https');
+var url = require('url');
 
-var service = require('../service');
-var config = require('../config');
+var service = require('../auth_service');
 
-var url = url.parse(config.url);
+service.set('port', config.httpsOptions.port);
 
-service.set('port', url.port);
-
-var server = https.createServer(config.ssl, service).listen(service.get('port'), function() {
-  console.log('HTTPS Express server listening on https://localhost:' + server.address().port);
-});
+if (process.env.NODE_ENV === 'production') {
+  service.listen(config.httpsOptions.port);
+  debug('Running in production mode behind an Nginx proxy, Listening on http port %d', config.httpsOptions.port);
+} else {
+  /**
+   * Read in the specified filenames for this config's security key and certificates,
+   * and then ask https to turn on the webservice
+   */
+  var server = https.createServer(config.httpsOptions, service).listen(service.get('port'), function() {
+    console.log('HTTPS Express server listening on https://localhost:' + server.address().port);
+  });
+}

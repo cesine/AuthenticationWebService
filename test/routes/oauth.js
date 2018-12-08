@@ -5,15 +5,14 @@ var oauth = require('./../../routes/oauth2');
 describe('oauth routes', function () {
   it('should load', function () {
     expect(oauth).to.be.a('object');
-    expect(oauth.router).to.be.a('function');
-    expect(oauth.getAuthorize).to.be.a('function');
-    expect(oauth.getToken).to.be.a('function');
-    expect(oauth.postAuthorize).to.be.a('function');
-    expect(oauth.postToken).to.be.a('function');
+    expect(oauth.getAuthorize).to.be.a('object');
+    expect(oauth.getToken).to.be.a('object');
+    expect(oauth.postAuthorize).to.be.a('object');
+    expect(oauth.postToken).to.be.a('object');
   });
 
   it('should postToken', function () {
-    oauth.postToken({
+    oauth.postToken.action({
       headers: {
         'content-type': 'application/x-www-form-urlencoded'
       },

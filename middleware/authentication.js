@@ -4,7 +4,7 @@ var ExtractJwt = require('passport-jwt').ExtractJwt;
 var JwtStrategy = require('passport-jwt').Strategy;
 var passport = require('passport');
 
-var config = require('./../config');
+var config = require('config');
 var user = require('./../models/user');
 
 var opts = {
