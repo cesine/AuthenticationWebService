@@ -15,14 +15,12 @@ describe('authentication middleware', function () {
       var req = {
         headers: {
           authorization: token
-        },
-        app: {
-          locals: {}
         }
       };
 
       var res = {
         headers: {},
+        locals: {},
         set: function (header, value) {
           this.headers[header.toLowerCase()] = value;
         }
@@ -31,7 +29,7 @@ describe('authentication middleware', function () {
       authentication.jwt(req, res, function (arg1, arg2, arg3, arg4) {
         expect(arg4).to.equal(undefined);
 
-        expect(req.user).to.deep.equal(req.app.locals.user);
+        expect(req.user).to.deep.equal(res.locals.user);
         expect(req.user).to.deep.equal({
           name: {
             givenName: '',

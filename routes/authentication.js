@@ -60,12 +60,33 @@ exports.postLogin = {
 
       var path = req.body.redirect
         || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth/authorize/as',
+          'oauth/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 
       return res.redirect(path);
     });
+  }
+};
+
+exports.getLogout = {
+  spec: {
+    path: '/logout',
+    description: 'Operations about authentication',
+    notes: 'Logs user out',
+    summary: 'Logs user out',
+    method: 'GET',
+    parameters: [
+      param.query('redirect', 'requested redirect after logout', 'string')
+    ],
+    responseClass: 'User',
+    errorResponses: [],
+    nickname: 'getLogout'
+  },
+  action: function getLogout(req, res, next) {
+    res.set('Set-Cookie', 'Authorization=null; path=/; Secure; HttpOnly');
+    res.set('Authorization', 'null');
+    res.redirect(req.query.redirect || '/authentication/login');
   }
 };
 
@@ -143,7 +164,7 @@ exports.postRegister = {
       // Successful logins should send the user back to /oauth/authorize.
       var path = req.body.redirect
         || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth/authorize/as',
+          'oauth/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 
