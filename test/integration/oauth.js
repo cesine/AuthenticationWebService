@@ -5,16 +5,16 @@ var service = require('./../../auth_service');
 var OauthClient = require('./../../models/oauth-client');
 var OauthToken = require('./../../models/oauth-token');
 
-describe('/oauth', function () {
+describe('/oauth2', function () {
   before(function () {
     OauthClient.init();
     OauthToken.init();
   });
 
-  describe('POST /oauth/authorize', function () {
+  describe('POST /oauth2/authorize', function () {
     it('should redirect to login if user is not present', function () {
       return supertest(service)
-        .post('/oauth/authorize')
+        .post('/oauth2/authorize')
         .query({
           client_id: 'test-client',
           client_secret: 'test-secret',
@@ -31,7 +31,7 @@ describe('/oauth', function () {
 
     it('should return 401 if no authentication is given', function () {
       return supertest(service)
-        .post('/oauth/authorize')
+        .post('/oauth2/authorize')
         .query({
           client_id: 'test-client',
           client_secret: 'test-secret',
@@ -54,10 +54,10 @@ describe('/oauth', function () {
     });
   });
 
-  describe('POST /oauth/token', function () {
+  describe('POST /oauth2/token', function () {
     it('should validate the authorization code', function () {
       return supertest(service)
-        .post('/oauth/token')
+        .post('/oauth2/token')
         .type('form') // content must be application/x-www-form-urlencoded
         .send({
           client_id: 'test-client',

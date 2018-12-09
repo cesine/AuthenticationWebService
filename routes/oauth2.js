@@ -13,7 +13,7 @@ var oauth = require('./../middleware/oauth');
  */
 exports.getAuthorize = {
   spec: {
-    path: '/oauth/authorize',
+    path: '/oauth2/authorize',
     description: 'Operations about authorization',
     notes: 'Requests authorization',
     summary: 'Retrieves authorization',
@@ -48,7 +48,7 @@ exports.getAuthorize = {
  */
 exports.postAuthorize = {
   spec: {
-    path: '/oauth/authorize',
+    path: '/oauth2/authorize',
     description: 'Operations about authorization',
     notes: 'Requests authorize',
     summary: 'Retrieves authorize',
@@ -92,7 +92,7 @@ exports.postAuthorize = {
  */
 exports.getToken = {
   spec: {
-    path: '/oauth/token',
+    path: '/oauth2/token',
     description: 'Operations about tokens',
     notes: 'Requests a token',
     summary: 'Retrieves a token',
@@ -123,7 +123,7 @@ exports.getToken = {
  */
 exports.postToken = {
   spec: {
-    path: '/oauth/token',
+    path: '/oauth2/token',
     description: 'Operations about tokens',
     notes: 'Requests a token',
     summary: 'Retrieves a token',

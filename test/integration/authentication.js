@@ -118,7 +118,7 @@ describe('/authentication', function () {
         .expect('Authorization', /Bearer v1\//)
         .then(function (res) {
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize?client_id=abc-li-12-li'
+          expect(res.text).to.contain('to /oauth2/authorize?client_id=abc-li-12-li'
             + '&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
 
           var token = res.headers.authorization.replace(/Bearer v1\//, '');
@@ -293,7 +293,7 @@ describe('/authentication', function () {
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .then(function (res) {
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize?client_id=abc-li-12-li&'
+          expect(res.text).to.contain('to /oauth2/authorize?client_id=abc-li-12-li&'
             + 'redirect_uri=/v1/users/' + username + '?with=other-stuff');
 
           return supertest(service)

@@ -60,7 +60,7 @@ exports.postLogin = {
 
       var path = req.body.redirect
         || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth/authorize',
+          'oauth2/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 
@@ -161,10 +161,10 @@ exports.postRegister = {
         // the error handler will send cleaned json which can be displayed to the user
         return next(err, req, res, next);
       }
-      // Successful logins should send the user back to /oauth/authorize.
+      // Successful logins should send the user back to /oauth2/authorize.
       var path = req.body.redirect
         || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth/authorize',
+          'oauth2/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 
