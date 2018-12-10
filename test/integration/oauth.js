@@ -44,7 +44,7 @@ describe('/oauth2', function () {
     }));
 
     // TODO use port of agent
-    console.log('agent', agent);
+    // console.log('agent', agent);
     passport.use(new OAuth2Strategy({
       authorizationURL: 'https://localhost:3183/oauth2/authorize',
       tokenURL: 'https://localhost:3183/oauth2/token',
@@ -136,6 +136,9 @@ describe('/oauth2', function () {
         .expect(302)
         .then(function (res) {
           console.log(' client app redirect res.headers', res.headers);
+          expect(res.headers.location).to.contain('/oauth2/authorize');
+          // expect(res.headers.location).to.contain('state');
+
           return supertest(service)
             .get(res.headers.location.replace('https://localhost:3183', ''))
             .expect(302);
@@ -143,6 +146,10 @@ describe('/oauth2', function () {
         .then(function (res) {
           console.log(' service redirect res.headers', res.headers);
           loginUrl = res.headers.location;
+          expect(loginUrl).to.contain('/authentication/login');
+          expect(loginUrl).not.to.contain('undefined');
+          expect(loginUrl).to.contain('state');
+
           return supertest(service)
             .get(loginUrl.replace('https://localhost:3183', ''))
             .expect(200);
@@ -154,9 +161,6 @@ describe('/oauth2', function () {
 
           console.log('redirect res.body', res.body);
           console.log('redirect res.headers', res.headers);
-          console.log('loginUrl', loginUrl);
-
-          expect(loginUrl).not.to.contain('undefined');
 
           // simulate user logging in
           return supertest(service)
@@ -165,16 +169,20 @@ describe('/oauth2', function () {
               client_id: fixtures.client.client_id,
               redirect_uri: 'http://localhost:8011/auth/example/callback',
               username: fixtures.user.username,
-              password: fixtures.user.password
+              password: fixtures.user.password,
+              code: 'abc',
+              state: 123
             })
             .expect(302);
         })
         .then(function (res) {
           console.log('logged in res.body', res.body);
           console.log('logged in res.headers', res.headers);
+          expect(res.headers.location).to.contain('/auth/example/callback');
+          expect(res.headers.authorization).to.contain('Bearer');
 
-          return supertest(service)
-            .get(res.headers.location)
+          return supertest(clientApp)
+            .get(res.headers.location.replace('http://localhost:8011', ''))
             .set('Authorization', res.headers.authorization)
             .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
             .send({

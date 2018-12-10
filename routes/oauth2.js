@@ -1,6 +1,7 @@
 var debug = require('debug')('oauth:routes');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
 var util = require('util');
+var querystring = require('querystring');
 
 var errorMiddleware = require('../middleware/error-handler').errorHandler;
 var oauth = require('../middleware/oauth');
@@ -29,11 +30,16 @@ exports.getAuthorize = {
   },
   action: function getAuthorize(req, res) {
     debug('getAuthorize res.locals', res.locals);
+    console.log('req.path', req.path);
+    console.log('req.query', req.query);
+    console.log('req.body', req.body);
 
     // Redirect anonymous users to login page.
     if (!res.locals.user) {
-      return res.redirect(util.format('/authentication/login/?redirect=%s&client_id=%s&'
-        + 'redirect_uri=%s', req.path, req.body.client_id, req.body.redirect_uri));
+      return res.redirect(util.format('/authentication/login/?%s&%s', req.path, querystring.stringify(req.query), querystring.stringify({
+        code: 'efg',
+        state: '789'
+      })));
     }
 
     var middleware = oauth.authorize({

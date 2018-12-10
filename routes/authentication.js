@@ -3,6 +3,7 @@ var debug = require('debug')('authentication');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
 var sequelize = require('sequelize');
 var util = require('util');
+var querystring = require('querystring');
 
 var User = require('../models/user');
 
@@ -45,6 +46,7 @@ exports.postLogin = {
       password: req.body.password,
       username: req.body.username
     }, function (err, user) {
+      delete req.body.password;
       if (err) {
         debug('error logging in', err, user);
         err.status = 403;
@@ -60,12 +62,7 @@ exports.postLogin = {
       res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
       res.set('Authorization', 'Bearer ' + token);
 
-      var path = req.body.redirect
-        || util.format('%s?client_id=%s&redirect_uri=%s',
-          '/oauth2/authorize',
-          req.body.client_id,
-          req.body.redirect_uri);
-
+      var path = req.body.redirect_uri + '?' + querystring.stringify(req.body);
       return res.redirect(path);
     });
   }
