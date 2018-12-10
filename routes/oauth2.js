@@ -36,8 +36,21 @@ exports.getAuthorize = {
         + 'redirect_uri=%s', req.path, req.body.client_id, req.body.redirect_uri));
     }
 
-    console.log('res.locals.user', res.locals.user);
-    return res.redirect(req.body.redirect_uri);
+    var middleware = oauth.authorize({
+      handleError: errorMiddleware
+    });
+    console.log('There is a user res.locals.user', res.locals.user, middleware);
+
+    middleware(req, res, function (err) {
+      console.log('done the authorize middleware', err, req.user, res.locals);
+      // if (err) {
+      //   debug('error authorizing client', err, req.query);
+      //   // the error handler will send cleaned json which can be displayed to the user
+      //   return next(err);
+      // }
+
+      // res.json({ something: true });
+    });
   }
 };
 /**
@@ -63,6 +76,7 @@ exports.postAuthorize = {
     nickname: 'postAuthorize'
   },
   action: function postAuthorize(req, res, next) {
+    return next(new Error(' not implemnted'));
     console.log('postAuthorize res.locals', res.locals);
     console.log('req.headers', req.headers);
     console.log('req.session', req.session);
@@ -154,7 +168,7 @@ exports.postToken = {
     nickname: 'postToken'
   },
   action: function postToken(req, res, next) {
-    debug('postToken', req.query, res.headers);
+    debug('postToken', req.query, req.body, res.headers);
 
     var middleware = oauth.token({
       handleError: errorMiddleware

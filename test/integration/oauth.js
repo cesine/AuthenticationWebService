@@ -4,6 +4,7 @@ var supertest = require('supertest');
 var https = require('https');
 var express = require('express');
 var passport = require('passport');
+var session = require('express-session');
 var OAuth2Strategy = require('passport-oauth2');
 
 var service = require('./../../auth_service');
@@ -18,7 +19,7 @@ var fixtures = {
 describe('/oauth2', function () {
   var access_token;
   var server;
-  var agent;
+  var clientApp;
   var jsonToken = {
     access_token: 'test-' + Date.now(),
     access_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
@@ -35,11 +36,18 @@ describe('/oauth2', function () {
   });
 
   before(function setUpClientApp(done) {
-    var app = new express();
+    clientApp = new express();
+    clientApp.use(session({
+      resave: true,
+      saveUninitialized: true,
+      secret: 'justtestingasanoauthclientapp'
+    }));
+
     // TODO use port of agent
+    console.log('agent', agent);
     passport.use(new OAuth2Strategy({
-      authorizationURL: 'https://www.example.com/oauth2/authorize',
-      tokenURL: 'https://www.example.com/oauth2/token',
+      authorizationURL: 'https://localhost:3183/oauth2/authorize',
+      tokenURL: 'https://localhost:3183/oauth2/token',
       clientID: fixtures.client.client_id,
       clientSecret: fixtures.client.client_secret,
       callbackURL: 'http://localhost:8011/auth/example/callback'
@@ -52,20 +60,21 @@ describe('/oauth2', function () {
       });
     }));
 
-    app.get('/auth/example',
+    clientApp.get('/auth/example',
       passport.authenticate('oauth2'));
 
-    app.get('/auth/example/callback',
+    clientApp.get('/auth/example/callback',
       passport.authenticate('oauth2', {
         failureRedirect: '/login'
       }),
       function (req, res) {
+        console.log('auth/example/callback got called back', req.headers, req.body, req.query);
         // Successful authentication, redirect home.
         res.redirect('/');
       });
 
-    server = app.listen(8011, function () {
-      console.log('HTTP Client app listening on http://localhost:' + server.address().port);
+    server = clientApp.listen(8011, function () {
+      console.log('HTTP clientApp listening on http://localhost:' + server.address().port);
       done();
     });
   });
@@ -112,20 +121,30 @@ describe('/oauth2', function () {
 
   describe('GET /oauth2/authorize', function () {
     it.only('should perform oauth2 dance', function () {
-      return supertest(service)
-        .get('/oauth2/authorize')
+      var loginUrl;
+
+      return supertest('http://localhost:8011')
+        .get('/auth/example') // Trigger the dance
+        // .get('/oauth2/authorize')
         .send({
           client_id: fixtures.client.client_id,
           response_type: 'code',
-          state: '123',
-          access_token: jsonToken.access_token // 'Bearer ' + access_token,
+          state: '123'
+          // access_token: jsonToken.access_token // 'Bearer ' + access_token,
         })
         .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
         .expect(302)
         .then(function (res) {
-          console.log(' /oauth2/authorize res.headers', res.headers);
+          console.log(' client app redirect res.headers', res.headers);
           return supertest(service)
             .get(res.headers.location.replace('https://localhost:3183', ''))
+            .expect(302);
+        })
+        .then(function (res) {
+          console.log(' service redirect res.headers', res.headers);
+          loginUrl = res.headers.location;
+          return supertest(service)
+            .get(loginUrl.replace('https://localhost:3183', ''))
             .expect(200);
         })
         .then(function (res) {
@@ -135,9 +154,13 @@ describe('/oauth2', function () {
 
           console.log('redirect res.body', res.body);
           console.log('redirect res.headers', res.headers);
+          console.log('loginUrl', loginUrl);
 
+          expect(loginUrl).not.to.contain('undefined');
+
+          // simulate user logging in
           return supertest(service)
-            .post('/authentication/login')
+            .post(loginUrl.replace('https://localhost:3183', ''))
             .send({
               client_id: fixtures.client.client_id,
               redirect_uri: 'http://localhost:8011/auth/example/callback',
@@ -150,10 +173,19 @@ describe('/oauth2', function () {
           console.log('logged in res.body', res.body);
           console.log('logged in res.headers', res.headers);
 
-          return agent
-            .get(res.headers.location.replace('http://localhost:8011', ''))
-            .set('Authorization', res.headers.authorization);
-          // .expect(200);
+          return supertest(service)
+            .get(res.headers.location)
+            .set('Authorization', res.headers.authorization)
+            .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
+            .send({
+              // client_id: fixtures.client.client_id,
+              // response_type: 'code',
+              // state: '123',
+              // redirect_uri: 'https://localhost:3183/oauth2/token',
+              // TODO where does this come from?
+              access_token: jsonToken.access_token
+            })
+            .expect(200);
         })
         .then(function (res) {
           console.log('after app callback res.status', res.status);

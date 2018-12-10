@@ -39,6 +39,8 @@ exports.postLogin = {
     nickname: 'postLogin'
   },
   action: function postLogin(req, res, next) {
+    console.log('postLogin req.body', req.body);
+    console.log('postLogin req.query', req.query);
     User.verifyPassword({
       password: req.body.password,
       username: req.body.username
@@ -59,8 +61,8 @@ exports.postLogin = {
       res.set('Authorization', 'Bearer ' + token);
 
       var path = req.body.redirect
-        || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth2/authorize',
+        || util.format('%s?client_id=%s&redirect_uri=%s',
+          '/oauth2/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 
@@ -163,8 +165,8 @@ exports.postRegister = {
       }
       // Successful logins should send the user back to /oauth2/authorize.
       var path = req.body.redirect
-        || util.format('/%s?client_id=%s&redirect_uri=%s',
-          'oauth2/authorize',
+        || util.format('%s?client_id=%s&redirect_uri=%s',
+          '/oauth2/authorize',
           req.body.client_id,
           req.body.redirect_uri);
 
