@@ -144,10 +144,10 @@ var getAccessToken = function (bearerToken) {
     }
 
     var access_token = bearerToken.replace(/bearer +/i, '');
-    console.log('getAccessToken access_token', access_token)
+    console.log('getAccessToken access_token', access_token);
 
     OAuthToken.read({
-      access_token: access_token,
+      access_token: access_token
     }, function (err, token) {
       if (err) {
         return reject(err);
@@ -162,7 +162,7 @@ var getAccessToken = function (bearerToken) {
         expires: token.access_token_expires_on,
         user: {
           id: token.user_id
-        },
+        }
       });
     });
   });
@@ -181,7 +181,7 @@ var getClient = function (clientId, clientSecret) {
 
   return new Promise(function (resolve, reject) {
     read({
-      client_id: clientId,
+      client_id: clientId
       // client_secret: clientSecret
     }, function (err, client) {
       if (err) {
@@ -212,6 +212,7 @@ var getClient = function (clientId, clientSecret) {
 
 var getAuthorizationCode = function (code) {
   debug('getAuthorizationCode', arguments, AUTHORIZATION_CODE_TRANSIENT_STORE);
+  debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
 
   return new Promise(function (resolve, reject) {
     var client = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
@@ -238,14 +239,16 @@ var revokeAuthorizationCode = function (code) {
   });
 };
 
-var saveAuthorizationCode = function (code, value) {
-  debug('saveAuthorizationCode', arguments);
+var saveAuthorizationCode = function (authorizationCode, value, client) {
+  debug('saveAuthorizationCode authorizationCode', authorizationCode);
+  debug('saveAuthorizationCode value', value);
+  debug('saveAuthorizationCode client', client);
 
   return new Promise(function (resolve) {
-    AUTHORIZATION_CODE_TRANSIENT_STORE[code] = value;
+    AUTHORIZATION_CODE_TRANSIENT_STORE[authorizationCode.authorizationCode] = value;
     debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
 
-    resolve({ authorizationCode: 'ABC' });
+    resolve({ authorizationCode: authorizationCode.authorizationCode });
   });
 };
 
@@ -271,6 +274,21 @@ var getRefreshToken = function (bearerToken, callback) {
       userId: token.user_id
     });
   });
+};
+
+/**
+ * Get token for code
+ *
+ * @param  {[type]}   bearerToken [description]
+ * @param  {Function} callback    [description]
+ * @return {[type]}               [description]
+ */
+var getTokenFromCode = function (code, callback) {
+  debug('getTokenFromCode', code);
+  getAuthorizationCode(code).then(function (result) {
+    console.log('done getAuthorizationCode', result);
+    return callback(null, result);
+  }).catch(callback);
 };
 
 /*
@@ -324,6 +342,8 @@ var saveAccessToken = function (token, client, user) {
       //   client: {},
       //   user: {}
       // };
+      //
+      console.log('saveAccessToken saved token', token.id);
 
       resolve({
         access_token: token.access_token,
@@ -349,6 +369,7 @@ module.exports.saveAuthorizationCode = saveAuthorizationCode;
 module.exports.revokeAuthorizationCode = revokeAuthorizationCode;
 module.exports.getClient = getClient;
 module.exports.getRefreshToken = getRefreshToken;
+module.exports.getTokenFromCode = getTokenFromCode;
 module.exports.getUser = getUser;
 module.exports.saveAccessToken = saveAccessToken;
 module.exports.saveToken = saveAccessToken;

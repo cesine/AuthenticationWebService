@@ -2,8 +2,9 @@ var debug = require('debug')('oauth:routes');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
 var util = require('util');
 
-var errorMiddleware = require('./../middleware/error-handler').errorHandler;
-var oauth = require('./../middleware/oauth');
+var errorMiddleware = require('../middleware/error-handler').errorHandler;
+var oauth = require('../middleware/oauth');
+var OAuthClient = require('../models/oauth-client');
 
 /**
  * Get authorization from a given user
@@ -19,8 +20,8 @@ exports.getAuthorize = {
     summary: 'Retrieves authorization',
     method: 'GET',
     parameters: [
-      param.query('client_id', 'client_id of the application', 'string'),
-      param.query('redirect_uri', 'requested redirect_uri after registration', 'string')
+      param.body('client_id', 'client_id of the application', 'string'),
+      param.body('redirect_uri', 'requested redirect_uri after registration', 'string')
     ],
     responseClass: 'Authorization',
     errorResponses: [],
@@ -31,12 +32,12 @@ exports.getAuthorize = {
 
     // Redirect anonymous users to login page.
     if (!res.locals.user) {
-      return res.redirect(util.format('/login?redirect=%s&client_id=%s&'
-        + 'redirect_uri=%s', req.path, req.query.client_id, req.query.redirect_uri));
+      return res.redirect(util.format('/authentication/login/?redirect=%s&client_id=%s&'
+        + 'redirect_uri=%s', req.path, req.body.client_id, req.body.redirect_uri));
     }
 
     console.log('res.locals.user', res.locals.user);
-    return res.redirect(req.query.redirect_uri);
+    return res.redirect(req.body.redirect_uri);
   }
 };
 /**
@@ -80,7 +81,7 @@ exports.postAuthorize = {
     });
     console.log('There is a user res.locals.user', res.locals.user, middleware);
 
-    middleware(req, res, function(err) {
+    middleware(req, res, function (err) {
       console.log('done the authorize middleware', err, req.user, res.locals);
       // if (err) {
       //   debug('error authorizing client', err, req.query);
@@ -122,8 +123,14 @@ exports.getToken = {
         req.query.client_id, req.query.redirect_uri));
     }
 
-    // return oauth.authorize();
-    res.send('TODO');
+    OAuthClient.getTokenFromCode(req.query.code, function (err, token) {
+      if (err) {
+        return next(err);
+      }
+      console.log('token', token);
+      // return oauth.authorize();
+      res.send(token);
+    });
   }
 };
 /**
