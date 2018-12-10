@@ -1,0 +1,6 @@
+{
+  "id": "test-client",
+  "client_id": "test-client",
+  "client_secret": "test-secret",
+  "redirect_uri": "https://localhost:3183/oauth2/token"
+}

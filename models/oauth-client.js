@@ -1,7 +1,7 @@
 var AsToken = require('as-token');
 var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
-var Promise = require('bluebird');
+// var Promise = require('bluebird');
 var uuid = require('uuid');
 
 var OAuthError = require('oauth2-server/lib/errors/oauth-error');
@@ -91,6 +91,7 @@ function list(options, callback) {
   options.attributes = [
     'client_id',
     'title',
+    'redirect_uri',
     'description',
     'contact',
     'createdAt',
@@ -142,8 +143,11 @@ var getAccessToken = function (bearerToken) {
       return reject(new OAuthError('This is a JWT token'));
     }
 
+    var access_token = bearerToken.replace(/bearer +/i, '');
+    console.log('getAccessToken access_token', access_token)
+
     OAuthToken.read({
-      access_token: bearerToken
+      access_token: access_token,
     }, function (err, token) {
       if (err) {
         return reject(err);
@@ -156,7 +160,9 @@ var getAccessToken = function (bearerToken) {
         accessToken: token.access_token,
         clientId: token.client_id,
         expires: token.access_token_expires_on,
-        userId: token.user_id
+        user: {
+          id: token.user_id
+        },
       });
     });
   });
@@ -176,13 +182,13 @@ var getClient = function (clientId, clientSecret) {
   return new Promise(function (resolve, reject) {
     read({
       client_id: clientId,
-      client_secret: clientSecret
+      // client_secret: clientSecret
     }, function (err, client) {
       if (err) {
         return reject(err);
       }
       if (!client) {
-        return reject(new Error('Client id or Client Secret is invalid'));
+        return reject(new Error('Client id is invalid'));
       }
 
       // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L144
@@ -192,8 +198,9 @@ var getClient = function (clientId, clientSecret) {
       var code = uuid.v4();
       var json = {
         clientId: client.client_id,
-        clientSecret: client.client_secret,
+        // clientSecret: client.client_secret,
         grants: ['authorization_code'],
+        redirectUris: client.redirect_uri ? client.redirect_uri.split(',') : [],
         code: code
       };
 
@@ -238,7 +245,7 @@ var saveAuthorizationCode = function (code, value) {
     AUTHORIZATION_CODE_TRANSIENT_STORE[code] = value;
     debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
 
-    resolve(true);
+    resolve({ authorizationCode: 'ABC' });
   });
 };
 
