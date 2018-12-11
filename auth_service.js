@@ -123,7 +123,7 @@ deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
  * Not found
  */
 authWebService.use(function notFoundMiddleware(req, res, next) {
-  debug(req.url + ' was not found');
+  debug(req.url + ' was not found/handled');
   var err = new Error('Not Found');
   err.status = 404;
   next(err, req, res, next);

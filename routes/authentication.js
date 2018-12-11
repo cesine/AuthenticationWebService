@@ -62,8 +62,8 @@ exports.postLogin = {
       res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
       res.set('Authorization', 'Bearer ' + token);
 
-      var path = req.body.redirect_uri + '?' + querystring.stringify(req.body);
-      return res.redirect(path);
+      var redirect = req.body.redirect || req.body.redirect_uri + '?' + querystring.stringify(req.body);
+      return res.redirect(redirect);
     });
   }
 };

@@ -38,15 +38,17 @@ exports.getAuthorize = {
     if (!res.locals.user) {
       return res.redirect(util.format('/authentication/login/?%s&%s', querystring.stringify(req.query), querystring.stringify({
         // TODO make the code here?
-        code: 'efg',
-        state: '789'
+        // code: 'efg',
+        // state: '789'
       })));
     }
 
     var middleware = oauth.authorize({
       handleError: errorMiddleware
+      // allowEmptyState: true,
     });
     console.log('There is a user res.locals.user', res.locals.user, middleware);
+    console.log('req.headers', req.headers);
 
     middleware(req, res, function (err) {
       console.log('done the authorize middleware', err, req.user, res.locals);
@@ -84,7 +86,6 @@ exports.postAuthorize = {
   },
   action: function postAuthorize(req, res, next) {
     return next(new Error(' not implemnted'));
-
 
     // console.log('postAuthorize res.locals', res.locals);
     // console.log('req.headers', req.headers);
@@ -183,7 +184,16 @@ exports.postToken = {
       handleError: errorMiddleware
     });
 
-    return middleware(req, res, next);
+    middleware(req, res, function (err) {
+      console.log('done the token middleware', err, req.user, res.locals);
+      // if (err) {
+      //   debug('error authorizing client', err, req.query);
+      //   // the error handler will send cleaned json which can be displayed to the user
+      //   return next(err);
+      // }
+
+      // res.json({ something: true });
+    });
   }
 };
 // comes from https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L64

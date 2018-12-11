@@ -135,19 +135,31 @@ function init() {
  */
 
 /*
- * Get access client.
+ * https://oauth2-server.readthedocs.io/en/latest/misc/migrating-v2-to-v3.html?highlight=getAccessToken
+ *
+ * getAccessToken(token) should return an object with:
+ *    accessToken (String)
+ *    accessTokenExpiresAt (Date)
+ *    client (Object), containing at least an id property that matches the supplied client
+ *    scope (optional String)
+ *    user (Object)
  */
 var getAccessToken = function (bearerToken) {
   return new Promise(function (resolve, reject) {
-    if (bearerToken.indexOf(AsToken.config.jwt.prefix) === 0) {
-      return reject(new OAuthError('This is a JWT token'));
-    }
+    // if (bearerToken.indexOf(AsToken.config.jwt.prefix) === 0) {
+    //   return reject(new OAuthError('This is a JWT token'));
+    // }
 
     var access_token = bearerToken.replace(/bearer +/i, '');
     console.log('getAccessToken access_token', access_token);
 
-    OAuthToken.read({
-      access_token: access_token
+    OAuthToken.create({
+      access_token: access_token,
+      access_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
+      refresh_token: '23waejsowj4wejsrd',
+      refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
+      client_id: 'test-client', // TODO hard coded
+      user_id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79' // TODO hard coded
     }, function (err, token) {
       if (err) {
         return reject(err);
@@ -160,6 +172,9 @@ var getAccessToken = function (bearerToken) {
         accessToken: token.access_token,
         clientId: token.client_id,
         expires: token.access_token_expires_on,
+        client: {
+          id: token.client_id
+        },
         user: {
           id: token.user_id
         }
@@ -197,6 +212,11 @@ var getClient = function (clientId, clientSecret) {
       // { grants: ['authorization_code'], redirectUris: ['http://example.com'] };
       var code = uuid.v4();
       var json = {
+        client: {
+          id: client.client_id
+        },
+        id: client.client_id,
+        expiresAt: new Date(client.expiresAt || Date.now() + 60 * 60 * 1000),
         clientId: client.client_id,
         // clientSecret: client.client_secret,
         grants: ['authorization_code'],
@@ -217,7 +237,11 @@ var getAuthorizationCode = function (code) {
   return new Promise(function (resolve, reject) {
     var client = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
     if (client) {
-      delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+      // delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+      client.expiresAt = new Date(client.expiresAt);
+      client.user = {
+        id: client.user_id
+      };
       return resolve(client);
     }
     var err = new OAuthError('Code is not authorized', {
@@ -233,9 +257,12 @@ var revokeAuthorizationCode = function (code) {
   debug('revokeAuthorizationCode', arguments);
 
   return new Promise(function (resolve) {
-    delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+    code.expiresAt = new Date(Date.now() - 1000);
+    var itWas = AUTHORIZATION_CODE_TRANSIENT_STORE[code.code];
+    delete AUTHORIZATION_CODE_TRANSIENT_STORE[code.code];
 
-    resolve(true);
+    console.log('revoked ', itWas);
+    resolve(code);
   });
 };
 
@@ -311,11 +338,17 @@ var getUser = function (username, password, callback) {
   });
 };
 
+var validateScope = function () {
+  console.log('validateScope', arguments);
+  return true;
+};
+
 /**
  * Save token.
  */
 
-var saveAccessToken = function (token, client, user) {
+var saveToken = function (token, client, user) {
+  console.log('saveToken ', arguments);
   return new Promise(function (resolve, reject) {
     if (!token || !client || !user) {
       return reject(new Error('Invalid Options'));
@@ -343,15 +376,21 @@ var saveAccessToken = function (token, client, user) {
       //   user: {}
       // };
       //
-      console.log('saveAccessToken saved token', token.id);
+      console.log('saveToken saved token', token.id);
 
       resolve({
-        access_token: token.access_token,
-        access_token_expires_on: token.access_token_expires_on,
-        client_id: token.client_id,
-        refresh_token: token.refresh_token,
-        refresh_token_expires_on: token.refresh_token_expires_on,
-        user_id: token.user_id
+        accessToken: token.access_token,
+        accessTokenExpiresOn: token.access_token_expires_on,
+        clientId: token.client_id,
+        client: {
+          id: token.client_id
+        },
+        user: {
+          id: token.user_id
+        },
+        refreshToken: token.refresh_token,
+        refreshTokenExpiresOn: token.refresh_token_expires_on,
+        userId: token.user_id
       });
     });
   });
@@ -371,5 +410,6 @@ module.exports.getClient = getClient;
 module.exports.getRefreshToken = getRefreshToken;
 module.exports.getTokenFromCode = getTokenFromCode;
 module.exports.getUser = getUser;
-module.exports.saveAccessToken = saveAccessToken;
-module.exports.saveToken = saveAccessToken;
+module.exports.saveToken = saveToken;
+module.exports.saveAccessToken = saveToken;
+module.exports.validateScope = validateScope;

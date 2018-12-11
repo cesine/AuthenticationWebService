@@ -54,7 +54,7 @@ function jwt(req, res, next) {
       res.locals.user = req.user = verified;
       res.locals.token = tokenString;
       // Oauth2 is trying to use this token
-      delete req.headers.authorization;
+      // delete req.headers.authorization;
 
       res.set('Authorization', res.locals.token);
     } catch (err) {
