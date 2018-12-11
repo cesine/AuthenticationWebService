@@ -104,7 +104,7 @@ describe('oauth client model', function () {
               hour_limit: null,
               day_limit: null,
               throttle: null,
-              redirect_uri: null,
+              redirect_uri: 'http://localhost:8011/auth/example/callback',
               deletedAt: null,
               deletedReason: null,
               createdAt: client.createdAt,

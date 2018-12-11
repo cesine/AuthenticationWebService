@@ -6,8 +6,8 @@ describe('oauth routes', function () {
   it('should load', function () {
     expect(oauth).to.be.a('object');
     expect(oauth.getAuthorize).to.be.a('object');
-    expect(oauth.getToken).to.be.a('object');
-    expect(oauth.postAuthorize).to.be.a('object');
+    expect(oauth.getToken).to.not.be.a('object');
+    expect(oauth.postAuthorize).to.not.be.a('object');
     expect(oauth.postToken).to.be.a('object');
   });
 
