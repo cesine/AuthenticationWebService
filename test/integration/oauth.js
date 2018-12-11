@@ -113,6 +113,15 @@ describe('/oauth2', function () {
     clientServer.close();
   });
 
+  /**
+   * Register the client app
+
+      participant User
+      participant 3183
+      participant 8011
+
+      8011->3183: POST /v1/client { name, redirect_uri }
+   */
   before(function (done) {
     OauthClient.init().then((function () {
       return OauthToken.init();
@@ -150,6 +159,23 @@ describe('/oauth2', function () {
   });
 
   describe('GET /oauth2/authorize', function () {
+    /**
+     * Login to client app via auth provider
+
+      participant User
+      participant 3183
+      participant 8011
+
+      User->8011: Login with: 3183 provider
+      8011->3183: /oauth2/authorize { state }
+      3183->User: Authorize 8011 to access your profile?
+      User-->3183: Yes
+      3183->User: Redirect to 8011 { code, state }
+      User->8011: /callback { code, state }
+      8011->3183: POST /oauth2/token { code, state }
+      3183-->8011: { token, profile }
+      8011-->User: Welcome anonymous!
+     */
     it.only('should perform oauth2 dance', function () {
       var loginUrl;
       return supertest('http://localhost:8011')
