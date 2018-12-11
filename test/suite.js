@@ -14,15 +14,18 @@ before(function setUpService() {
   }
 
   // keep the port constant for oauth testing
-  server = require('../bin/www').server; // eslint-disable-line global-require
-  test = supertest(server)
-    .get('/v1/healthcheck');
+  bin = require('../bin/www'); // eslint-disable-line global-require
+  return bin.ready.then(function(serv) {
+    server = serv;
+    test = supertest(server)
+      .get('/v1/healthcheck');
 
-  expect(test.url).to.contain(config.httpsOptions.port);
-  process.env.URL = test.url.replace('/v1/healthcheck', '');
+    expect(test.url).to.contain(config.httpsOptions.port);
+    process.env.URL = test.url.replace('/v1/healthcheck', '');
 
-  return test
-    .expect(200);
+    return test
+      .expect(200);
+  });
 });
 
 after(function turnOffService() {
