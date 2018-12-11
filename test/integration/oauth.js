@@ -16,80 +16,6 @@ var fixtures = {
 };
 
 describe('/oauth2', function () {
-  var clientApp;
-  var clientServer;
-
-  before(function setUpClientApp(done) {
-    clientApp = new Express();
-    clientApp.use(session({
-      resave: true,
-      saveUninitialized: true,
-      secret: 'justtestingasanoauthclientapp'
-    }));
-    clientApp.use(passport.initialize());
-    clientApp.use(passport.session());
-    passport.serializeUser(function (passportUser, callback) {
-      callback(null, passportUser);
-    });
-    passport.deserializeUser(function (passportUser, callback) {
-      callback(null, passportUser);
-    });
-    passport.use(new OAuth2Strategy({
-      authorizationURL: 'https://localhost:3183/oauth2/authorize',
-      tokenURL: 'https://localhost:3183/oauth2/token',
-      clientID: fixtures.client.client_id,
-      clientSecret: fixtures.client.client_secret,
-      callbackURL: 'http://localhost:8011/auth/example/callback'
-    },
-    function (accessToken, refreshToken, profile, cb) {
-      debug('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
-      return cb(null, {
-        id: fixtures.user.id,
-        username: 'somebody'
-      }, { info: 'goes here' });
-    }));
-    clientApp.get('/auth/example', function (req, res, next) {
-      var x = passport.authenticate('oauth2');
-      debug('/auth/example will call passport.authenticate', x);
-      debug('headers', req.headers);
-      // res.set('Authorization', req.headers.authorization);
-      return x(req, res, next);
-    });
-    clientApp.get('/auth/example/callback',
-      passport.authenticate('oauth2', {
-        failureRedirect: '/login'
-      }),
-      function (req, res) {
-        debug('auth/example/callback got called back', req.headers, req.body, req.query);
-        // Successful authentication
-        res.json({
-          success: 'called back',
-          headers: req.headers,
-          body: req.body,
-          query: req.query,
-          session: req.session
-        });
-      });
-    // eslint-disable-next-line no-unused-vars
-    clientApp.use(function (err, req, res, next) {
-      debug('Error in the clientApp', err);
-      res.status(err.status || 500);
-      res.json(err);
-    });
-    clientServer = clientApp.listen(8011, function () {
-      debug('HTTP clientApp listening on http://localhost:' + clientServer.address().port);
-      done();
-    });
-  });
-
-  after(function setUpClientApp() {
-    if (!clientServer) {
-      return null;
-    }
-    debug('turning off client server');
-    return clientServer.close();
-  });
-
   /**
    * Register the client app
 
@@ -119,6 +45,99 @@ describe('/oauth2', function () {
   });
 
   describe('GET /oauth2/authorize', function () {
+    it('should redirect to login if user is not present', function () {
+      return supertest(process.env.URL)
+        .get('/oauth2/authorize')
+        .query({
+          client_id: 'test-client',
+          client_secret: 'test-secret',
+          grant_type: 'authorization_code',
+          redirect_uri: 'http://localhost:8011/v1/users'
+        })
+        .expect(302)
+        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .then(function (res) {
+          expect(res.text).to.contain('Found. Redirecting to');
+          expect(res.text).to.equal('Found. Redirecting to /authentication/login/?client_id=test-client&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fv1%2Fusers'); // jshint ignore:line
+        });
+    });
+  });
+
+  describe('Oauth Dance', function () {
+    var clientApp;
+    var clientServer;
+
+    before(function setUpClientApp(done) {
+      clientApp = new Express();
+      clientApp.use(session({
+        resave: true,
+        saveUninitialized: true,
+        secret: 'justtestingasanoauthclientapp'
+      }));
+      clientApp.use(passport.initialize());
+      clientApp.use(passport.session());
+      passport.serializeUser(function (passportUser, callback) {
+        callback(null, passportUser);
+      });
+      passport.deserializeUser(function (passportUser, callback) {
+        callback(null, passportUser);
+      });
+      passport.use(new OAuth2Strategy({
+        authorizationURL: 'https://localhost:3183/oauth2/authorize',
+        tokenURL: 'https://localhost:3183/oauth2/token',
+        clientID: fixtures.client.client_id,
+        clientSecret: fixtures.client.client_secret,
+        callbackURL: 'http://localhost:8011/auth/example/callback'
+      },
+      function (accessToken, refreshToken, profile, cb) {
+        debug('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
+        return cb(null, {
+          id: fixtures.user.id,
+          username: 'somebody'
+        }, { info: 'goes here' });
+      }));
+      clientApp.get('/auth/example', function (req, res, next) {
+        var x = passport.authenticate('oauth2');
+        debug('/auth/example will call passport.authenticate', x);
+        debug('headers', req.headers);
+        // res.set('Authorization', req.headers.authorization);
+        return x(req, res, next);
+      });
+      clientApp.get('/auth/example/callback',
+        passport.authenticate('oauth2', {
+          failureRedirect: '/login'
+        }),
+        function (req, res) {
+          debug('auth/example/callback got called back', req.headers, req.body, req.query);
+          // Successful authentication
+          res.json({
+            success: 'called back',
+            headers: req.headers,
+            body: req.body,
+            query: req.query,
+            session: req.session
+          });
+        });
+      // eslint-disable-next-line no-unused-vars
+      clientApp.use(function (err, req, res, next) {
+        debug('Error in the clientApp', err);
+        res.status(err.status || 500);
+        res.json(err);
+      });
+      clientServer = clientApp.listen(8011, function () {
+        debug('HTTP clientApp listening on http://localhost:' + clientServer.address().port);
+        done();
+      });
+    });
+
+    after(function setUpClientApp() {
+      if (!clientServer) {
+        return null;
+      }
+      debug('turning off client server');
+      return clientServer.close();
+    });
+
     /**
      * Login to client app via auth provider
 
@@ -136,7 +155,7 @@ describe('/oauth2', function () {
       3183-->8011: { token, profile }
       8011-->User: Welcome anonymous!
      */
-    it.only('should perform oauth2 dance', function () {
+    it('should perform oauth2 dance', function () {
       var loginUrl;
       // Trigger the dance
       return supertest('http://localhost:8011')
@@ -197,15 +216,6 @@ describe('/oauth2', function () {
           return supertest(process.env.URL)
             .get(res.headers.location)
             .set('Authorization', res.headers.authorization)
-            // .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-            .send({
-              // client_id: fixtures.client.client_id,
-              // response_type: 'code',
-              // state: '123',
-              // redirect_uri: 'https://localhost:3183/oauth2/token',
-              // TODO where does this come from?
-              // access_token: jsonToken.access_token
-            })
             .expect(302);
         })
         .then(function (res) {
@@ -263,59 +273,43 @@ describe('/oauth2', function () {
     it('should redirect to login if user is not present', function () {
       return supertest(process.env.URL)
         .post('/oauth2/authorize')
-        .query({
+        .type('form')
+        .send({
           client_id: 'test-client',
           client_secret: 'test-secret',
           grant_type: 'authorization_code',
           redirect_uri: 'http://localhost:8011/v1/users'
         })
-        .expect(302)
-        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect(404)
+        .expect('Content-Type', 'application/json; charset=utf-8')
         .then(function (res) {
-          expect(res.text).to.contain('Found. Redirecting to');
-          expect(res.text).to.contain('to /authentication/login?client_id=test-client&redirect_uri=http://localhost:8011/users'); // jshint ignore:line
+          expect(res.body).to.deep.equal({
+            status: 404,
+            userFriendlyErrors: ['Not Found']
+          });
         });
     });
+  });
 
-    it.skip('should perform oauth2 dance', function () {
+  describe('GET /oauth2/token', function () {
+    it('should be not found', function () {
       return supertest(process.env.URL)
-        .post('/oauth2/authorize')
+        .get('/oauth2/token')
         .send({
           client_id: 'test-client',
           client_secret: 'test-secret',
-          // grant_type: 'authorization_code',
-          response_type: 'code',
-          // code: 'ABC',
-          state: '123'
-          // redirect_uri: 'https://localhost:3183/oauth2/token',
+          grant_type: 'authorization_code',
+          username: 'test-user',
+          code: 'ABC'
         })
-        .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-        .set('Authorization', 'Bearer v1/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjp7ImdpdmVuTmFtZSI6IiIsImZhbWlseU5hbWUiOiIifSwiaWQiOiJ0ZXN0LXVzZXItZWZnX3JhbmRvbV91dWlkIiwicmV2aXNpb24iOiIxLTE0NjgyMDUzMDkwNjkiLCJkZWxldGVkQXQiOm51bGwsImRlbGV0ZWRSZWFzb24iOiIiLCJ1c2VybmFtZSI6InRlc3QtdXNlciIsImVtYWlsIjoiIiwiZ3JhdmF0YXIiOiI5Y2I0Nzk4ODc0NTkzNTI5MjhkNDEyNmY4OTg0NTRjZiIsImRlc2NyaXB0aW9uIjoiIiwibGFuZ3VhZ2UiOiIiLCJoYXNoIjoiJDJhJDEwJDUxOWkxeW5lQkw0cEgzaVRNdG51b09hRjZkbnFDV041QmgxRDh1bzY4S3pRWTdEcklHeFlxIiwiY3JlYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwidXBkYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwiaWF0IjoxNDY4MjEyMTY3fQ.HCOkTzqR4v-vSSmoXqTS6vHnZPbgWaEDEL2T6iqzwTdnF58sm_ufnFMDmWfxWzBMc15Y--2oCSEhAPdTVfMqh_h4CSkqDNH10MSCrF346OKHLugFT3BUSuvE6NMszBnItBX8P2r7lc6hhLnpbI4lvslCfQNI3PCoQssbmT1IZ3k') // jshint ignore:line
-        .expect(302)
-        // .expect('Content-Type', 'application/json; charset=utf-8')
-        // .expect({
-        //   access_token: 'foobar',
-        //   token_type: 'bearer'
-        // })
+        .expect(404)
+        .expect('Content-Type', 'application/json; charset=utf-8')
         .then(function (res) {
-          debug('res.headers', res.headers);
-          return supertest(process.env.URL)
-            .get(res.headers.location.replace('https://localhost:3183', ''))
-            .set('Authorization', res.headers.authorization)
-            .expect(200);
-        })
-        .then(function (res) {
-          debug('res.body', res.body);
-
           expect(res.body).to.deep.equal({
-            clientId: 'test-client',
-            code: 'ddbf9e3f-ac88-4759-a514-81a6d126fba9',
-            grants: [
-              'authorization_code'
-            ],
-            redirectUris: [
-              'https://localhost:3183/oauth2/token'
-            ]
+            status: 404,
+            message: 'Not Found',
+            stack: res.body.stack,
+            userFriendlyErrors: ['Not Found']
           });
         });
     });
@@ -338,7 +332,7 @@ describe('/oauth2', function () {
         .then(function (res) {
           expect(res.body).to.deep.equal({
             status: 403,
-            userFriendlyErrors: ['Client id or Client Secret is invalid']
+            userFriendlyErrors: ['Code is not authorized']
           });
         });
     });
