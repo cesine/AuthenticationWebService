@@ -8,11 +8,7 @@ var service = require('../auth_service');
 var server;
 
 service.set('port', config.httpsOptions.port);
-var originalAddress = service.address;
-service.address = function(){
-  console.log('originalAddress', originalAddress.apply(service));
-  return 'https://localhost:3183';
-}
+
 if (process.env.NODE_ENV === 'production') {
   service.listen(config.httpsOptions.port);
   debug('Running in production mode behind an Nginx proxy, Listening on http port %d', config.httpsOptions.port);

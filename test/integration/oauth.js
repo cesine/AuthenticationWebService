@@ -1,38 +1,26 @@
-var AsToken = require('as-token');
+var debug = require('debug')('test:integration:oauth');
 var expect = require('chai').expect;
-var supertest = require('supertest');
-var https = require('https');
-var express = require('express');
-var passport = require('passport');
-var session = require('express-session');
+var Express = require('express');
 var OAuth2Strategy = require('passport-oauth2');
-var url = require('url');
+var passport = require('passport');
 var querystring = require('querystring');
+var session = require('express-session');
+var supertest = require('supertest');
+var url = require('url');
 
 var OauthClient = require('./../../models/oauth-client');
-var OauthToken = require('./../../models/oauth-token');
-var user = require('./../../models/user');
+var UserModel = require('./../../models/user');
 var fixtures = {
-  client: require('./../fixtures/client.json'),
-  user: require('./../fixtures/user.json')
+  client: require('./../fixtures/client.json'), // eslint-disable-line global-require
+  user: require('./../fixtures/user.json') // eslint-disable-line global-require
 };
 
 describe('/oauth2', function () {
-  var access_token;
-  var server;
   var clientApp;
   var clientServer;
-  var jsonToken = {
-    access_token: 'test-' + Date.now(),
-    access_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
-    refresh_token: '23waejsowj4wejsrd',
-    refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
-    client_id: fixtures.client.client_id,
-    user_id: fixtures.user.id
-  };
 
   before(function setUpClientApp(done) {
-    clientApp = new express();
+    clientApp = new Express();
     clientApp.use(session({
       resave: true,
       saveUninitialized: true,
@@ -40,18 +28,12 @@ describe('/oauth2', function () {
     }));
     clientApp.use(passport.initialize());
     clientApp.use(passport.session());
-
-    passport.serializeUser(function (user, done) {
-      done(null, user);
+    passport.serializeUser(function (passportUser, callback) {
+      callback(null, passportUser);
     });
-
-    passport.deserializeUser(function (user, done) {
-      done(null, user);
+    passport.deserializeUser(function (passportUser, callback) {
+      callback(null, passportUser);
     });
-
-    // TODO use port of agent
-    // console.log('agent', agent.serverAddress(service));
-    // console.log('service ', service.address());
     passport.use(new OAuth2Strategy({
       authorizationURL: 'https://localhost:3183/oauth2/authorize',
       tokenURL: 'https://localhost:3183/oauth2/token',
@@ -60,57 +42,52 @@ describe('/oauth2', function () {
       callbackURL: 'http://localhost:8011/auth/example/callback'
     },
     function (accessToken, refreshToken, profile, cb) {
-      console.log('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
+      debug('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
       return cb(null, {
         id: fixtures.user.id,
         username: 'somebody'
       }, { info: 'goes here' });
-      // User.findOrCreate({
-      //   exampleId: profile.id
-      // }, function (err, user) {
-      //   return cb(err, user);
-      // });
     }));
-
     clientApp.get('/auth/example', function (req, res, next) {
       var x = passport.authenticate('oauth2');
-      console.log('/auth/example will call passport.authenticate', x);
-      console.log('headers', req.headers);
+      debug('/auth/example will call passport.authenticate', x);
+      debug('headers', req.headers);
       // res.set('Authorization', req.headers.authorization);
       return x(req, res, next);
     });
-
     clientApp.get('/auth/example/callback',
       passport.authenticate('oauth2', {
         failureRedirect: '/login'
       }),
       function (req, res) {
-        console.log('auth/example/callback got called back', req.headers, req.body, req.query);
-        // Successful authentication, redirect home.
+        debug('auth/example/callback got called back', req.headers, req.body, req.query);
+        // Successful authentication
         res.json({
           success: 'called back',
           headers: req.headers,
           body: req.body,
-          query: req.query
+          query: req.query,
+          session: req.session
         });
       });
-
+    // eslint-disable-next-line no-unused-vars
     clientApp.use(function (err, req, res, next) {
-      console.log('Error in the clientApp', err);
+      debug('Error in the clientApp', err);
       res.status(err.status || 500);
       res.json(err);
     });
     clientServer = clientApp.listen(8011, function () {
-      console.log('HTTP clientApp listening on http://localhost:' + clientServer.address().port);
+      debug('HTTP clientApp listening on http://localhost:' + clientServer.address().port);
       done();
     });
   });
 
   after(function setUpClientApp() {
     if (!clientServer) {
-      return;
+      return null;
     }
-    clientServer.close();
+    debug('turning off client server');
+    return clientServer.close();
   });
 
   /**
@@ -123,38 +100,21 @@ describe('/oauth2', function () {
       8011->3183: POST /v1/client { name, redirect_uri }
    */
   before(function (done) {
-    OauthClient.init().then((function () {
-      return OauthToken.init();
-    }))
-      .then(function () {
+    OauthClient.init()
+      .then((function () {
         OauthClient
-          .create(fixtures.client, function () {
-            OauthToken.create(jsonToken, function (err, token) {
-              if (err) {
-                return done(err);
-              }
-
-              expect(token.id).length(36);
-              expect(token).to.deep.equal({
-                id: token.id,
-                access_token: jsonToken.access_token,
-                access_token_expires_on: jsonToken.access_token_expires_on,
-                client_id: jsonToken.client_id,
-                refresh_token: jsonToken.refresh_token,
-                refresh_token_expires_on: jsonToken.refresh_token_expires_on,
-                user_id: jsonToken.user_id,
-                updatedAt: token.updatedAt,
-                createdAt: token.createdAt
-              });
-
-              access_token = AsToken.sign(token, 60 * 24);
-
-              user
-                .create(fixtures.user, function () {
-                  done();
-                });
-            });
+          .create(fixtures.client, function (err, result) {
+            debug('created client', result);
+            done();
           });
+      }));
+  });
+
+  before(function (done) {
+    return UserModel
+      .create(fixtures.user, function (err, result) {
+        debug('created user', result);
+        done();
       });
   });
 
@@ -178,30 +138,33 @@ describe('/oauth2', function () {
      */
     it.only('should perform oauth2 dance', function () {
       var loginUrl;
+      // Trigger the dance
       return supertest('http://localhost:8011')
-        .get('/auth/example') // Trigger the dance
+        .get('/auth/example')
         .send({
           client_id: fixtures.client.client_id
         })
         .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
         .expect(302)
         .then(function (res) {
-          console.log(' client app redirect res.headers', res.headers);
+          debug(' client app redirect res.headers', res.headers);
           expect(res.headers.location).to.contain('/oauth2/authorize');
 
+          // Request authorization
           return supertest(process.env.URL)
             .get(res.headers.location.replace('https://localhost:3183', ''))
             .expect(302);
         })
         .then(function (res) {
-          console.log(' service redirect res.headers', res.headers);
+          debug(' service redirect res.headers', res.headers);
           loginUrl = url.parse(res.headers.location);
           loginUrl.params = querystring.parse(loginUrl.query);
-          console.log('loginUrl', loginUrl);
+          debug('loginUrl', loginUrl);
           expect(loginUrl.pathname).to.equal('/authentication/login/');
-          expect(loginUrl.query).not.to.contain('undefined');
-          // expect(loginUrl.query).to.contain('state');
+          expect(loginUrl.query).to.not.contain('undefined');
+          expect(loginUrl.query).to.not.contain('state');
 
+          // Simulate User Requests login page
           return supertest(process.env.URL)
             .get(loginUrl.pathname)
             .query(loginUrl.params)
@@ -212,23 +175,25 @@ describe('/oauth2', function () {
           expect(res.text).to.contain('button');
           expect(res.text).to.contain('Password');
 
-          console.log('redirect res.body', res.body);
-          console.log('redirect res.headers', res.headers);
+          debug('redirect res.body', res.body);
+          debug('redirect res.headers', res.headers);
 
-          // simulate user logging as part of oauth dance
           loginUrl.params.redirect = '/oauth2/authorize?' + querystring.stringify(loginUrl.params);
           loginUrl.params.username = fixtures.user.username;
           loginUrl.params.password = fixtures.user.password;
+
+          // Simulate User Logs in
           return supertest(process.env.URL)
             .post(loginUrl.pathname)
             .send(loginUrl.params)
             .expect(302);
         })
         .then(function (res) {
-          console.log('logged in res.body', res.body);
-          console.log('logged in res.headers', res.headers);
+          debug('logged in res.body', res.body);
+          debug('logged in res.headers', res.headers);
           expect(res.headers.location).to.contain('/oauth2/authorize');
 
+          // Request authorization now that User is logged in
           return supertest(process.env.URL)
             .get(res.headers.location)
             .set('Authorization', res.headers.authorization)
@@ -244,21 +209,23 @@ describe('/oauth2', function () {
             .expect(302);
         })
         .then(function (res) {
-          console.log('after authorize in res.body', res.body);
-          console.log('after authorize in res.headers', res.headers);
+          debug('after authorize in res.body', res.body);
+          debug('after authorize in res.headers', res.headers);
           expect(res.headers.location).to.contain('/auth/example/callback');
           expect(res.headers.authorization).to.contain('Bearer');
 
+          // Follow redirect back to client
           return supertest(clientServer)
             .get(res.headers.location.replace('http://localhost:8011', ''))
             .set('Authorization', res.headers.authorization)
             .expect(200);
         })
         .then(function (res) {
-          console.log('after app callback res.status', res.status);
-          console.log('after app callback res.body', res.body);
-          console.log('after app callback res.headers', res.headers);
+          debug('after app callback res.status', res.status);
+          debug('after app callback res.body', res.body);
+          debug('after app callback res.headers', res.headers);
 
+          // Expect client succesfully got user profile and token
           expect(res.body.query.code).length(40);
           expect(res.body.headers.authorization).to.contain('Bearer v1');
           expect(res.body).to.deep.equal({
@@ -272,6 +239,20 @@ describe('/oauth2', function () {
             },
             query: {
               code: res.body.query.code
+            },
+            session: {
+              cookie: {
+                originalMaxAge: null,
+                expires: null,
+                httpOnly: true,
+                path: '/'
+              },
+              passport: {
+                user: {
+                  id: fixtures.user.id,
+                  username: 'somebody'
+                }
+              }
             }
           });
         });
@@ -305,9 +286,8 @@ describe('/oauth2', function () {
           // grant_type: 'authorization_code',
           response_type: 'code',
           // code: 'ABC',
-          state: '123',
+          state: '123'
           // redirect_uri: 'https://localhost:3183/oauth2/token',
-          access_token: jsonToken.access_token// 'Bearer ' + access_token,
         })
         .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
         .set('Authorization', 'Bearer v1/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjp7ImdpdmVuTmFtZSI6IiIsImZhbWlseU5hbWUiOiIifSwiaWQiOiJ0ZXN0LXVzZXItZWZnX3JhbmRvbV91dWlkIiwicmV2aXNpb24iOiIxLTE0NjgyMDUzMDkwNjkiLCJkZWxldGVkQXQiOm51bGwsImRlbGV0ZWRSZWFzb24iOiIiLCJ1c2VybmFtZSI6InRlc3QtdXNlciIsImVtYWlsIjoiIiwiZ3JhdmF0YXIiOiI5Y2I0Nzk4ODc0NTkzNTI5MjhkNDEyNmY4OTg0NTRjZiIsImRlc2NyaXB0aW9uIjoiIiwibGFuZ3VhZ2UiOiIiLCJoYXNoIjoiJDJhJDEwJDUxOWkxeW5lQkw0cEgzaVRNdG51b09hRjZkbnFDV041QmgxRDh1bzY4S3pRWTdEcklHeFlxIiwiY3JlYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwidXBkYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwiaWF0IjoxNDY4MjEyMTY3fQ.HCOkTzqR4v-vSSmoXqTS6vHnZPbgWaEDEL2T6iqzwTdnF58sm_ufnFMDmWfxWzBMc15Y--2oCSEhAPdTVfMqh_h4CSkqDNH10MSCrF346OKHLugFT3BUSuvE6NMszBnItBX8P2r7lc6hhLnpbI4lvslCfQNI3PCoQssbmT1IZ3k') // jshint ignore:line
@@ -318,14 +298,14 @@ describe('/oauth2', function () {
         //   token_type: 'bearer'
         // })
         .then(function (res) {
-          console.log('res.headers', res.headers);
+          debug('res.headers', res.headers);
           return supertest(process.env.URL)
             .get(res.headers.location.replace('https://localhost:3183', ''))
             .set('Authorization', res.headers.authorization)
             .expect(200);
         })
         .then(function (res) {
-          console.log('res.body', res.body);
+          debug('res.body', res.body);
 
           expect(res.body).to.deep.equal({
             clientId: 'test-client',

@@ -3,9 +3,8 @@ var OAuthClient = require('./../models/oauth-client');
 
 var oauth = new OAuthServer({
   debug: true,
-  allowEmptyState: true,
+  allowEmptyState: true, // TODO remove
   model: OAuthClient // See https://github.com/thomseddon/node-oauth2-server for specification
 });
 
-console.log('oauth', oauth);
 module.exports = oauth;

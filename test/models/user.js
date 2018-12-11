@@ -94,7 +94,7 @@ describe('user model', function () {
         expect(profile.hash).length(60);
         expect(profile.deletedAt).to.equal(null);
 
-        done();
+        return done();
       });
     });
 

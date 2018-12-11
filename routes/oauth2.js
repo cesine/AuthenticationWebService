@@ -30,9 +30,9 @@ exports.getAuthorize = {
   },
   action: function getAuthorize(req, res) {
     debug('getAuthorize res.locals', res.locals);
-    console.log('req.path', req.path);
-    console.log('req.query', req.query);
-    console.log('req.body', req.body);
+    debug('req.path', req.path);
+    debug('req.query', req.query);
+    debug('req.body', req.body);
 
     // Redirect anonymous users to login page.
     if (!res.locals.user) {
@@ -47,11 +47,11 @@ exports.getAuthorize = {
       handleError: errorMiddleware
       // allowEmptyState: true,
     });
-    console.log('There is a user res.locals.user', res.locals.user, middleware);
-    console.log('req.headers', req.headers);
+    debug('There is a user res.locals.user', res.locals.user, middleware);
+    debug('req.headers', req.headers);
 
-    middleware(req, res, function (err) {
-      console.log('done the authorize middleware', err, req.user, res.locals);
+    return middleware(req, res, function (err) {
+      debug('done the authorize middleware', err, req.user, res.locals);
       // if (err) {
       //   debug('error authorizing client', err, req.query);
       //   // the error handler will send cleaned json which can be displayed to the user
@@ -87,10 +87,10 @@ exports.postAuthorize = {
   action: function postAuthorize(req, res, next) {
     return next(new Error(' not implemnted'));
 
-    // console.log('postAuthorize res.locals', res.locals);
-    // console.log('req.headers', req.headers);
-    // console.log('req.session', req.session);
-    // console.log('req.body', req.body);
+    // debug('postAuthorize res.locals', res.locals);
+    // debug('req.headers', req.headers);
+    // debug('req.session', req.session);
+    // debug('req.body', req.body);
     // debug(req.user);
 
     // // Redirect anonymous users to login page.
@@ -103,10 +103,10 @@ exports.postAuthorize = {
     // var middleware = oauth.authorize({
     //   handleError: errorMiddleware
     // });
-    // console.log('There is a user res.locals.user', res.locals.user, middleware);
+    // debug('There is a user res.locals.user', res.locals.user, middleware);
 
     // middleware(req, res, function (err) {
-    //   console.log('done the authorize middleware', err, req.user, res.locals);
+    //   debug('done the authorize middleware', err, req.user, res.locals);
     //   // if (err) {
     //   //   debug('error authorizing client', err, req.query);
     //   //   // the error handler will send cleaned json which can be displayed to the user
@@ -151,7 +151,7 @@ exports.getToken = {
       if (err) {
         return next(err);
       }
-      console.log('token', token);
+      debug('token', token);
       // return oauth.authorize();
       res.send(token);
     });
@@ -185,7 +185,7 @@ exports.postToken = {
     });
 
     middleware(req, res, function (err) {
-      console.log('done the token middleware', err, req.user, res.locals);
+      debug('done the token middleware', err, req.user, res.locals);
       // if (err) {
       //   debug('error authorizing client', err, req.query);
       //   // the error handler will send cleaned json which can be displayed to the user

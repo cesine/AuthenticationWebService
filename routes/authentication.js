@@ -40,8 +40,8 @@ exports.postLogin = {
     nickname: 'postLogin'
   },
   action: function postLogin(req, res, next) {
-    console.log('postLogin req.body', req.body);
-    console.log('postLogin req.query', req.query);
+    debug('postLogin req.body', req.body);
+    debug('postLogin req.query', req.query);
     User.verifyPassword({
       password: req.body.password,
       username: req.body.username

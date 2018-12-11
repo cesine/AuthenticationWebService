@@ -310,7 +310,6 @@ describe('/authentication', function () {
             .expect(200);
         })
         .then(function (res) {
-          console.log('res.body', res.body);
           expect(res.body).to.deep.equal({
             name: {
               givenName: '',

@@ -1,7 +1,8 @@
-var AsToken = require('as-token');
+/* global Promise */
+
 var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
-// var Promise = require('bluebird');
+var _ = require('lodash');
 var uuid = require('uuid');
 
 var OAuthError = require('oauth2-server/lib/errors/oauth-error');
@@ -46,10 +47,10 @@ function create(options, callback) {
     return callback(new Error('Invalid Options'));
   }
 
-  oauthClient
+  return oauthClient
     .create(options)
-    .then(function (dbModel) {
-      callback(null, dbModel.toJSON());
+    .then(function whenCreateClient(dbModel) {
+      return callback(null, dbModel.toJSON());
     })
     .catch(callback);
 }
@@ -66,11 +67,11 @@ function read(client, callback) {
 
   oauthClient
     .find(options)
-    .then(function (dbModel) {
+    .then(function whenReadDB(dbModel) {
       if (!dbModel) {
         return callback(null, null);
       }
-      callback(null, dbModel.toJSON());
+      return callback(null, dbModel.toJSON());
     })
     .catch(callback);
 }
@@ -80,8 +81,8 @@ function read(client, callback) {
  * @param  {String} options [description]
  * @param callback        [description]
  */
-function list(options, callback) {
-  options = options || {};
+function list(opts, callback) {
+  var options = _.clone(opts || {});
   options.limit = options.limit || 10;
   options.offset = options.offset || 0;
   options.where = options.where || {
@@ -100,7 +101,7 @@ function list(options, callback) {
 
   oauthClient
     .findAll(options)
-    .then(function (oauth_clients) {
+    .then(function whenList(oauth_clients) {
       if (!oauth_clients) {
         return callback(new Error('Unable to fetch oauthClient collection'));
       }
@@ -126,7 +127,9 @@ function flagAsDeleted() {
  * @param callback        [description]
  */
 function init() {
-  return sequelize.sync();
+  return OAuthToken.init().then(function whenInit() {
+    return sequelize.sync();
+  });
 }
 
 /*
@@ -151,7 +154,7 @@ var getAccessToken = function (bearerToken) {
     // }
 
     var access_token = bearerToken.replace(/bearer +/i, '');
-    console.log('getAccessToken access_token', access_token);
+    debug('getAccessToken access_token', access_token);
 
     OAuthToken.create({
       access_token: access_token,
@@ -261,7 +264,7 @@ var revokeAuthorizationCode = function (code) {
     var itWas = AUTHORIZATION_CODE_TRANSIENT_STORE[code.code];
     delete AUTHORIZATION_CODE_TRANSIENT_STORE[code.code];
 
-    console.log('revoked ', itWas);
+    debug('revoked ', itWas);
     resolve(code);
   });
 };
@@ -313,7 +316,7 @@ var getRefreshToken = function (bearerToken, callback) {
 var getTokenFromCode = function (code, callback) {
   debug('getTokenFromCode', code);
   getAuthorizationCode(code).then(function (result) {
-    console.log('done getAuthorizationCode', result);
+    debug('done getAuthorizationCode', result);
     return callback(null, result);
   }).catch(callback);
 };
@@ -339,7 +342,7 @@ var getUser = function (username, password, callback) {
 };
 
 var validateScope = function () {
-  console.log('validateScope', arguments);
+  debug('validateScope', arguments);
   return true;
 };
 
@@ -348,7 +351,7 @@ var validateScope = function () {
  */
 
 var saveToken = function (token, client, user) {
-  console.log('saveToken ', arguments);
+  debug('saveToken ', arguments);
   return new Promise(function (resolve, reject) {
     if (!token || !client || !user) {
       return reject(new Error('Invalid Options'));
@@ -361,11 +364,11 @@ var saveToken = function (token, client, user) {
       refresh_token: token.refreshToken,
       refresh_token_expires_on: token.refreshTokenExpiresOn,
       user_id: user.id
-    }, function (err, token) {
+    }, function (err, result) {
       if (err) {
         return reject(err);
       }
-      if (!token) {
+      if (!result) {
         return reject(new OAuthError('Unable to create token, please report this.'));
       }
 
@@ -376,21 +379,21 @@ var saveToken = function (token, client, user) {
       //   user: {}
       // };
       //
-      console.log('saveToken saved token', token.id);
+      debug('saveToken saved result', result.id);
 
       resolve({
-        accessToken: token.access_token,
-        accessTokenExpiresOn: token.access_token_expires_on,
-        clientId: token.client_id,
+        accessToken: result.access_token,
+        accessTokenExpiresOn: result.access_token_expires_on,
+        clientId: result.client_id,
         client: {
-          id: token.client_id
+          id: result.client_id
         },
         user: {
-          id: token.user_id
+          id: result.user_id
         },
-        refreshToken: token.refresh_token,
-        refreshTokenExpiresOn: token.refresh_token_expires_on,
-        userId: token.user_id
+        refreshToken: result.refresh_token,
+        refreshTokenExpiresOn: result.refresh_token_expires_on,
+        userId: result.user_id
       });
     });
   });

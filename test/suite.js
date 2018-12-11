@@ -3,8 +3,7 @@ var expect = require('chai').expect;
 var path = require('path');
 var replay = require('replay');
 var supertest = require('supertest');
-
-var server = require('../bin/www').server;
+var server;
 
 replay.fixtures = path.join(__dirname, '/fixtures/replay');
 
@@ -15,6 +14,7 @@ before(function setUpService() {
   }
 
   // keep the port constant for oauth testing
+  server = require('../bin/www').server; // eslint-disable-line global-require
   test = supertest(server)
     .get('/v1/healthcheck');
 
@@ -27,8 +27,9 @@ before(function setUpService() {
 
 after(function turnOffService() {
   if (process.env.URL) {
-    return null;
+    return;
   }
 
-  return server.close();
+  server.close();
+  server = null;
 });
