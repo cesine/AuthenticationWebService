@@ -160,19 +160,13 @@ exports.postRegister = {
         // the error handler will send cleaned json which can be displayed to the user
         return next(err, req, res, next);
       }
-      // Successful logins should send the user back to /oauth2/authorize.
-      var path = req.body.redirect
-        || util.format('%s?client_id=%s&redirect_uri=%s',
-          '/oauth2/authorize',
-          req.body.client_id,
-          req.body.redirect_uri);
 
       var token = AsToken.sign(user, 60 * 24);
       debug('token', token);
       res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
       res.set('Authorization', 'Bearer ' + token);
 
-      return res.redirect(path);
+      return res.redirect(req.body.redirect_uri || '');
     });
   }
 };
