@@ -8,6 +8,7 @@ var session = require('express-session');
 var supertest = require('supertest');
 var url = require('url');
 
+var service = require('../../auth_service');
 var OauthClient = require('./../../models/oauth-client');
 var UserModel = require('./../../models/user');
 var fixtures = {
@@ -46,7 +47,7 @@ describe('/oauth2', function () {
 
   describe('GET /oauth2/authorize', function () {
     it('should redirect to login if user is not present', function () {
-      return supertest(process.env.URL)
+      return supertest(service)
         .get('/oauth2/authorize')
         .query({
           client_id: 'test-client',
@@ -66,6 +67,27 @@ describe('/oauth2', function () {
   describe('Oauth Dance', function () {
     var clientApp;
     var clientServer;
+    var oauthOpts = {
+      authorizationURL: 'http://localhost:3183/oauth2/authorize',
+      tokenURL: 'http://localhost:3183/oauth2/token',
+      clientID: fixtures.client.client_id,
+      clientSecret: fixtures.client.client_secret,
+      callbackURL: 'http://localhost:8011/auth/example/callback'
+    };
+    var port;
+    var server;
+
+    before(function (done) {
+      server = service.listen(0, function () {
+        port = server.address().port;
+        debug('Listening on http port %d', port);
+        done();
+      });
+    });
+
+    after(function () {
+      server.close();
+    });
 
     before(function setUpClientApp(done) {
       clientApp = new Express();
@@ -82,20 +104,17 @@ describe('/oauth2', function () {
       passport.deserializeUser(function (passportUser, callback) {
         callback(null, passportUser);
       });
-      passport.use(new OAuth2Strategy({
-        authorizationURL: 'https://localhost:3183/oauth2/authorize',
-        tokenURL: 'https://localhost:3183/oauth2/token',
-        clientID: fixtures.client.client_id,
-        clientSecret: fixtures.client.client_secret,
-        callbackURL: 'http://localhost:8011/auth/example/callback'
-      },
-      function (accessToken, refreshToken, profile, cb) {
-        debug('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
-        return cb(null, {
-          id: fixtures.user.id,
-          username: 'somebody'
-        }, { info: 'goes here' });
-      }));
+      oauthOpts.authorizationURL = oauthOpts.authorizationURL.replace('3183', port);
+      oauthOpts.tokenURL = oauthOpts.tokenURL.replace('3183', port);
+      debug('port', port, oauthOpts);
+      passport.use(new OAuth2Strategy(oauthOpts,
+        function (accessToken, refreshToken, profile, cb) {
+          debug('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
+          return cb(null, {
+            id: fixtures.user.id,
+            username: 'somebody'
+          }, { info: 'goes here' });
+        }));
       clientApp.get('/auth/example', function (req, res, next) {
         var x = passport.authenticate('oauth2');
         debug('/auth/example will call passport.authenticate', x);
@@ -170,8 +189,8 @@ describe('/oauth2', function () {
           expect(res.headers.location).to.contain('/oauth2/authorize');
 
           // Request authorization
-          return supertest(process.env.URL)
-            .get(res.headers.location.replace('https://localhost:3183', ''))
+          return supertest(server)
+            .get(res.headers.location.replace('http://localhost:' + port, ''))
             .expect(302);
         })
         .then(function (res) {
@@ -184,7 +203,7 @@ describe('/oauth2', function () {
           expect(loginUrl.query).to.not.contain('state');
 
           // Simulate User Requests login page
-          return supertest(process.env.URL)
+          return supertest(server)
             .get(loginUrl.pathname)
             .query(loginUrl.params)
             .expect(200);
@@ -202,7 +221,7 @@ describe('/oauth2', function () {
           loginUrl.params.password = fixtures.user.password;
 
           // Simulate User Logs in
-          return supertest(process.env.URL)
+          return supertest(server)
             .post(loginUrl.pathname)
             .send(loginUrl.params)
             .expect(302);
@@ -213,20 +232,23 @@ describe('/oauth2', function () {
           expect(res.headers.location).to.contain('/oauth2/authorize');
 
           // Request authorization now that User is logged in
-          return supertest(process.env.URL)
+          return supertest(server)
             .get(res.headers.location)
             .set('Authorization', res.headers.authorization)
             .expect(302);
         })
         .then(function (res) {
+          var callbackUrl;
           debug('after authorize in res.body', res.body);
           debug('after authorize in res.headers', res.headers);
           expect(res.headers.location).to.contain('/auth/example/callback');
           expect(res.headers.authorization).to.contain('Bearer');
 
           // Follow redirect back to client
+          callbackUrl = res.headers.location.replace('http://localhost:8011', '');
+          debug('callbackUrl', callbackUrl);
           return supertest(clientServer)
-            .get(res.headers.location.replace('http://localhost:8011', ''))
+            .get(callbackUrl)
             .set('Authorization', res.headers.authorization)
             .expect(200);
         })
@@ -270,8 +292,8 @@ describe('/oauth2', function () {
   });
 
   describe('POST /oauth2/authorize', function () {
-    it('should redirect to login if user is not present', function () {
-      return supertest(process.env.URL)
+    it('should be not found', function () {
+      return supertest(service)
         .post('/oauth2/authorize')
         .type('form')
         .send({
@@ -293,7 +315,7 @@ describe('/oauth2', function () {
 
   describe('GET /oauth2/token', function () {
     it('should be not found', function () {
-      return supertest(process.env.URL)
+      return supertest(service)
         .get('/oauth2/token')
         .send({
           client_id: 'test-client',
@@ -317,7 +339,7 @@ describe('/oauth2', function () {
 
   describe('POST /oauth2/token', function () {
     it('should validate the authorization code', function () {
-      return supertest(process.env.URL)
+      return supertest(service)
         .post('/oauth2/token')
         .type('form') // content must be application/x-www-form-urlencoded
         .send({

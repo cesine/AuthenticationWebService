@@ -37,7 +37,7 @@ exports.getAuthorize = {
     // Redirect anonymous users to login page.
     if (!res.locals.user) {
       delete req.query.client_secret;
-      return res.redirect('/authentication/login/?'+ querystring.stringify(req.query));
+      return res.redirect('/authentication/login/?' + querystring.stringify(req.query));
     }
 
     var middleware = oauth.authorize({
