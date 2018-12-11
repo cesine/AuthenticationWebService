@@ -79,7 +79,7 @@
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint .",
     "start": "node ./bin/www",
-    "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 mocha --recursive test",
+    "test": "rm db/*.sqlite; NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 mocha --recursive test",
     "test:debug": "node-debug _mocha test/integration/oauth.js",
     "test:deprecated": "bash test/routes/deprecated.sh",
     "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",

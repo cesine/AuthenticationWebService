@@ -36,7 +36,8 @@ exports.getAuthorize = {
 
     // Redirect anonymous users to login page.
     if (!res.locals.user) {
-      return res.redirect(util.format('/authentication/login/?%s&%s', req.path, querystring.stringify(req.query), querystring.stringify({
+      return res.redirect(util.format('/authentication/login/?%s&%s', querystring.stringify(req.query), querystring.stringify({
+        // TODO make the code here?
         code: 'efg',
         state: '789'
       })));
@@ -83,34 +84,36 @@ exports.postAuthorize = {
   },
   action: function postAuthorize(req, res, next) {
     return next(new Error(' not implemnted'));
-    console.log('postAuthorize res.locals', res.locals);
-    console.log('req.headers', req.headers);
-    console.log('req.session', req.session);
-    console.log('req.body', req.body);
-    debug(req.user);
 
-    // Redirect anonymous users to login page.
-    if (!res.locals.user) {
-      debug(req.body, req.params);
-      return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
-        req.body.client_id, req.body.redirect_uri));
-    }
 
-    var middleware = oauth.authorize({
-      handleError: errorMiddleware
-    });
-    console.log('There is a user res.locals.user', res.locals.user, middleware);
+    // console.log('postAuthorize res.locals', res.locals);
+    // console.log('req.headers', req.headers);
+    // console.log('req.session', req.session);
+    // console.log('req.body', req.body);
+    // debug(req.user);
 
-    middleware(req, res, function (err) {
-      console.log('done the authorize middleware', err, req.user, res.locals);
-      // if (err) {
-      //   debug('error authorizing client', err, req.query);
-      //   // the error handler will send cleaned json which can be displayed to the user
-      //   return next(err);
-      // }
+    // // Redirect anonymous users to login page.
+    // if (!res.locals.user) {
+    //   debug(req.body, req.params);
+    //   return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
+    //     req.body.client_id, req.body.redirect_uri));
+    // }
 
-      // res.json({ something: true });
-    });
+    // var middleware = oauth.authorize({
+    //   handleError: errorMiddleware
+    // });
+    // console.log('There is a user res.locals.user', res.locals.user, middleware);
+
+    // middleware(req, res, function (err) {
+    //   console.log('done the authorize middleware', err, req.user, res.locals);
+    //   // if (err) {
+    //   //   debug('error authorizing client', err, req.query);
+    //   //   // the error handler will send cleaned json which can be displayed to the user
+    //   //   return next(err);
+    //   // }
+
+    //   // res.json({ something: true });
+    // });
   }
 };
 
