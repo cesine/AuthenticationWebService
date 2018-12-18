@@ -1,30 +1,22 @@
 var expect = require('chai').expect;
+var AsToken = require('as-token');
 
 var OAuthClient = require('./../../models/oauth-client');
 var OAuthToken = require('./../../models/oauth-token');
 var User = require('./../../models/user');
+var fixtures = {
+  client: require('./../fixtures/client.json'), // eslint-disable-line global-require
+  user: require('./../fixtures/user.json') // eslint-disable-line global-require
+};
 
 describe('oauth client model', function () {
-  var client = {
-    id: 'test-client',
-    client_id: 'test-client',
-    client_secret: 'test-secret'
-  };
-  var user = {
-    id: 'test-user-efg_random_uuid',
-    username: 'test-user',
-    password: 'aje24wersdfgs324rfe+woe',
-    name: {
-      familyName: 'Test'
-    }
-  };
   var token = {
     access_token: 'test-token',
     access_token_expires_on: new Date(1468108856432),
     refresh_token: 'test-refresh',
     refresh_token_expires_on: new Date(1468108856432),
-    client_id: client.client_id,
-    user_id: user.id
+    client_id: fixtures.client.client_id,
+    user_id: fixtures.user.id
   };
 
   before(function (done) {
@@ -33,8 +25,8 @@ describe('oauth client model', function () {
     OAuthToken.init();
 
     setTimeout(function () {
-      OAuthClient.create(client, function () {
-        User.create(user, function () {
+      OAuthClient.create(fixtures.client, function () {
+        User.create(fixtures.user, function () {
           OAuthToken.create(token, function () {
             done();
           });
@@ -60,7 +52,11 @@ describe('oauth client model', function () {
           client_id: client.client_id,
           client_secret: '29j3werd',
           createdAt: client.createdAt,
-          updatedAt: client.updatedAt
+          updatedAt: client.updatedAt,
+          expiresAt: client.expiresAt,
+          throttle: 500,
+          hour_limit: 600,
+          day_limit: 6000
         });
 
         done();
@@ -98,15 +94,16 @@ describe('oauth client model', function () {
             expect(client).to.deep.equal({
               client_id: 'test-client',
               client_secret: 'test-secret',
-              contact: null,
-              title: null,
-              description: null,
-              hour_limit: null,
-              day_limit: null,
-              throttle: null,
+              contact: 'Joe Smoe <joe@smoe.ca>',
+              title: 'Testing Client',
+              description: 'Client used for testing the oauth flow',
+              hour_limit: 600,
+              day_limit: 6000,
+              throttle: 500,
               redirect_uri: 'http://localhost:8011/auth/example/callback',
               deletedAt: null,
               deletedReason: null,
+              expiresAt: client.expiresAt,
               createdAt: client.createdAt,
               updatedAt: client.updatedAt
             });
@@ -206,30 +203,41 @@ describe('oauth client model', function () {
     describe('tokens', function () {
       it('should save an access token', function () {
         return OAuthClient
-          .saveAccessToken(token, client, user)
+          .saveAccessToken('test-token', fixtures.client, fixtures.user)
           .then(function (token) {
             expect(token).not.to.equal(null);
             expect(token).deep.equal({
-              access_token: token.access_token,
-              client_id: 'test-client',
-              access_token_expires_on: token.expires,
-              refresh_token: token.refresh_token,
-              refresh_token_expires_on: token.expires,
-              user_id: user.id
+              accessToken: undefined,
+              client: {
+                id: 'test-client'
+              },
+              clientId: 'test-client',
+              accessTokenExpiresOn: undefined,
+              refreshToken: undefined,
+              refreshTokenExpiresOn: undefined,
+              userId: fixtures.user.id,
+              user: {
+                id: fixtures.user.id
+              }
             });
           });
       });
 
       it('should get an access token', function () {
+        var bearerToken = AsToken.sign({ id: '123' }, 60 * 24);
         return OAuthClient
-          .getAccessToken('test-token')
+          .getAccessToken(bearerToken)
           .then(function (token) {
             expect(token).not.to.equal(null);
             expect(token).deep.equal({
-              accessToken: 'test-token',
-              clientId: 'test-client',
+              accessToken: bearerToken,
+              client: {
+                id: 'test-client'
+              },
               expires: token.expires,
-              userId: 'test-user-efg_random_uuid'
+              user: {
+                id: '123'
+              }
             });
           });
       });
@@ -245,7 +253,7 @@ describe('oauth client model', function () {
             accessToken: 'test-token',
             clientId: 'test-client',
             expires: token.expires,
-            userId: 'test-user-efg_random_uuid'
+            userId: '6e6017b0-4235-11e6-afb5-8d78a35b2f79'
           });
 
           done();
@@ -259,11 +267,28 @@ describe('oauth client model', function () {
           .getClient('test-client', 'test-secret')
           .then(function (client_info) {
             expect(client_info).not.to.equal(null);
+            console.log(JSON.stringify(client_info));
             expect(client_info).deep.equal({
-              clientId: 'test-client',
-              clientSecret: 'test-secret',
-              code: client_info.code,
-              grants: ['authorization_code']
+              id: 'test-client',
+              grants: ['authorization_code'],
+              redirectUris: ['http://localhost:8011/auth/example/callback'],
+              client: {
+                client_id: 'test-client',
+                client_secret: 'test-secret',
+                title: 'Testing Client',
+                description: 'Client used for testing the oauth flow',
+                contact: 'Joe Smoe <joe@smoe.ca>',
+                redirect_uri: 'http://localhost:8011/auth/example/callback',
+                hour_limit: 600,
+                day_limit: 6000,
+                throttle: 500,
+                expiresAt: client_info.client.expiresAt,
+                deletedAt: null,
+                deletedReason: null,
+                createdAt: client_info.client.createdAt,
+                updatedAt: client_info.client.updatedAt,
+                id: 'test-client'
+              }
             });
           });
       });

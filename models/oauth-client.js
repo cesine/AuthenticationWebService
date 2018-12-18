@@ -4,6 +4,7 @@ var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
 var _ = require('lodash');
 var uuid = require('uuid');
+var AsToken = require('as-token');
 
 var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
@@ -50,6 +51,9 @@ function create(options, callback) {
   }
 
   options.expiresAt = Date.now() + 5 * YEAR;
+  options.hour_limit = 600;
+  options.day_limit = 6000;
+  options.throttle = 500;
 
   return oauthClient
     .create(options)
@@ -153,11 +157,10 @@ function init() {
  */
 var getAccessToken = function (bearerToken) {
   return new Promise(function (resolve, reject) {
-    // if (bearerToken.indexOf(AsToken.config.jwt.prefix) === 0) {
-    //   return reject(new OAuthError('This is a JWT token'));
-    // }
-
+    var user = AsToken.verify(bearerToken);
     var access_token = bearerToken.replace(/bearer +/i, '');
+
+    debug('getAccessToken for user', user);
     debug('getAccessToken access_token', access_token);
 
     OAuthToken.create({
@@ -166,7 +169,7 @@ var getAccessToken = function (bearerToken) {
       refresh_token: '23waejsowj4wejsrd',
       refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
       client_id: 'test-client', // TODO hard coded
-      user_id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79' // TODO hard coded
+      user_id: user.id
     }, function (err, token) {
       if (err) {
         return reject(err);
@@ -177,7 +180,6 @@ var getAccessToken = function (bearerToken) {
 
       resolve({
         accessToken: token.access_token,
-        clientId: token.client_id,
         expires: token.access_token_expires_on,
         client: {
           id: token.client_id
@@ -199,41 +201,30 @@ var getAccessToken = function (bearerToken) {
  */
 var AUTHORIZATION_CODE_TRANSIENT_STORE = {};
 var getClient = function (clientId, clientSecret) {
-  debug('getClient', arguments);
+  debug('getClient arguments', arguments);
 
-  return new Promise(function (resolve, reject) {
-    read({
-      client_id: clientId
-      // client_secret: clientSecret
-    }, function (err, client) {
-      if (err) {
-        return reject(err);
-      }
-      if (!client) {
-        return reject(new Error('Client id is invalid'));
-      }
+  return oauthClient.find({
+    client_id: clientId,
+    client_secret: clientSecret,
+    deletedAt: null
+  }).then(function (client) {
+    if (!client) {
+      throw new Error('Client id or secret is invalid');
+    }
 
-      // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L144
-      // Seems to require a grants
-      // { grants: ['password'] }
-      // { grants: ['authorization_code'], redirectUris: ['http://example.com'] };
-      var code = uuid.v4();
-      var json = {
-        client: {
-          id: client.client_id
-        },
-        id: client.client_id,
-        expiresAt: new Date(client.expiresAt || Date.now() + 60 * 60 * 1000),
-        clientId: client.client_id,
-        // clientSecret: client.client_secret,
-        grants: ['authorization_code'],
-        redirectUris: client.redirect_uri ? client.redirect_uri.split(',') : [],
-        code: code
-      };
+    // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L144
+    // Seems to require a grants
+    // { grants: ['password'] }
+    // { grants: ['authorization_code'], redirectUris: ['http://example.com'] };
+    var json = {
+      client: client.toJSON(),
+      id: clientId,
+      grants: ['authorization_code'],
+      redirectUris: client.redirect_uri ? client.redirect_uri.split(',') : []
+    };
+    json.client.id = client.client_id;
 
-      AUTHORIZATION_CODE_TRANSIENT_STORE[code] = json;
-      resolve(json);
-    });
+    return json;
   });
 };
 

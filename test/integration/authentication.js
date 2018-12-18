@@ -4,6 +4,7 @@ var AsToken = require('as-token');
 
 var service = require('./../../auth_service');
 var User = require('./../../models/user');
+var fixture = require('./../fixtures/user.json');
 
 describe('/authentication', function () {
   before(function (done) {
@@ -127,7 +128,7 @@ describe('/authentication', function () {
           expect(decoded).to.deep.equal({
             name: {
               givenName: '',
-              familyName: process.env.TRAVIS ? '' : 'Test'
+              familyName: ''
             },
             id: 'test-user-efg_random_uuid',
             revision: decoded.revision,
@@ -296,8 +297,8 @@ describe('/authentication', function () {
 
           return supertest(service)
             .get(res.headers.location)
-            .set('Authorization', res.headers.authorization)
-            // .expect(302);
+            .set('Authorization', res.headers.authorization);
+          // .expect(302);
         })
         .then(function (res) {
           expect(res.body).to.deep.equal({

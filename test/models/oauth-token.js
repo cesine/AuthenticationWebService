@@ -59,12 +59,12 @@ describe('oauth token model', function () {
       before(function (done) {
         OauthToken
           .create({
-            access_token: 'test-token',
+            access_token: 'test-token-lookup',
             access_token_expires_on: new Date(1468108856432),
             refresh_token: 'test-refresh',
             refresh_token_expires_on: new Date(1468108856432),
             client_id: 'test-client',
-            user_id: 'test-user-efg_random_uuid'
+            user_id: 'test-user-efg_random_uuid-lookup'
           }, function () {
             done();
           });
@@ -73,16 +73,16 @@ describe('oauth token model', function () {
       it('should look up an access token', function (done) {
         OauthToken
           .read({
-            access_token: 'test-token'
+            access_token: 'test-token-lookup'
           }, function (err, token) {
             if (err) {
               return done(err);
             }
 
-            expect(token.access_token).equal('test-token');
+            expect(token.access_token).equal('test-token-lookup');
             expect(token.refresh_token).equal('test-refresh');
             expect(token.client_id).equal('test-client');
-            expect(token.user_id).equal('test-user-efg_random_uuid');
+            expect(token.user_id).equal('test-user-efg_random_uuid-lookup');
 
             expect(token.access_token_expires_on instanceof Date).to.equal(true);
             expect(token.refresh_token_expires_on instanceof Date).to.equal(true);

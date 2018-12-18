@@ -2,5 +2,8 @@
   "id": "test-client",
   "client_id": "test-client",
   "client_secret": "test-secret",
+  "title": "Testing Client",
+  "description": "Client used for testing the oauth flow",
+  "contact": "Joe Smoe <joe@smoe.ca>",
   "redirect_uri": "http://localhost:8011/auth/example/callback"
 }
