@@ -9,6 +9,7 @@ var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
 var User = require('./user');
 
+var YEAR = 1000 * 60 * 60 * 24 * 365;
 var sequelize = new Sequelize('database', 'id', 'password', {
   dialect: 'sqlite',
   pool: {
@@ -33,6 +34,7 @@ var oauthClient = sequelize.define('oauth_clients', {
   hour_limit: Sequelize.BIGINT, // requests per hour
   day_limit: Sequelize.BIGINT, // requests per calendar day
   throttle: Sequelize.INTEGER, // miliseconds
+  expiresAt: Sequelize.DATE, // expiry date
   deletedAt: Sequelize.DATE,
   deletedReason: Sequelize.TEXT
 });
@@ -46,6 +48,8 @@ function create(options, callback) {
   if (!options) {
     return callback(new Error('Invalid Options'));
   }
+
+  options.expiresAt = Date.now() + 5 * YEAR;
 
   return oauthClient
     .create(options)
