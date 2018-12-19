@@ -72,6 +72,7 @@ describe('/oauth2', function () {
       tokenURL: 'http://localhost:3183/oauth2/token',
       clientID: fixtures.client.client_id,
       clientSecret: fixtures.client.client_secret,
+      state: true,
       callbackURL: 'http://localhost:8011/auth/example/callback'
     };
     var port;
@@ -176,6 +177,8 @@ describe('/oauth2', function () {
      */
     it('should perform oauth2 dance', function () {
       var loginUrl;
+      var clientAppSessionCookies;
+
       // Trigger the dance
       return supertest('http://localhost:8011')
         .get('/auth/example')
@@ -183,32 +186,34 @@ describe('/oauth2', function () {
           client_id: fixtures.client.client_id
         })
         .set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-        .expect(302)
         .then(function (res) {
           debug(' client app redirect res.headers', res.headers);
+          expect(res.status).to.equal(302, res.text);
           expect(res.headers.location).to.contain('/oauth2/authorize');
+          expect(res.headers.location).to.contain('state=');
+          clientAppSessionCookies = res.headers['set-cookie'];
 
           // Request authorization
           return supertest(server)
-            .get(res.headers.location.replace('http://localhost:' + port, ''))
-            .expect(302);
+            .get(res.headers.location.replace('http://localhost:' + port, ''));
         })
         .then(function (res) {
           debug(' service redirect res.headers', res.headers);
+          expect(res.status).to.equal(302, res.text);
           loginUrl = url.parse(res.headers.location);
           loginUrl.params = querystring.parse(loginUrl.query);
           debug('loginUrl', loginUrl);
           expect(loginUrl.pathname).to.equal('/authentication/login/');
           expect(loginUrl.query).to.not.contain('undefined');
-          expect(loginUrl.query).to.not.contain('state');
+          expect(loginUrl.query).to.contain('state');
 
           // Simulate User Requests login page
           return supertest(server)
             .get(loginUrl.pathname)
-            .query(loginUrl.params)
-            .expect(200);
+            .query(loginUrl.params);
         })
         .then(function (res) {
+          expect(res.status).to.equal(200, res.text);
           expect(res.text).to.contain('Login');
           expect(res.text).to.contain('button');
           expect(res.text).to.contain('Password');
@@ -223,24 +228,25 @@ describe('/oauth2', function () {
           // Simulate User Logs in
           return supertest(server)
             .post(loginUrl.pathname)
-            .send(loginUrl.params)
-            .expect(302);
+            .send(loginUrl.params);
         })
         .then(function (res) {
           debug('logged in res.body', res.body);
           debug('logged in res.headers', res.headers);
+          expect(res.status).to.equal(302, res.text);
           expect(res.headers.location).to.contain('/oauth2/authorize');
+          expect(res.headers.location).to.contain('state=');
 
           // Request authorization now that User is logged in
           return supertest(server)
             .get(res.headers.location)
-            .set('Authorization', res.headers.authorization)
-            .expect(302);
+            .set('Authorization', res.headers.authorization);
         })
         .then(function (res) {
           var callbackUrl;
           debug('after authorize in res.body', res.body);
           debug('after authorize in res.headers', res.headers);
+          expect(res.status).to.equal(302, res.text);
           expect(res.headers.location).to.contain('/auth/example/callback');
           expect(res.headers.authorization).to.contain('Bearer');
 
@@ -250,7 +256,7 @@ describe('/oauth2', function () {
           return supertest(clientServer)
             .get(callbackUrl)
             .set('Authorization', res.headers.authorization)
-            .expect(200);
+            .set('Cookie', clientAppSessionCookies);
         })
         .then(function (res) {
           debug('after app callback res.status', res.status);
@@ -258,8 +264,11 @@ describe('/oauth2', function () {
           debug('after app callback res.headers', res.headers);
 
           // Expect client succesfully got user profile and token
+          expect(res.status).to.equal(200, res.text);
           expect(res.body.query.code).length(40);
+          expect(res.body.query.state).length(24);
           expect(res.body.headers.authorization).to.contain('Bearer v1');
+          expect(res.body.headers.cookie).to.contain('connect.sid=');
           expect(res.body).to.deep.equal({
             success: 'called back',
             headers: {
@@ -267,10 +276,12 @@ describe('/oauth2', function () {
               'accept-encoding': 'gzip, deflate',
               'user-agent': 'node-superagent/3.8.3',
               authorization: res.body.headers.authorization,
-              connection: 'close'
+              connection: 'close',
+              cookie: res.body.headers.cookie
             },
             query: {
-              code: res.body.query.code
+              code: res.body.query.code,
+              state: res.body.query.state
             },
             session: {
               cookie: {

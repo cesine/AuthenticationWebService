@@ -51,6 +51,9 @@ var errorHandler = function (err, req, res, next) {
     data.status = 403;
     data.message = data.message;
     data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
+  } else if (err.message === 'Missing parameter: `state`') {
+    data.message = data.message;
+    data.userFriendlyErrors = err.userFriendlyErrors || [data.message];
   } else if (err.message === 'Client id or Client Secret is invalid') {
     data.status = 403;
     data.userFriendlyErrors = err.userFriendlyErrors || [data.message];

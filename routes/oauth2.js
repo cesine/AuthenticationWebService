@@ -42,7 +42,6 @@ exports.getAuthorize = {
 
     var middleware = oauth.authorize({
       handleError: errorMiddleware
-      // allowEmptyState: true,
     });
     debug('There is a user res.locals.user', res.locals.user, middleware);
     debug('req.headers', req.headers);
