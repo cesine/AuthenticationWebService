@@ -1,11 +1,22 @@
 var AsToken = require('as-token');
 var debug = require('debug')('authentication');
+var lodash = require('lodash');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
 var sequelize = require('sequelize');
-var util = require('util');
 var querystring = require('querystring');
 
 var User = require('../models/user');
+
+function signUserAsToken(user, client) {
+  var tokenJson = lodash.omit(user, ['hash', 'deletedAt', 'deletedReason']);
+  if (client) {
+    tokenJson.clientId = client.client_id;
+  }
+  debug('signUserAsToken', tokenJson);
+  return AsToken.sign(tokenJson, 60 * 24);
+}
+
+exports.signUserAsToken = signUserAsToken;
 
 /**
  * Log in
@@ -45,24 +56,25 @@ exports.postLogin = {
     User.verifyPassword({
       password: req.body.password,
       username: req.body.username
-    }, function (err, user) {
+    }, function whenVerified(err, user) {
+      var token;
+      var redirect;
+
       delete req.body.password;
       if (err) {
         debug('error logging in', err, user);
+        // eslint-disable-next-line no-param-reassign
         err.status = 403;
         // the error handler will send cleaned json which can be displayed to the user
         return next(err, req, res, next);
       }
 
-      delete user.hash;
-      delete user.deletedAt;
-      delete user.deletedReason;
-      var token = AsToken.sign(user, 60 * 24);
+      token = signUserAsToken(user);
       debug('token', token);
       res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
       res.set('Authorization', 'Bearer ' + token);
 
-      var redirect = req.body.redirect || req.body.redirect_uri + '?' + querystring.stringify(req.body);
+      redirect = req.body.redirect || req.body.redirect_uri + '?' + querystring.stringify(req.body);
       return res.redirect(redirect);
     });
   }
@@ -82,7 +94,7 @@ exports.getLogout = {
     errorResponses: [],
     nickname: 'getLogout'
   },
-  action: function getLogout(req, res, next) {
+  action: function getLogout(req, res) {
     res.set('Set-Cookie', 'Authorization=null; path=/; Secure; HttpOnly');
     res.set('Authorization', 'null');
     res.redirect(req.query.redirect || '/authentication/login');
@@ -146,8 +158,11 @@ exports.postRegister = {
       return next(err, req, res, next);
     }
 
-    User.create(req.body, function (err, user) {
-      if (err) {
+    return User.create(req.body, function whenCreated(createErr, user) {
+      var token;
+
+      if (createErr) {
+        err = createErr;
         debug('Error registering the user', err, user);
 
         if (err instanceof sequelize.UniqueConstraintError
@@ -161,7 +176,7 @@ exports.postRegister = {
         return next(err, req, res, next);
       }
 
-      var token = AsToken.sign(user, 60 * 24);
+      token = signUserAsToken(user);
       debug('token', token);
       res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
       res.set('Authorization', 'Bearer ' + token);

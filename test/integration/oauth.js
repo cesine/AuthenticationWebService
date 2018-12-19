@@ -1,3 +1,4 @@
+var AsToken = require('as-token');
 var debug = require('debug')('test:integration:oauth');
 var expect = require('chai').expect;
 var Express = require('express');
@@ -249,6 +250,29 @@ describe('/oauth2', function () {
           expect(res.status).to.equal(302, res.text);
           expect(res.headers.location).to.contain('/auth/example/callback');
           expect(res.headers.authorization).to.contain('Bearer');
+
+          var token = res.headers.authorization.replace(/Bearer v1\//, '');
+          var decoded = AsToken.verify(token);
+          expect(decoded).to.deep.equal({
+            name: {
+              givenName: 'Anony',
+              familyName: 'Mouse'
+            },
+            id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
+            revision: decoded.revision,
+            // deletedAt: null,
+            // deletedReason: '',
+            username: 'test-anonymouse',
+            email: '',
+            gravatar: decoded.gravatar,
+            description: 'Friendly',
+            language: 'zh',
+            // hash: decoded.hash,
+            createdAt: decoded.createdAt,
+            updatedAt: decoded.updatedAt,
+            iat: decoded.iat,
+            exp: decoded.exp
+          });
 
           // Follow redirect back to client
           callbackUrl = res.headers.location.replace('http://localhost:8011', '');
