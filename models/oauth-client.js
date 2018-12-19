@@ -2,7 +2,7 @@
 
 var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
-var _ = require('lodash');
+var lodash = require('lodash');
 var AsToken = require('as-token');
 
 var OAuthError = require('oauth2-server/lib/errors/oauth-error');
@@ -40,13 +40,22 @@ var oauthClient = sequelize.define('oauth_clients', {
   deletedReason: Sequelize.TEXT
 });
 
+function signUserAsToken(user, client) {
+  var tokenJson = lodash.omit(user, ['hash', 'deletedAt', 'deletedReason', 'exp']);
+  if (client) {
+    tokenJson.clientId = client.client_id;
+  }
+  debug('signUserAsToken', tokenJson);
+  return AsToken.sign(tokenJson, 60 * 24);
+}
+
 /**
  * Create a oauth client in the database
  * @param  {oauthClient}   client
  * @param callback
  */
 function create(options, callback) {
-  var opts = _.clone(options);
+  var opts = lodash.clone(options);
   if (!options) {
     return callback(new Error('Invalid Options'));
   }
@@ -90,7 +99,7 @@ function read(client, callback) {
  * @param callback        [description]
  */
 function list(opts, callback) {
-  var options = _.clone(opts || {});
+  var options = lodash.clone(opts || {});
   options.limit = options.limit || 10;
   options.offset = options.offset || 0;
   options.where = options.where || {
@@ -147,7 +156,7 @@ function init() {
 
 /*
  * https://oauth2-server.readthedocs.io/en/latest/misc/migrating-v2-to-v3.html?highlight=getAccessToken
- *
+ * TODO should read or create token?
  * getAccessToken(token) should return an object with:
  *    accessToken (String)
  *    accessTokenExpiresAt (Date)
@@ -158,17 +167,23 @@ function init() {
 function getAccessToken(bearerToken) {
   return new Promise(function whenPromise(resolve, reject) {
     var user = AsToken.verify(bearerToken);
-    var access_token = bearerToken.replace(/bearer +/i, '');
+    var client = {
+      client_id: 'test-client' // TODO hard coded
+    };
+    var access_token;
 
     debug('getAccessToken for user', user);
     debug('getAccessToken access_token', access_token);
 
+    access_token = signUserAsToken(user, client);
+    console.log('access_token', access_token);
+
     OAuthToken.create({
       access_token: access_token,
       access_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
-      refresh_token: '23waejsowj4wejsrd',
+      refresh_token: '23waejsowj4wejsrd', // TODO hard coded
       refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
-      client_id: 'test-client', // TODO hard coded
+      client_id: client.client_id,
       user_id: user.id
     }, function whenCreated(err, token) {
       if (err) {
@@ -256,7 +271,7 @@ function revokeAuthorizationCode(code) {
   debug('revokeAuthorizationCode', arguments);
 
   return new Promise(function whenPromise(resolve) {
-    var revokedCode = _.clone(code);
+    var revokedCode = lodash.clone(code);
     var itWas = AUTHORIZATION_CODE_TRANSIENT_STORE[code.code];
     debug('revoked ', itWas);
 
@@ -403,6 +418,7 @@ module.exports.init = init;
 module.exports.list = list;
 module.exports.read = read;
 
+module.exports.signUserAsToken = signUserAsToken;
 module.exports.getAccessToken = getAccessToken;
 module.exports.getAuthorizationCode = getAuthorizationCode;
 module.exports.saveAuthorizationCode = saveAuthorizationCode;

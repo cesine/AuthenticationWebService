@@ -224,13 +224,13 @@ describe('oauth client model', function () {
       });
 
       it('should get an access token', function () {
-        var bearerToken = AsToken.sign({ id: '123' }, 60 * 24);
+        var bearerToken = AsToken.sign({ id: '123', something: 'else' }, 60 * 24);
         return OAuthClient
           .getAccessToken(bearerToken)
           .then(function (token) {
             expect(token).not.to.equal(null);
             expect(token).deep.equal({
-              accessToken: bearerToken,
+              accessToken: token.accessToken,
               client: {
                 id: 'test-client'
               },
@@ -238,6 +238,13 @@ describe('oauth client model', function () {
               user: {
                 id: '123'
               }
+            });
+            expect(AsToken.decode(token.accessToken)).deep.equal({
+              id: '123',
+              something: 'else',
+              clientId: 'test-client',
+              iat: Math.floor(Date.now() / 1000),
+              exp: Math.floor((Date.now() + 1440000) / 1000)
             });
           });
       });

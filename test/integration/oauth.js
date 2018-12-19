@@ -292,6 +292,30 @@ describe('/oauth2', function () {
           expect(res.body.query.code).length(40);
           expect(res.body.query.state).length(24);
           expect(res.body.headers.authorization).to.contain('Bearer v1');
+
+          var token = res.body.headers.authorization.replace(/Bearer v1\//, '');
+          var decoded = AsToken.verify(token);
+          expect(decoded).to.deep.equal({
+            name: {
+              givenName: 'Anony',
+              familyName: 'Mouse'
+            },
+            id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
+            revision: decoded.revision,
+            // deletedAt: null,
+            // deletedReason: '',
+            username: 'test-anonymouse',
+            email: '',
+            gravatar: decoded.gravatar,
+            description: 'Friendly',
+            language: 'zh',
+            // hash: decoded.hash,
+            createdAt: decoded.createdAt,
+            updatedAt: decoded.updatedAt,
+            iat: decoded.iat,
+            exp: decoded.exp
+          });
+
           expect(res.body.headers.cookie).to.contain('connect.sid=');
           expect(res.body).to.deep.equal({
             success: 'called back',

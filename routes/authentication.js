@@ -6,17 +6,7 @@ var sequelize = require('sequelize');
 var querystring = require('querystring');
 
 var User = require('../models/user');
-
-function signUserAsToken(user, client) {
-  var tokenJson = lodash.omit(user, ['hash', 'deletedAt', 'deletedReason']);
-  if (client) {
-    tokenJson.clientId = client.client_id;
-  }
-  debug('signUserAsToken', tokenJson);
-  return AsToken.sign(tokenJson, 60 * 24);
-}
-
-exports.signUserAsToken = signUserAsToken;
+var signUserAsToken = require('../models/oauth-client').signUserAsToken;
 
 /**
  * Log in
