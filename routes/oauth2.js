@@ -1,11 +1,9 @@
 var debug = require('debug')('oauth:routes');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
-var util = require('util');
 var querystring = require('querystring');
 
 var errorMiddleware = require('../middleware/error-handler').errorHandler;
 var oauth = require('../middleware/oauth');
-var OAuthClient = require('../models/oauth-client');
 
 /**
  * Get authorization from a given user
@@ -29,6 +27,7 @@ exports.getAuthorize = {
     nickname: 'getAuthorize'
   },
   action: function getAuthorize(req, res) {
+    var middleware;
     debug('getAuthorize res.locals', res.locals);
     debug('req.path', req.path);
     debug('req.query', req.query);
@@ -40,13 +39,13 @@ exports.getAuthorize = {
       return res.redirect('/authentication/login/?' + querystring.stringify(req.query));
     }
 
-    var middleware = oauth.authorize({
+    middleware = oauth.authorize({
       handleError: errorMiddleware
     });
     debug('There is a user res.locals.user', res.locals.user, middleware);
     debug('req.headers', req.headers);
 
-    return middleware(req, res, function (err) {
+    return middleware(req, res, function whenDoneAuthorizeMiddleware(err) {
       debug('done the authorize middleware', err, req.user, res.locals);
       // if (err) {
       //   debug('error authorizing client', err, req.query);
@@ -79,14 +78,15 @@ exports.postToken = {
     errorResponses: [],
     nickname: 'postToken'
   },
-  action: function postToken(req, res, next) {
+  action: function postToken(req, res) {
+    var middleware;
     debug('postToken', req.query, req.body, res.headers);
 
-    var middleware = oauth.token({
+    middleware = oauth.token({
       handleError: errorMiddleware
     });
 
-    middleware(req, res, function (err) {
+    middleware(req, res, function whenDoneTokenMiddleware(err) {
       debug('done the token middleware', err, req.user, res.locals);
       // if (err) {
       //   debug('error authorizing client', err, req.query);
