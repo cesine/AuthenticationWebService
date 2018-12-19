@@ -1,4 +1,5 @@
 var Sequelize = require('sequelize');
+var lodash = require('lodash');
 
 var sequelize = new Sequelize('database', 'id', 'password', {
   dialect: 'sqlite',
@@ -38,9 +39,9 @@ function create(options, callback) {
     return callback(new Error('Invalid Options'));
   }
 
-  oauthToken
+  return oauthToken
     .create(options)
-    .then(function (dbToken) {
+    .then(function whenCreated(dbToken) {
       callback(null, dbToken.toJSON());
     })
     .catch(callback);
@@ -68,13 +69,13 @@ function read(token, callback) {
     return callback(new Error('Read tokens by  either access_token or refresh_token'));
   }
 
-  oauthToken
+  return oauthToken
     .find(options)
-    .then(function (dbModel) {
+    .then(function whenFound(dbModel) {
       if (!dbModel) {
         return callback(null, null);
       }
-      callback(null, dbModel.toJSON());
+      return callback(null, dbModel.toJSON());
     })
     .catch(callback);
 }
@@ -85,23 +86,24 @@ function read(token, callback) {
  * @return {Promise}        [description]
  */
 function list(options, callback) {
-  options = options || {};
-  options.limit = options.limit || 10;
-  options.offset = options.offset || 0;
-  options.where = options.where || {
-    deletedAt: null
-  };
+  var opts = lodash.assign({
+    limit: 10,
+    offset: 0,
+    where: {
+      deletedAt: null
+    }
+  }, options);
 
-  options.attributes = ['access_token', 'client_id', 'user_id', 'deletedReason'];
+  opts.attributes = ['access_token', 'client_id', 'user_id', 'deletedReason'];
 
-  oauthToken
-    .findAll(options)
-    .then(function (oauth_tokens) {
+  return oauthToken
+    .findAll(opts)
+    .then(function whenFound(oauth_tokens) {
       if (!oauth_tokens) {
         return callback(new Error('Unable to fetch oauthToken collection'));
       }
 
-      callback(null, oauth_tokens.map(function (dbModel) {
+      return callback(null, oauth_tokens.map(function mapToJson(dbModel) {
         return dbModel.toJSON();
       }));
     })
