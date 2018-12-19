@@ -1,21 +1,6 @@
 #!/usr/local/bin/node
-/* Load modules provided by Node */
-var debug = require('debug')('auth:service');
-var https = require('https');
-var path = require('path');
-/* Load modules provided by $ npm install, see package.json for details */
-var crossOriginResourceSharing = require('cors');
-var express = require('express');
-var favicon = require('serve-favicon');
-var bunyan = require('express-bunyan-logger');
-var session = require('express-session');
 var bodyParser = require('body-parser');
-
-/* Load modules provided by this codebase */
-var errorHandler = require('./middleware/error-handler').errorHandler;
-var authenticationMiddleware = require('./middleware/authentication');
-var authWebServiceRoutes = require('./routes/routes');
-var deprecatedRoutes = require('./routes/deprecated');
+var bunyan = require('express-bunyan-logger');
 /**
  * You can control aspects of the deployment by using Environment Variables
  *
@@ -26,27 +11,36 @@ var deprecatedRoutes = require('./routes/deprecated');
  * $ NODE_ENV=local             # uses config/local.js
  * $ NODE_ENV=yoursecretconfig  # uses config/yoursecretconfig.js
  */
-debug('process.env.NODE_ENV', process.env.NODE_ENV);
 var config = require('config');
+var crossOriginResourceSharing = require('cors');
+var debug = require('debug')('auth:service');
+var express = require('express');
+var favicon = require('serve-favicon');
+var path = require('path');
+
+/* Load modules provided by this codebase */
+var authenticationMiddleware = require('./middleware/authentication');
+var authWebServiceRoutes = require('./routes/routes');
+var errorHandler = require('./middleware/error-handler').errorHandler;
+var deprecatedRoutes = require('./routes/deprecated');
 var apiVersion = 'v1'; // 'v' + parseInt(require('./package.json').version, 10);
-debug('Accepting api version ' + apiVersion);
 var corsOptions = {
   credentials: true,
   maxAge: 86400,
   methods: 'HEAD, POST, GET, PUT, PATCH, DELETE',
   allowedHeaders: 'Access-Control-Allow-Origin, access-control-request-headers, accept, accept-charset, accept-encoding, accept-language, authorization, content-length, content-type, host, origin, proxy-connection, referer, user-agent, x-requested-with',
-  origin: function origin(origin, callback) {
+  origin: function isOriginWhiteListed(origin, callback) {
     var originIsWhitelisted = false;
     if (/* permit curl */ origin === undefined || /* permit android */ origin === 'null' || origin === null || !origin) {
       originIsWhitelisted = true;
     } else if (origin.search(/^https?:\/\/.*\.lingsync.org$/) > -1
       || origin.search(/^https?:\/\/.*\.phophlo.ca$/) > -1
       || origin.search(/^https?:\/\/(localhost|127.0.0.1):[0-9]*$/) > -1
-      || origin.search(/^chrome-extension:\/\/[^\/]*$/) > -1
+      || origin.search(/^chrome-extension:\/\/[^/]*$/) > -1
       || origin.search(/^https?:\/\/.*\.jrwdunham.com$/) > -1) {
       originIsWhitelisted = true;
     }
-    // debug(new Date() + " Responding with CORS options for " + origin + " accept as whitelisted is: " + originIsWhitelisted);
+    debug(new Date() + ' Responding with CORS options for ' + origin + ' accept as whitelisted is: ' + originIsWhitelisted);
     callback(null, originIsWhitelisted);
   }
 };
@@ -62,6 +56,7 @@ authWebService.use(crossOriginResourceSharing(corsOptions));
 //   }
 //   next();
 // });
+debug('Accepting api version ' + apiVersion);
 
 /**
  * Middleware
@@ -71,7 +66,7 @@ authWebService.use(crossOriginResourceSharing(corsOptions));
 // service.oauth = oauthMiddleware;
 authWebService.use(authenticationMiddleware.jwt);
 
-authWebService.use(favicon(__dirname + '/public/favicon.ico'));
+authWebService.use(favicon(path.join(__dirname, '/public/favicon.ico')));
 authWebService.use(bunyan({
   name: 'fielddb-auth',
   streams: [{
@@ -102,13 +97,11 @@ authWebService.options('*', function options(req, res) {
   }
 });
 
-authWebService.use('/bower_components', express.static(__dirname
-  + '/public/components/as-ui-auth/bower_components'));
-authWebService.use('/authentication', authenticationMiddleware.redirectAuthenticatedUser, express.static(__dirname
-  + '/public/components/as-ui-auth/components'));
+authWebService.use('/bower_components', express.static(path.join(__dirname,
+  '/public/components/as-ui-auth/bower_components')));
+authWebService.use('/authentication', authenticationMiddleware.redirectAuthenticatedUser, express.static(path.join(__dirname, '/public/components/as-ui-auth/components')));
 authWebService.use('/authentication/register', authenticationMiddleware.redirectAuthenticatedUser,
-  express.static(__dirname
-  + '/public/components/as-ui-auth/components/signup'));
+  express.static(path.join(__dirname, '/public/components/as-ui-auth/components/signup')));
 
 /**
  * Set up all the available URL authWebServiceRoutes see routes/routes.js for more details
@@ -123,8 +116,8 @@ deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
  * Not found
  */
 authWebService.use(function notFoundMiddleware(req, res, next) {
-  debug(req.url + ' was not found/handled');
   var err = new Error('Not Found');
+  debug(req.url + ' was not found/handled');
   err.status = 404;
   next(err, req, res, next);
 });
