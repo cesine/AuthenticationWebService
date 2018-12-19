@@ -38,7 +38,7 @@ describe('/oauth2', function () {
   });
 
   before(function (done) {
-    return UserModel
+    UserModel
       .create(fixtures.user, function (err, result) {
         debug('created user', result);
         done();
@@ -223,7 +223,7 @@ describe('/oauth2', function () {
 
           loginUrl.params.redirect = '/oauth2/authorize?' + querystring.stringify(loginUrl.params);
           loginUrl.params.username = fixtures.user.username;
-          loginUrl.params.password = fixtures.user.password;
+          loginUrl.params.password = 'phonemes';
 
           // Simulate User Logs in
           return supertest(server)
