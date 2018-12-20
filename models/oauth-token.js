@@ -1,14 +1,18 @@
 var Sequelize = require('sequelize');
 var lodash = require('lodash');
 
+var env = process.env;
+var DEBUG = env.DEBUG;
+var NODE_ENV = env.NODE_ENV;
 var sequelize = new Sequelize('database', 'id', 'password', {
   dialect: 'sqlite',
+  logging: /(sql|oauth|token)/.test(DEBUG) ? console.log : false,
   pool: {
     max: 5,
     min: 0,
     idle: 10000
   },
-  storage: 'db/oauth_tokens.sqlite'
+  storage: 'db/oauth_tokens_' + NODE_ENV + '.sqlite'
 });
 
 var oauthToken = sequelize.define('oauth_tokens', {

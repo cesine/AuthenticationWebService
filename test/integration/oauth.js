@@ -65,7 +65,7 @@ describe('/oauth2', function () {
     });
   });
 
-  describe('Oauth Dance', function () {
+  describe('OAuth2 Dance', function () {
     var clientApp;
     var clientServer;
     var oauthOpts = {

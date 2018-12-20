@@ -1,17 +1,21 @@
 var bcrypt = require('bcrypt');
 var crypto = require('crypto');
-var debug = require('debug')('user');
+var debug = require('debug')('model:user');
 var lodash = require('lodash');
 var Sequelize = require('sequelize');
 
+var env = process.env;
+var DEBUG = env.DEBUG;
+var NODE_ENV = env.NODE_ENV;
 var sequelize = new Sequelize('database', 'username', 'password', {
   dialect: 'sqlite',
+  logging: /(sql|user)/.test(DEBUG) ? console.log : false,
   pool: {
     max: 5,
     min: 0,
     idle: 10000
   },
-  storage: 'db/users.sqlite'
+  storage: 'db/users_' + NODE_ENV + '.sqlite'
 });
 
 var DEFAULT_GRAVATAR = '9a85e3d0-4233-11e6-bac0-4b263459491d';

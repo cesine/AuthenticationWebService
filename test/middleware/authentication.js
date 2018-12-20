@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var authentication = require('./../../middleware/authentication');
 
-describe('authentication middleware', function () {
+describe('middleware/authentication', function () {
   it('should load', function () {
     expect(authentication).to.be.a('object');
     expect(authentication.jwt).to.be.a('function');

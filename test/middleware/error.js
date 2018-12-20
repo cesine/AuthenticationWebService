@@ -3,7 +3,7 @@ var sinon = require('sinon');
 
 var error = require('./../../middleware/error-handler').errorHandler;
 
-describe('error middleware', function () {
+describe('middleware/error-handler', function () {
   var NODE_ENV = process.env.NODE_ENV;
   var err = new Error('oops');
   err.status = 500;

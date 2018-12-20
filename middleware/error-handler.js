@@ -1,5 +1,7 @@
 var debug = require('debug')('middleware:error');
 
+var BUNYAN_LOG_LEVEL = process.env.BUNYAN_LOG_LEVEL;
+
 var cleanErrorStatus = function (status) {
   if (status && status < 600) {
     return status;
@@ -74,7 +76,9 @@ var errorHandler = function (err, req, res, next) {
   if (data.status >= 500) {
     data.stack = data.stack ? data.stack.toString() : undefined;
     data.message = 'Internal server error';
-    console.log(new Date() + 'There was an unexpected error ' + process.env.NODE_ENV + req.url, err);
+    if (BUNYAN_LOG_LEVEL !== 'FATAL') {
+      console.log(new Date() + 'There was an unexpected error ' + process.env.NODE_ENV + req.url, err);
+    }
   } else {
     data.message = err.message;
   }

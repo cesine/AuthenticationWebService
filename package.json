@@ -75,11 +75,11 @@
     "node": ">8.x.x"
   },
   "scripts": {
-    "coverage": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 istanbul cover _mocha --include-all-sources -- --recursive test && istanbul check-coverage  --statements 34 --functions 28 --branches 21 --lines 34",
+    "coverage": "NODE_ENV=test BUNYAN_LOG_LEVEL=FATAL NODE_TLS_REJECT_UNAUTHORIZED=0 istanbul cover _mocha --include-all-sources -- --recursive test && istanbul check-coverage  --statements 34 --functions 28 --branches 21 --lines 34",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint .",
     "start": "node ./bin/www",
-    "test": "rm db/*.sqlite; NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 mocha --recursive test",
+    "test": "rm db/*test.sqlite; NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 mocha --recursive test",
     "test:debug": "node-debug _mocha test/integration/oauth.js",
     "test:deprecated": "bash test/routes/deprecated.sh",
     "test:fielddb": "NODE_ENV=localhost jasmine-node node_modules/fielddb/tests",

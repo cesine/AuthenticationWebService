@@ -3,7 +3,7 @@ var supertest = require('supertest');
 
 var authWebService = require('./../../auth_service');
 
-describe('Corpus REST API', function () {
+describe('/ deprecated', function () {
   describe('login', function () {
     it('should handle invalid users', function () {
       return supertest(authWebService)

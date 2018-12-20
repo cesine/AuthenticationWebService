@@ -1,6 +1,6 @@
 /* global Promise */
 
-var debug = require('debug')('oauth:model');
+var debug = require('debug')('model:oauth');
 var Sequelize = require('sequelize');
 var lodash = require('lodash');
 var AsToken = require('as-token');
@@ -9,16 +9,20 @@ var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
 var User = require('./user');
 
+var env = process.env;
+var DEBUG = env.DEBUG;
+var NODE_ENV = env.NODE_ENV;
 var YEAR = 1000 * 60 * 60 * 24 * 365;
 var AUTHORIZATION_CODE_TRANSIENT_STORE = {};
 var sequelize = new Sequelize('database', 'id', 'password', {
   dialect: 'sqlite',
+  logging: /(sql|oauth)/.test(DEBUG) ? console.log : false,
   pool: {
     max: 5,
     min: 0,
     idle: 10000
   },
-  storage: 'db/oauth_clients.sqlite'
+  storage: 'db/oauth_clients_' + NODE_ENV + '.sqlite'
 });
 
 var oauthClient = sequelize.define('oauth_clients', {
@@ -176,7 +180,7 @@ function getAccessToken(bearerToken) {
     debug('getAccessToken access_token', access_token);
 
     access_token = signUserAsToken(user, client);
-    console.log('access_token', access_token);
+    debug('updated access_token', access_token);
 
     OAuthToken.create({
       access_token: access_token,

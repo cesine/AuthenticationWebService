@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var OauthToken = require('./../../models/oauth-token');
 
-describe('oauth token model', function () {
+describe('models/oauth-token', function () {
   before(function () {
     OauthToken.init();
   });
@@ -56,14 +56,15 @@ describe('oauth token model', function () {
     });
 
     describe('existing OauthTokens', function () {
+      var clientId = 'test-client' + Date.now();
       before(function (done) {
         OauthToken
           .create({
-            access_token: 'test-token-lookup',
+            access_token: 'test-token-lookup' + clientId,
             access_token_expires_on: new Date(1468108856432),
             refresh_token: 'test-refresh',
             refresh_token_expires_on: new Date(1468108856432),
-            client_id: 'test-client',
+            client_id: clientId,
             user_id: 'test-user-efg_random_uuid-lookup'
           }, function () {
             done();
@@ -73,15 +74,15 @@ describe('oauth token model', function () {
       it('should look up an access token', function (done) {
         OauthToken
           .read({
-            access_token: 'test-token-lookup'
+            access_token: 'test-token-lookup' + clientId
           }, function (err, token) {
             if (err) {
               return done(err);
             }
 
-            expect(token.access_token).equal('test-token-lookup');
+            expect(token.access_token).equal('test-token-lookup' + clientId);
             expect(token.refresh_token).equal('test-refresh');
-            expect(token.client_id).equal('test-client');
+            expect(token.client_id).equal(clientId);
             expect(token.user_id).equal('test-user-efg_random_uuid-lookup');
 
             expect(token.access_token_expires_on instanceof Date).to.equal(true);

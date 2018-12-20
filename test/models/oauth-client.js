@@ -9,7 +9,7 @@ var fixtures = {
   user: require('./../fixtures/user.json') // eslint-disable-line global-require
 };
 
-describe('oauth client model', function () {
+describe('models/oauth-client', function () {
   var token = {
     access_token: 'test-token',
     access_token_expires_on: new Date(1468108856432),
@@ -274,7 +274,6 @@ describe('oauth client model', function () {
           .getClient('test-client', 'test-secret')
           .then(function (client_info) {
             expect(client_info).not.to.equal(null);
-            console.log(JSON.stringify(client_info));
             expect(client_info).deep.equal({
               id: 'test-client',
               grants: ['authorization_code'],

@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var oauth = require('./../../routes/oauth2');
 
-describe('oauth routes', function () {
+describe('routes/oauth2', function () {
   it('should load', function () {
     expect(oauth).to.be.a('object');
     expect(oauth.getAuthorize).to.be.a('object');

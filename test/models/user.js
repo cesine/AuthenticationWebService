@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var User = require('./../../models/user');
 
-describe('user model', function () {
+describe('models/user', function () {
   before(function () {
     return User.init();
   });
