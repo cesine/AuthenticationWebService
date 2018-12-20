@@ -5,7 +5,6 @@ var Sequelize = require('sequelize');
 var lodash = require('lodash');
 var AsToken = require('as-token');
 
-var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
 var User = require('./user');
 
@@ -260,7 +259,7 @@ function getAuthorizationCode(code) {
       // };
       return resolve(result);
     }
-    err = new OAuthError('Code is not authorized', {
+    err = new Error('Code is not authorized', {
       code: 403
     });
     err.status = 403;
@@ -391,7 +390,7 @@ function saveToken(token, value, user) {
         return reject(err);
       }
       if (!result) {
-        return reject(new OAuthError('Unable to create token, please report this.'));
+        return reject(new Error('Unable to create token, please report this.'));
       }
 
       access_token = signUserAsToken(user, value.client);
