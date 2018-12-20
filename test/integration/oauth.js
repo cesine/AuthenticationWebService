@@ -112,8 +112,9 @@ describe('/oauth2', function () {
       passport.use(new OAuth2Strategy(oauthOpts,
         function (accessToken, refreshToken, profile, cb) {
           debug('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
+          // res.set('Authorization', 'Bearer ' + accessToken);
           return cb(null, {
-            id: fixtures.user.id,
+            id: fixtures.user.id, // TODO hard coded
             username: 'somebody'
           }, { info: 'goes here' });
         }));
@@ -176,7 +177,7 @@ describe('/oauth2', function () {
       3183-->8011: { token, profile }
       8011-->User: Welcome anonymous!
      */
-    it('should perform oauth2 dance', function () {
+    it.only('should perform oauth2 dance', function () {
       var loginUrl;
       var clientAppSessionCookies;
 

@@ -81,6 +81,7 @@ exports.postToken = {
   action: function postToken(req, res) {
     var middleware;
     debug('postToken', req.query, req.body, res.headers);
+    // req.user = res.locals.user; TODO where does the user that is passed to client come from
 
     middleware = oauth.token({
       handleError: errorMiddleware
@@ -88,6 +89,10 @@ exports.postToken = {
 
     middleware(req, res, function whenDoneTokenMiddleware(err) {
       debug('done the token middleware', err, req.user, res.locals);
+
+      // TODO how return the token?
+      // res.set('Authorization', 'Bearer ' + res.locals.oauth.token.accessToken);
+
       // if (err) {
       //   debug('error authorizing client', err, req.query);
       //   // the error handler will send cleaned json which can be displayed to the user

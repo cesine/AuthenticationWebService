@@ -175,9 +175,7 @@ function getAccessToken(bearerToken) {
       client_id: 'test-client' // TODO hard coded
     };
     var access_token;
-
     debug('getAccessToken for user', user);
-    debug('getAccessToken access_token', access_token);
 
     access_token = signUserAsToken(user, client);
     debug('updated access_token', access_token);
@@ -252,15 +250,15 @@ function getAuthorizationCode(code) {
   debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
 
   return new Promise(function whenPromise(resolve, reject) {
-    var client = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+    var result = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
     var err;
-    if (client) {
+    if (result) {
       // delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
-      client.expiresAt = new Date(client.expiresAt);
-      client.user = {
-        id: client.user_id
-      };
-      return resolve(client);
+      result.expiresAt = new Date(result.expiresAt);
+      // result.user = {
+      //   id: client.user_id
+      // };
+      return resolve(result);
     }
     err = new OAuthError('Code is not authorized', {
       code: 403
@@ -286,16 +284,23 @@ function revokeAuthorizationCode(code) {
   });
 }
 
-function saveAuthorizationCode(authorizationCode, value, client) {
+function saveAuthorizationCode(authorizationCode, value, user) {
   debug('saveAuthorizationCode authorizationCode', authorizationCode);
   debug('saveAuthorizationCode value', value);
-  debug('saveAuthorizationCode client', client);
+  debug('saveAuthorizationCode user', user);
 
   return new Promise(function whenPromise(resolve) {
-    AUTHORIZATION_CODE_TRANSIENT_STORE[authorizationCode.authorizationCode] = value;
+    var result = {
+      authorizationCode:authorizationCode.authorizationCode,
+      code: authorizationCode,
+      client: value.client,
+      user: user,
+      expiresAt: authorizationCode.expiresAt,
+    };
+    AUTHORIZATION_CODE_TRANSIENT_STORE[authorizationCode.authorizationCode] = result;
     debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
 
-    resolve({ authorizationCode: authorizationCode.authorizationCode });
+    resolve(result);
   });
 }
 
@@ -354,7 +359,7 @@ function getUser(username, password, callback) {
       return callback(null);
     }
 
-    return callback(null, profile.id);
+    return callback(null, profile);
   });
 }
 
@@ -367,17 +372,17 @@ function validateScope() {
  * Save token.
  */
 
-function saveToken(token, client, user) {
+function saveToken(token, value, user) {
   debug('saveToken ', arguments);
   return new Promise(function whenPromise(resolve, reject) {
-    if (!token || !client || !user) {
+    if (!token || !value || !user) {
       return reject(new Error('Invalid Options'));
     }
 
     return OAuthToken.create({
       access_token: token.accessToken,
       access_token_expires_on: token.accessTokenExpiresOn,
-      client_id: client.id,
+      client_id: value.client.client_id,
       refresh_token: token.refreshToken,
       refresh_token_expires_on: token.refreshTokenExpiresOn,
       user_id: user.id
@@ -389,6 +394,8 @@ function saveToken(token, client, user) {
         return reject(new OAuthError('Unable to create token, please report this.'));
       }
 
+      access_token = signUserAsToken(user, value.client);
+      debug('updated access_token', access_token);
       // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L238
       // {
       //   accessToken: 'foobar',
@@ -397,20 +404,17 @@ function saveToken(token, client, user) {
       // };
       //
       debug('saveToken saved result', result.id);
+      user.accessToken = access_token;
 
       return resolve({
-        accessToken: result.access_token,
+        accessToken: result.id,
         accessTokenExpiresOn: result.access_token_expires_on,
-        clientId: result.client_id,
-        client: {
-          id: result.client_id
-        },
-        user: {
-          id: result.user_id
-        },
+        // clientId: result.client_id,
+        client: value.client,
+        user: user,
         refreshToken: result.refresh_token,
         refreshTokenExpiresOn: result.refresh_token_expires_on,
-        userId: result.user_id
+        // userId: result.user_id
       });
     });
   });
