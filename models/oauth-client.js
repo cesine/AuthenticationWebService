@@ -233,7 +233,7 @@ function getClient(clientId, clientSecret) {
     // { grants: ['password'] }
     // { grants: ['authorization_code'], redirectUris: ['http://example.com'] };
     json = {
-      client: client.toJSON(),
+      client: client.toJSON(), // TODO remove the secret
       id: clientId,
       grants: ['authorization_code'],
       redirectUris: client.redirect_uri ? client.redirect_uri.split(',') : []

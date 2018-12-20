@@ -178,7 +178,7 @@ describe('/oauth2', function () {
       3183-->8011: { token, profile }
       8011-->User: Welcome anonymous!
      */
-    it.only('should perform oauth2 dance', function () {
+    it('should perform oauth2 dance', function () {
       var loginUrl;
       var clientAppSessionCookies;
 

@@ -12,7 +12,7 @@ var fixtures = {
 describe('models/oauth-client', function () {
   var token = {
     access_token: 'test-token',
-    access_token_expires_on: new Date(1468108856432),
+    accessTokenExpiresAt: new Date(1468108856432),
     refresh_token: 'test-refresh',
     refresh_token_expires_on: new Date(1468108856432),
     client_id: fixtures.client.client_id,
@@ -203,22 +203,18 @@ describe('models/oauth-client', function () {
     describe('tokens', function () {
       it('should save an access token', function () {
         return OAuthClient
-          .saveAccessToken('test-token', fixtures.client, fixtures.user)
+          .saveAccessToken('test-token', { client: fixtures.client }, fixtures.user)
           .then(function (token) {
             expect(token).not.to.equal(null);
             expect(token).deep.equal({
-              accessToken: undefined,
-              client: {
-                id: 'test-client'
-              },
-              clientId: 'test-client',
-              accessTokenExpiresOn: undefined,
+              accessToken: token.accessToken,
+              client: fixtures.client,
+              // clientId: 'test-client',
+              accessTokenExpiresAt: undefined,
               refreshToken: undefined,
               refreshTokenExpiresOn: undefined,
-              userId: fixtures.user.id,
-              user: {
-                id: fixtures.user.id
-              }
+              // userId: fixtures.user.id,
+              user: fixtures.user
             });
           });
       });
@@ -234,7 +230,7 @@ describe('models/oauth-client', function () {
               client: {
                 id: 'test-client'
               },
-              expires: token.expires,
+              accessTokenExpiresAt: token.accessTokenExpiresAt,
               user: {
                 id: '123'
               }
@@ -259,7 +255,7 @@ describe('models/oauth-client', function () {
           expect(token).deep.equal({
             accessToken: 'test-token',
             clientId: 'test-client',
-            expires: token.expires,
+            accessTokenExpiresAt: token.accessTokenExpiresAt,
             userId: '6e6017b0-4235-11e6-afb5-8d78a35b2f79'
           });
 
@@ -302,13 +298,30 @@ describe('models/oauth-client', function () {
 
     describe('users', function () {
       it('should get a user', function (done) {
-        OAuthClient.getUser('test-user', 'aje24wersdfgs324rfe+woe', function (err, userId) {
+        OAuthClient.getUser('test-user', 'aje24wersdfgs324rfe+woe', function (err, profile) {
           if (err) {
             return done(err);
           }
 
-          expect(userId).not.to.equal(null);
-          expect(userId).equal('test-user-efg_random_uuid');
+          expect(profile).not.to.equal(null);
+          expect(profile).to.deep.equal({
+            name: {
+              givenName: '',
+              familyName: ''
+            },
+            id: 'test-user-efg_random_uuid',
+            revision: profile.revision,
+            deletedAt: null,
+            deletedReason: '',
+            username: 'test-user',
+            email: '',
+            gravatar: '9cb479887459352928d4126f898454cf',
+            description: '',
+            language: '',
+            hash: profile.hash,
+            createdAt: profile.createdAt,
+            updatedAt: profile.updatedAt
+          });
 
           done();
         });
