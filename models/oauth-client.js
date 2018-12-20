@@ -181,7 +181,7 @@ function getAccessToken(bearerToken) {
 
     OAuthToken.create({
       access_token: access_token,
-      access_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
+      accessTokenExpiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000),
       refresh_token: '23waejsowj4wejsrd', // TODO hard coded
       refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
       client_id: client.client_id,
@@ -196,7 +196,7 @@ function getAccessToken(bearerToken) {
 
       return resolve({
         accessToken: token.access_token,
-        expires: token.access_token_expires_on,
+        accessTokenExpiresAt: token.accessTokenExpiresAt,
         client: {
           id: token.client_id
         },
@@ -290,11 +290,11 @@ function saveAuthorizationCode(authorizationCode, value, user) {
 
   return new Promise(function whenPromise(resolve) {
     var result = {
-      authorizationCode:authorizationCode.authorizationCode,
+      authorizationCode: authorizationCode.authorizationCode,
       code: authorizationCode,
       client: value.client,
       user: user,
-      expiresAt: authorizationCode.expiresAt,
+      expiresAt: authorizationCode.expiresAt
     };
     AUTHORIZATION_CODE_TRANSIENT_STORE[authorizationCode.authorizationCode] = result;
     debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
@@ -321,7 +321,7 @@ function getRefreshToken(bearerToken, callback) {
     return callback(null, {
       accessToken: token.access_token,
       clientId: token.client_id,
-      expires: token.access_token_expires_on,
+      accessTokenExpiresAt: token.accessTokenExpiresAt,
       userId: token.user_id
     });
   });
@@ -364,7 +364,7 @@ function getUser(username, password, callback) {
 
 function validateScope() {
   debug('validateScope', arguments);
-  return true;
+  return true; // TODO hard coded
 }
 
 /**
@@ -380,7 +380,7 @@ function saveToken(token, value, user) {
 
     return OAuthToken.create({
       access_token: token.accessToken,
-      access_token_expires_on: token.accessTokenExpiresOn,
+      accessTokenExpiresAt: token.accessTokenExpiresAt,
       client_id: value.client.client_id,
       refresh_token: token.refreshToken,
       refresh_token_expires_on: token.refreshTokenExpiresOn,
@@ -407,12 +407,12 @@ function saveToken(token, value, user) {
 
       return resolve({
         accessToken: result.id,
-        accessTokenExpiresOn: result.access_token_expires_on,
+        accessTokenExpiresAt: result.accessTokenExpiresAt,
         // clientId: result.client_id,
         client: value.client,
         user: user,
         refreshToken: result.refresh_token,
-        refreshTokenExpiresOn: result.refresh_token_expires_on,
+        refreshTokenExpiresOn: result.refresh_token_expires_on
         // userId: result.user_id
       });
     });

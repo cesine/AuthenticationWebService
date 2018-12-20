@@ -83,6 +83,9 @@ function requireAuthentication(req, res, next) {
     return next(err, req, res, next);
   }
 
+  // TOOD can add oauth middleware = oauth.authenticate({ });
+  // https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L42
+
   next();
 }
 

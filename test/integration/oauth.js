@@ -55,6 +55,7 @@ describe('/oauth2', function () {
           client_secret: 'test-secret',
           grant_type: 'authorization_code',
           redirect_uri: 'http://localhost:8011/v1/users'
+          // scope: 'corpora, datalist, session, speech'
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')

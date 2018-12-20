@@ -22,7 +22,7 @@ var oauthToken = sequelize.define('oauth_tokens', {
     primaryKey: true
   },
   access_token: Sequelize.TEXT,
-  access_token_expires_on: Sequelize.DATE,
+  accessTokenExpiresAt: Sequelize.DATE,
   client_id: Sequelize.TEXT,
   deletedAt: Sequelize.DATE,
   deletedReason: Sequelize.TEXT,

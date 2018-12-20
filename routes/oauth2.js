@@ -26,7 +26,7 @@ exports.getAuthorize = {
     errorResponses: [],
     nickname: 'getAuthorize'
   },
-  action: function getAuthorize(req, res) {
+  action: function getAuthorize(req, res, next) {
     var middleware;
     debug('getAuthorize res.locals', res.locals);
     debug('req.path', req.path);
@@ -39,19 +39,17 @@ exports.getAuthorize = {
       return res.redirect('/authentication/login/?' + querystring.stringify(req.query));
     }
 
-    middleware = oauth.authorize({
-      handleError: errorMiddleware
-    });
+    middleware = oauth.authorize({});
     debug('There is a user res.locals.user', res.locals.user, middleware);
     debug('req.headers', req.headers);
 
     return middleware(req, res, function whenDoneAuthorizeMiddleware(err) {
       debug('done the authorize middleware', err, req.user, res.locals);
-      // if (err) {
-      //   debug('error authorizing client', err, req.query);
-      //   // the error handler will send cleaned json which can be displayed to the user
-      //   return next(err);
-      // }
+      if (err) {
+        debug('error authorizing client', err, req.query);
+        // the error handler will send cleaned json which can be displayed to the user
+        return next(err);
+      }
 
       // res.json({ something: true });
     });
@@ -78,14 +76,12 @@ exports.postToken = {
     errorResponses: [],
     nickname: 'postToken'
   },
-  action: function postToken(req, res) {
+  action: function postToken(req, res, next) {
     var middleware;
     debug('postToken', req.query, req.body, res.headers);
     // req.user = res.locals.user; TODO where does the user that is passed to client come from
 
-    middleware = oauth.token({
-      handleError: errorMiddleware
-    });
+    middleware = oauth.token({});
 
     middleware(req, res, function whenDoneTokenMiddleware(err) {
       debug('done the token middleware', err, req.user, res.locals);
@@ -93,11 +89,11 @@ exports.postToken = {
       // TODO how return the token?
       // res.set('Authorization', 'Bearer ' + res.locals.oauth.token.accessToken);
 
-      // if (err) {
-      //   debug('error authorizing client', err, req.query);
-      //   // the error handler will send cleaned json which can be displayed to the user
-      //   return next(err);
-      // }
+      if (err) {
+        debug('error authorizing client', err, req.query);
+        // the error handler will send cleaned json which can be displayed to the user
+        return next(err);
+      }
 
       // res.json({ something: true });
     });
