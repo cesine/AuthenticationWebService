@@ -160,7 +160,6 @@ function init() {
 
 /*
  * https://oauth2-server.readthedocs.io/en/latest/misc/migrating-v2-to-v3.html?highlight=getAccessToken
- * TODO should read or create token?
  * getAccessToken(token) should return an object with:
  *    accessToken (String)
  *    accessTokenExpiresAt (Date)
