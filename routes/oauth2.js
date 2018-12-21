@@ -39,7 +39,7 @@ exports.getAuthorize = {
       return res.redirect('/authentication/login/?' + querystring.stringify(req.query));
     }
 
-    middleware = oauth.authorize({});
+    middleware = oauth.authorize({ scope: req.query.scope });
     debug('There is a user res.locals.user', res.locals.user, middleware);
     debug('req.headers', req.headers);
 

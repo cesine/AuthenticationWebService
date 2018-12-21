@@ -55,7 +55,6 @@ describe('/oauth2', function () {
           client_secret: 'test-secret',
           grant_type: 'authorization_code',
           redirect_uri: 'http://localhost:8011/v1/users'
-          // scope: 'corpora, datalist, session, speech'
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -66,7 +65,7 @@ describe('/oauth2', function () {
     });
   });
 
-  describe('OAuth2 Dance', function () {
+  describe.only('OAuth2 Dance', function () {
     var clientApp;
     var clientServer;
     var oauthOpts = {
@@ -75,7 +74,8 @@ describe('/oauth2', function () {
       clientID: fixtures.client.client_id,
       clientSecret: fixtures.client.client_secret,
       state: true,
-      callbackURL: 'http://localhost:8011/auth/example/callback'
+      callbackURL: 'http://localhost:8011/auth/example/callback',
+      scope: 'corpora, datalist, session, speech'
     };
     var port;
     var server;
@@ -409,7 +409,8 @@ describe('/oauth2', function () {
             accessTokenExpiresAt: newToken.accessTokenExpiresAt,
             refreshToken: newToken.refreshToken,
             client: {
-              client_id: 'test-client'
+              client_id: 'test-client',
+              scope: 'corpora, datalist, session, speech, activity'
             },
             user: {
               name: {

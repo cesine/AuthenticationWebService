@@ -33,6 +33,7 @@ var oauthClient = sequelize.define('oauth_clients', {
   client_secret: Sequelize.TEXT,
   title: Sequelize.TEXT,
   description: Sequelize.TEXT,
+  scope: Sequelize.TEXT,
   contact: Sequelize.TEXT,
   redirect_uri: Sequelize.TEXT,
   hour_limit: Sequelize.BIGINT, // requests per hour
@@ -174,13 +175,13 @@ function getAccessToken(bearerToken) {
       client_id: 'test-client' // TODO hard coded
     };
     var access_token;
-    debug('getAccessToken for token', decoded);
+    debug('getAccessToken for token', bearerToken, decoded);
 
-    access_token = signUserAsToken(decoded);
-    debug('updated access_token', access_token);
+    // access_token = signUserAsToken(decoded);
+    // debug('updated access_token', access_token);
 
     OAuthToken.create({
-      access_token: access_token,
+      access_token: bearerToken,
       accessTokenExpiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000),
       refresh_token: '23waejsowj4wejsrd', // TODO hard coded
       refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
@@ -194,8 +195,9 @@ function getAccessToken(bearerToken) {
         return reject(new Error('Unable to get access token, please report this'));
       }
 
+      debug('getAccessToken created token', token);
       return resolve({
-        accessToken: token.access_token,
+        accessToken: token.id,
         accessTokenExpiresAt: token.accessTokenExpiresAt,
         client: {
           id: client.client_id
@@ -360,10 +362,16 @@ function getUser(username, password, callback) {
   });
 }
 
-function validateScope() {
-  debug('validateScope', arguments);
-  return true; // TODO hard coded
+function verifyScope(decodedToken, scope, callback) {
+  console.log('verifyScope', arguments);
+  // TODO look up if the client permits those scopes
+  return callback(null, true);
 }
+
+// function validateScope(user, decodedToken) {
+//   console.log('validateScope', arguments);
+//   return decodedToken && decodedToken.client && decodedToken.client.scope;
+// }
 
 /**
  * Save token.
@@ -443,4 +451,5 @@ module.exports.getTokenFromCode = getTokenFromCode;
 module.exports.getUser = getUser;
 module.exports.saveToken = saveToken;
 module.exports.saveAccessToken = saveToken;
-module.exports.validateScope = validateScope;
+// module.exports.validateScope = validateScope;
+module.exports.verifyScope = verifyScope;
