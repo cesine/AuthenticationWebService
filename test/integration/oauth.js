@@ -66,7 +66,7 @@ describe('/oauth2', function () {
     });
   });
 
-  describe('OAuth2 Dance', function () {
+  describe.only('OAuth2 Dance', function () {
     var clientApp;
     var clientServer;
     var oauthOpts = {
@@ -131,17 +131,27 @@ describe('/oauth2', function () {
         passport.authenticate('oauth2', {
           failureRedirect: '/login'
         }),
-        function (req, res) {
+        function (req, res, next) {
           debug('auth/example/callback got called back', req.headers, req.body, req.query);
-          // Successful authentication
-          res.json({
-            success: 'called back',
-            headers: req.headers,
-            body: req.body,
-            locals: res.locals,
-            query: req.query,
-            session: req.session
-          });
+          // Successful authentication, now try to use the token
+
+          debug('requesting an authenticated route usnig this token', req.session.passport.user.accessToken);
+          supertest(server)
+            .get('/v1/user') // an authenticated route
+            // .set('Authorization', req.headers.authorization)
+            .set('Authorization', 'Bearer ' + req.session.passport.user.accessToken)
+            .then(function whenContactedApi(response) {
+              res.json({
+                success: 'called back',
+                headers: req.headers,
+                body: req.body,
+                locals: res.locals,
+                query: req.query,
+                session: req.session,
+                response: response.body,
+              });
+            }).catch(next);
+
         });
       // eslint-disable-next-line no-unused-vars
       clientApp.use(function (err, req, res, next) {
@@ -368,6 +378,25 @@ describe('/oauth2', function () {
                   updatedAt: decoded.user.updatedAt
                 }
               }
+            },
+            response: {
+              name: {
+                givenName: 'Anony',
+                familyName: 'Mouse'
+              },
+              id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
+              revision: res.body.response.revision,
+              username: 'test-anonymouse',
+              email: '',
+              gravatar: res.body.response.gravatar,
+              description: 'Friendly',
+              language: 'zh',
+              hash: res.body.response.hash,
+              createdAt: res.body.response.createdAt,
+              updatedAt: res.body.response.updatedAt,
+              deletedAt: null,
+              deletedReason: '',
+              token: 'Bearer ' + res.body.session.passport.user.accessToken
             }
           });
 

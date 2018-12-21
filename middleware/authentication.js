@@ -51,7 +51,7 @@ function jwt(req, res, next) {
   if (tokenString) {
     try {
       var verified = AsToken.verify(tokenString);
-      res.locals.user = req.user = verified;
+      res.locals.user = req.user = verified.user;
       res.locals.token = tokenString;
       // Oauth2 is trying to use this token
       // delete req.headers.authorization;
@@ -60,7 +60,7 @@ function jwt(req, res, next) {
     } catch (err) {
       // Often this is because it has expired or it was mutated
       debug(err);
-      res.locals.user = req.user = AsToken.decode(tokenString);
+      res.locals.user = req.user = AsToken.decode(tokenString).user;
       res.locals.user.expired = true;
       return next();
     }

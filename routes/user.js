@@ -64,6 +64,12 @@ exports.getCurrentUser = {
         if (err) {
           return next(err, req, res, next);
         }
+
+        if (!profile){
+          var notFound = new Error('Not found');
+          notFound.status = 404;
+          return next(notFound);
+        }
         profile.token = res.locals.token;
         res.json(profile);
       });
