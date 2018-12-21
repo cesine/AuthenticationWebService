@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var user = require('./../../routes/user');
 
-describe('user routes', function () {
+describe('routes/user', function () {
   it('should load', function () {
     expect(user).to.be.a('object');
     expect(user.getUser).to.be.a('object');

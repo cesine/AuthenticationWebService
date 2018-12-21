@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var oauth = require('./../../middleware/oauth');
 
-describe('oauth middleware', function () {
+describe('middleware/oauth', function () {
   it('should load', function () {
     expect(oauth).to.be.a('object');
     expect(oauth.server).to.be.a('object');
@@ -11,7 +11,6 @@ describe('oauth middleware', function () {
     expect(oauth.server.authorize).to.be.a('function');
 
     expect(oauth.server.options).to.be.a('object');
-    expect(oauth.server.options.debug).equal(true);
     expect(oauth.server.options.model).to.be.a('object');
 
     expect(oauth.server.options.model.getClient).to.be.a('function');

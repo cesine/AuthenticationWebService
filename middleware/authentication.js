@@ -51,16 +51,16 @@ function jwt(req, res, next) {
   if (tokenString) {
     try {
       var verified = AsToken.verify(tokenString);
-      res.locals.user = req.user = verified;
+      res.locals.user = req.user = verified.user;
       res.locals.token = tokenString;
       // Oauth2 is trying to use this token
-      delete req.headers.authorization;
+      // delete req.headers.authorization;
 
       res.set('Authorization', res.locals.token);
     } catch (err) {
       // Often this is because it has expired or it was mutated
       debug(err);
-      res.locals.user = req.user = AsToken.decode(tokenString);
+      res.locals.user = req.user = AsToken.decode(tokenString).user;
       res.locals.user.expired = true;
       return next();
     }
@@ -82,6 +82,9 @@ function requireAuthentication(req, res, next) {
     err.status = 403;
     return next(err, req, res, next);
   }
+
+  // TOOD can add oauth middleware = oauth.authenticate({ });
+  // https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L42
 
   next();
 }

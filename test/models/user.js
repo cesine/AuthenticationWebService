@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var User = require('./../../models/user');
 
-describe('user model', function () {
+describe('models/user', function () {
   before(function () {
     return User.init();
   });
@@ -94,7 +94,7 @@ describe('user model', function () {
         expect(profile.hash).length(60);
         expect(profile.deletedAt).to.equal(null);
 
-        done();
+        return done();
       });
     });
 
@@ -386,7 +386,7 @@ describe('user model', function () {
 
   describe('password', function () {
     var userWithPassword = {
-      username: 'test-password',
+      username: 'test-password' + Date.now(),
       name: {
         givenName: 'Test',
         familyName: 'Password'
@@ -396,7 +396,11 @@ describe('user model', function () {
 
     before(function (done) {
       User.init();
-      User.create(userWithPassword, function () {
+      User.create(userWithPassword, function (err, profile) {
+        if (profile) {
+          expect(userWithPassword.password).to.equal(undefined);
+          userWithPassword.hash = profile.hash;
+        }
         done();
       });
     });
@@ -440,6 +444,54 @@ describe('user model', function () {
         }
 
         expect(profile.username).equal(userWithPassword.username);
+
+        done();
+      });
+    });
+
+    it('should be able to change a password', function (done) {
+      expect(userWithPassword.hash).to.not.equal(undefined);
+      User.changePassword({
+        username: userWithPassword.username,
+        password: 'zKmmfweLj2!h',
+        newPassword: 'changedpassword'
+      }, function (err, updatedProfile) {
+        if (err) {
+          return done(err);
+        }
+        expect(updatedProfile.hash).to.not.equal(userWithPassword.hash);
+
+        User.changePassword({
+          username: userWithPassword.username,
+          password: 'changedpassword',
+          newPassword: 'zKmmfweLj2!h'
+        }, function () {
+          done();
+        });
+      });
+    });
+
+    it('should require matching old password to able to change a password', function (done) {
+      var info = {
+        username: userWithPassword.username,
+        password: 'nottherightpassword',
+        newPassword: 'attempedpassword'
+      };
+      User.changePassword(info, function (err, updatedProfile) {
+        expect(err.message).to.equal('Password doesn\'t match your old password');
+
+        done();
+      });
+    });
+
+    it('should bubble bycrpt errors', function (done) {
+      var info = {
+        username: userWithPassword.username,
+        password: 'zKmmfweLj2!h',
+        newPassword: 123
+      };
+      User.changePassword(info, function (err, updatedProfile) {
+        expect(err.message).to.equal('data must be a string and salt must either be a salt string or a number of rounds');
 
         done();
       });

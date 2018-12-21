@@ -118,30 +118,32 @@ describe('/authentication', function () {
         .expect('Authorization', /Bearer v1\//)
         .then(function (res) {
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize?client_id=abc-li-12-li'
-            + '&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
+          expect(res.text).to.equal('Found. Redirecting to http://localhost:8011/some/place/users?with=other-stuff?client_id=abc-li-12-li&redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff&username=test-user');
 
           var token = res.headers.authorization.replace(/Bearer v1\//, '');
           expect(token).to.not.equal(undefined);
 
           var decoded = AsToken.decode(token);
           expect(decoded).to.deep.equal({
-            name: {
-              givenName: '',
-              familyName: process.env.TRAVIS ? '' : 'Test'
+            client: {},
+            user: {
+              name: {
+                givenName: '',
+                familyName: ''
+              },
+              id: 'test-user-efg_random_uuid',
+              revision: decoded.user.revision,
+              // deletedAt: null,
+              // deletedReason: '',
+              username: 'test-user',
+              email: '',
+              gravatar: decoded.user.gravatar,
+              description: '',
+              language: '',
+              // hash: decoded.user.hash,
+              createdAt: decoded.user.createdAt,
+              updatedAt: decoded.user.updatedAt
             },
-            id: 'test-user-efg_random_uuid',
-            revision: decoded.revision,
-            // deletedAt: null,
-            // deletedReason: '',
-            username: 'test-user',
-            email: '',
-            gravatar: decoded.gravatar,
-            description: '',
-            language: '',
-            // hash: decoded.hash,
-            createdAt: decoded.createdAt,
-            updatedAt: decoded.updatedAt,
             iat: decoded.iat,
             exp: decoded.exp
           });
@@ -293,24 +295,14 @@ describe('/authentication', function () {
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .then(function (res) {
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize?client_id=abc-li-12-li&'
-            + 'redirect_uri=/v1/users/' + username + '?with=other-stuff');
+          expect(res.text).to.deep.equal('Found. Redirecting to /v1/users/' + username + '?with=other-stuff');
 
           return supertest(service)
             .get(res.headers.location)
-            .set('Authorization', res.headers.authorization)
-            .expect(302);
+            .set('Authorization', res.headers.authorization);
+          // .expect(302);
         })
         .then(function (res) {
-          expect(res.headers.location).to.equal('/v1/users/' + username + '?with=other-stuff');
-
-          return supertest(service)
-            .get(res.headers.location)
-            .set('Authorization', res.headers.authorization)
-            .expect(200);
-        })
-        .then(function (res) {
-          console.log('res.body', res.body);
           expect(res.body).to.deep.equal({
             name: {
               givenName: '',

@@ -1,13 +1,18 @@
 var Sequelize = require('sequelize');
+var lodash = require('lodash');
 
+var env = process.env;
+var DEBUG = env.DEBUG;
+var NODE_ENV = env.NODE_ENV;
 var sequelize = new Sequelize('database', 'id', 'password', {
   dialect: 'sqlite',
+  logging: /(sql|oauth|token)/.test(DEBUG) ? console.log : false,
   pool: {
     max: 5,
     min: 0,
     idle: 10000
   },
-  storage: 'db/oauth_tokens.sqlite'
+  storage: 'db/oauth_tokens_' + NODE_ENV + '.sqlite'
 });
 
 var oauthToken = sequelize.define('oauth_tokens', {
@@ -17,7 +22,7 @@ var oauthToken = sequelize.define('oauth_tokens', {
     primaryKey: true
   },
   access_token: Sequelize.TEXT,
-  access_token_expires_on: Sequelize.DATE,
+  accessTokenExpiresAt: Sequelize.DATE,
   client_id: Sequelize.TEXT,
   deletedAt: Sequelize.DATE,
   deletedReason: Sequelize.TEXT,
@@ -30,7 +35,7 @@ var oauthToken = sequelize.define('oauth_tokens', {
 
 /**
  * Create a oauth token in the database
- * @param  {oauthToken}   token
+ * @param  {Token}   token
  * @return {Promise}
  */
 function create(options, callback) {
@@ -38,9 +43,9 @@ function create(options, callback) {
     return callback(new Error('Invalid Options'));
   }
 
-  oauthToken
+  return oauthToken
     .create(options)
-    .then(function (dbToken) {
+    .then(function whenCreated(dbToken) {
       callback(null, dbToken.toJSON());
     })
     .catch(callback);
@@ -48,7 +53,7 @@ function create(options, callback) {
 
 /**
  * Read an oauth token from the database
- * @param  {oauthToken}   token
+ * @param  {Token}   token
  * @return {Promise}
  */
 function read(token, callback) {
@@ -56,11 +61,11 @@ function read(token, callback) {
     where: {}
   };
 
-  if (token.access_token && !token.refresh_token) {
+  if (token.access_token) {
     options.where = {
       access_token: token.access_token
     };
-  } else if (token.refresh_token && !token.access_token) {
+  } else if (token.refresh_token) {
     options.where = {
       refresh_token: token.refresh_token
     };
@@ -68,40 +73,41 @@ function read(token, callback) {
     return callback(new Error('Read tokens by  either access_token or refresh_token'));
   }
 
-  oauthToken
+  return oauthToken
     .find(options)
-    .then(function (dbModel) {
+    .then(function whenFound(dbModel) {
       if (!dbModel) {
         return callback(null, null);
       }
-      callback(null, dbModel.toJSON());
+      return callback(null, dbModel.toJSON());
     })
     .catch(callback);
 }
 
 /**
  * List oauth token matching the options
- * @param  {String} options [description]
+ * @param  {Object} options [description]
  * @return {Promise}        [description]
  */
 function list(options, callback) {
-  options = options || {};
-  options.limit = options.limit || 10;
-  options.offset = options.offset || 0;
-  options.where = options.where || {
-    deletedAt: null
-  };
+  var opts = lodash.assign({
+    limit: 10,
+    offset: 0,
+    where: {
+      deletedAt: null
+    }
+  }, options);
 
-  options.attributes = ['access_token', 'client_id', 'user_id', 'deletedReason'];
+  opts.attributes = ['access_token', 'client_id', 'user_id', 'deletedReason'];
 
-  oauthToken
-    .findAll(options)
-    .then(function (oauth_tokens) {
+  return oauthToken
+    .findAll(opts)
+    .then(function whenFound(oauth_tokens) {
       if (!oauth_tokens) {
         return callback(new Error('Unable to fetch oauthToken collection'));
       }
 
-      callback(null, oauth_tokens.map(function (dbModel) {
+      return callback(null, oauth_tokens.map(function mapToJson(dbModel) {
         return dbModel.toJSON();
       }));
     })
@@ -110,7 +116,7 @@ function list(options, callback) {
 
 /**
  * Delete oauth_tokens matching the options
- * @param  {String} options [description]
+ * @param  {Token} options [description]
  * @return {Promise}        [description]
  */
 function flagAsDeleted() {

@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var service = require('../auth_service');
 
-describe('service', function () {
+describe('auth_service', function () {
   it('should load', function () {
     expect(process.env.NODE_ENV).to.equal('test');
     expect(service).to.not.equal(undefined);

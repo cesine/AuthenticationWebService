@@ -1,21 +1,27 @@
-var AsToken = require('as-token');
-var debug = require('debug')('oauth:model');
-var Sequelize = require('sequelize');
-var Promise = require('bluebird');
-var uuid = require('uuid');
+/* global Promise */
 
-var OAuthError = require('oauth2-server/lib/errors/oauth-error');
+var debug = require('debug')('model:oauth');
+var Sequelize = require('sequelize');
+var lodash = require('lodash');
+var AsToken = require('as-token');
+
 var OAuthToken = require('./oauth-token');
 var User = require('./user');
 
+var env = process.env;
+var DEBUG = env.DEBUG;
+var NODE_ENV = env.NODE_ENV;
+var YEAR = 1000 * 60 * 60 * 24 * 365;
+var AUTHORIZATION_CODE_TRANSIENT_STORE = {};
 var sequelize = new Sequelize('database', 'id', 'password', {
   dialect: 'sqlite',
+  logging: /(sql|oauth)/.test(DEBUG) ? console.log : false,
   pool: {
     max: 5,
     min: 0,
     idle: 10000
   },
-  storage: 'db/oauth_clients.sqlite'
+  storage: 'db/oauth_clients_' + NODE_ENV + '.sqlite'
 });
 
 var oauthClient = sequelize.define('oauth_clients', {
@@ -27,14 +33,25 @@ var oauthClient = sequelize.define('oauth_clients', {
   client_secret: Sequelize.TEXT,
   title: Sequelize.TEXT,
   description: Sequelize.TEXT,
+  scope: Sequelize.TEXT,
   contact: Sequelize.TEXT,
   redirect_uri: Sequelize.TEXT,
   hour_limit: Sequelize.BIGINT, // requests per hour
   day_limit: Sequelize.BIGINT, // requests per calendar day
   throttle: Sequelize.INTEGER, // miliseconds
+  expiresAt: Sequelize.DATE, // expiry date
   deletedAt: Sequelize.DATE,
   deletedReason: Sequelize.TEXT
 });
+
+function signUserAsToken(json) {
+  var tokenJson = lodash.omit(json, ['exp']);
+  tokenJson.user = lodash.omit(json.user, ['hash', 'deletedAt', 'deletedReason']);
+  tokenJson.client = lodash.pick(json.client, ['client_id', 'scope']);
+
+  debug('signUserAsToken', tokenJson);
+  return AsToken.sign(tokenJson, 60 * 24);
+}
 
 /**
  * Create a oauth client in the database
@@ -42,14 +59,20 @@ var oauthClient = sequelize.define('oauth_clients', {
  * @param callback
  */
 function create(options, callback) {
+  // TODO avoid sql injections
+  var opts = lodash.clone(options);
   if (!options) {
     return callback(new Error('Invalid Options'));
   }
+  opts.expiresAt = Date.now() + 5 * YEAR;
+  opts.hour_limit = 600;
+  opts.day_limit = 6000;
+  opts.throttle = 500;
 
-  oauthClient
-    .create(options)
-    .then(function (dbModel) {
-      callback(null, dbModel.toJSON());
+  return oauthClient
+    .create(opts)
+    .then(function whenCreateClient(dbModel) {
+      return callback(null, dbModel.toJSON());
     })
     .catch(callback);
 }
@@ -66,11 +89,11 @@ function read(client, callback) {
 
   oauthClient
     .find(options)
-    .then(function (dbModel) {
+    .then(function whenReadDB(dbModel) {
       if (!dbModel) {
         return callback(null, null);
       }
-      callback(null, dbModel.toJSON());
+      return callback(null, dbModel.toJSON());
     })
     .catch(callback);
 }
@@ -80,8 +103,8 @@ function read(client, callback) {
  * @param  {String} options [description]
  * @param callback        [description]
  */
-function list(options, callback) {
-  options = options || {};
+function list(opts, callback) {
+  var options = lodash.clone(opts || {});
   options.limit = options.limit || 10;
   options.offset = options.offset || 0;
   options.where = options.where || {
@@ -91,6 +114,7 @@ function list(options, callback) {
   options.attributes = [
     'client_id',
     'title',
+    'redirect_uri',
     'description',
     'contact',
     'createdAt',
@@ -99,12 +123,12 @@ function list(options, callback) {
 
   oauthClient
     .findAll(options)
-    .then(function (oauth_clients) {
+    .then(function whenList(oauth_clients) {
       if (!oauth_clients) {
         return callback(new Error('Unable to fetch oauthClient collection'));
       }
 
-      callback(null, oauth_clients.map(function (dbModel) {
+      return callback(null, oauth_clients.map(function mapToJson(dbModel) {
         return dbModel.toJSON();
       }));
     })
@@ -121,11 +145,13 @@ function flagAsDeleted() {
 }
 
 /**
- * Initialize the table if not already present
+ * Initialize the oauth token and oauth client table if not already present
  * @param callback        [description]
  */
 function init() {
-  return sequelize.sync();
+  return OAuthToken.init().then(function whenInit() {
+    return sequelize.sync();
+  });
 }
 
 /*
@@ -134,17 +160,22 @@ function init() {
  */
 
 /*
- * Get access client.
+ * https://oauth2-server.readthedocs.io/en/latest/misc/migrating-v2-to-v3.html?highlight=getAccessToken
+ * getAccessToken(token) should return an object with:
+ *    accessToken (String)
+ *    accessTokenExpiresAt (Date)
+ *    client (Object), containing at least an id property that matches the supplied client
+ *    scope (optional String)
+ *    user (Object)
  */
-var getAccessToken = function (bearerToken) {
-  return new Promise(function (resolve, reject) {
-    if (bearerToken.indexOf(AsToken.config.jwt.prefix) === 0) {
-      return reject(new OAuthError('This is a JWT token'));
-    }
+function getAccessToken(bearerToken) {
+  return new Promise(function whenPromise(resolve, reject) {
+    var decoded = AsToken.verify(bearerToken);
+    debug('getAccessToken for token', bearerToken, decoded);
 
     OAuthToken.read({
-      access_token: bearerToken
-    }, function (err, token) {
+      access_token: decoded.accessToken
+    }, function whenFound(err, token) {
       if (err) {
         return reject(err);
       }
@@ -152,104 +183,126 @@ var getAccessToken = function (bearerToken) {
         return reject(new Error('Unable to get access token, please report this'));
       }
 
-      resolve({
-        accessToken: token.access_token,
-        clientId: token.client_id,
-        expires: token.access_token_expires_on,
-        userId: token.user_id
+      debug('getAccessToken created token', token);
+      return resolve({
+        accessToken: token.id,
+        accessTokenExpiresAt: token.accessTokenExpiresAt,
+        client: {
+          // TODO could fetch client details
+          id: token.client_id
+        },
+        user: {
+          // TODO could fetch user details
+          id: token.user_id
+        }
       });
     });
   });
-};
+}
 
 /**
- * Get client.
- * Only seems to support a promise
- * https://github.com/oauthjs/node-oauth2-server/issues/277
- * Despite saying others are possible
- * https://github.com/oauthjs/node-oauth2-server#upgrading-from-2x
+ * Get oauth client details
  */
-var AUTHORIZATION_CODE_TRANSIENT_STORE = {};
-var getClient = function (clientId, clientSecret) {
-  debug('getClient', arguments);
+function getClient(clientId, clientSecret) {
+  debug('getClient arguments', arguments);
 
-  return new Promise(function (resolve, reject) {
-    read({
-      client_id: clientId,
-      client_secret: clientSecret
-    }, function (err, client) {
-      if (err) {
-        return reject(err);
-      }
-      if (!client) {
-        return reject(new Error('Client id or Client Secret is invalid'));
-      }
-
-      // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L144
-      // Seems to require a grants
-      // { grants: ['password'] }
-      // { grants: ['authorization_code'], redirectUris: ['http://example.com'] };
-      var code = uuid.v4();
-      var json = {
-        clientId: client.client_id,
-        clientSecret: client.client_secret,
-        grants: ['authorization_code'],
-        code: code
-      };
-
-      AUTHORIZATION_CODE_TRANSIENT_STORE[code] = json;
-      resolve(json);
-    });
-  });
-};
-
-var getAuthorizationCode = function (code) {
-  debug('getAuthorizationCode', arguments, AUTHORIZATION_CODE_TRANSIENT_STORE);
-
-  return new Promise(function (resolve, reject) {
-    var client = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
-    if (client) {
-      delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
-      return resolve(client);
+  return oauthClient.find({
+    client_id: clientId,
+    client_secret: clientSecret,
+    deletedAt: null
+  }).then(function whenClientFound(client) {
+    var json;
+    if (!client) {
+      throw new Error('Client id or secret is invalid');
     }
-    var err = new OAuthError('Code is not authorized', {
+
+    json = {
+      client: lodash.omit(client.toJSON(), ['client_secret']), // remove the secret
+      id: clientId,
+      grants: ['authorization_code'],
+      redirectUris: client.redirect_uri ? client.redirect_uri.split(',') : []
+    };
+    json.client.id = client.client_id;
+
+    return json;
+  });
+}
+
+/**
+ * Get details for a given authorization code
+ */
+function getAuthorizationCode(code) {
+  debug('getAuthorizationCode', arguments, AUTHORIZATION_CODE_TRANSIENT_STORE);
+  debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
+
+  return new Promise(function whenPromise(resolve, reject) {
+    var result = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+    var err;
+    if (result) {
+      // delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+      result.expiresAt = new Date(result.expiresAt);
+      // result.user = {
+      //   id: client.user_id
+      // };
+      return resolve(result);
+    }
+    err = new Error('Code is not authorized', {
       code: 403
     });
     err.status = 403;
 
-    reject(err);
+    return reject(err);
   });
-};
-
-var revokeAuthorizationCode = function (code) {
-  debug('revokeAuthorizationCode', arguments);
-
-  return new Promise(function (resolve) {
-    delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
-
-    resolve(true);
-  });
-};
-
-var saveAuthorizationCode = function (code, value) {
-  debug('saveAuthorizationCode', arguments);
-
-  return new Promise(function (resolve) {
-    AUTHORIZATION_CODE_TRANSIENT_STORE[code] = value;
-    debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
-
-    resolve(true);
-  });
-};
+}
 
 /**
- * Get refresh token.
+ * Revoke a given authorization code
  */
+function revokeAuthorizationCode(code) {
+  debug('revokeAuthorizationCode', arguments);
 
-var getRefreshToken = function (bearerToken, callback) {
+  return new Promise(function whenPromise(resolve) {
+    var revokedCode = lodash.clone(code);
+    var itWas = AUTHORIZATION_CODE_TRANSIENT_STORE[code.code];
+    debug('revoked ', itWas);
+
+    revokedCode.expiresAt = new Date(Date.now() - 1000);
+    delete AUTHORIZATION_CODE_TRANSIENT_STORE[code.code];
+
+    resolve(revokedCode);
+  });
+}
+
+/**
+ * Save details for an authorization code
+ */
+function saveAuthorizationCode(authorizationCode, value, user) {
+  debug('saveAuthorizationCode authorizationCode', authorizationCode);
+  debug('saveAuthorizationCode value', value);
+  debug('saveAuthorizationCode user', user);
+
+  return new Promise(function whenPromise(resolve) {
+    var result = {
+      authorizationCode: authorizationCode.authorizationCode,
+      code: authorizationCode,
+      client: value.client,
+      user: user,
+      expiresAt: authorizationCode.expiresAt
+    };
+    AUTHORIZATION_CODE_TRANSIENT_STORE[authorizationCode.authorizationCode] = result;
+    debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
+
+    resolve(result);
+  });
+}
+
+/**
+ * Get refresh token
+ */
+function getRefreshToken(bearerToken, callback) {
   OAuthToken.read({
     refresh_token: bearerToken
-  }, function (err, token) {
+  }, function whenRead(err, token) {
     if (err) {
       return callback(err);
     }
@@ -257,24 +310,24 @@ var getRefreshToken = function (bearerToken, callback) {
       return callback(null);
     }
 
-    callback(null, {
+    return callback(null, {
       accessToken: token.access_token,
       clientId: token.client_id,
-      expires: token.access_token_expires_on,
+      accessTokenExpiresAt: token.accessTokenExpiresAt,
       userId: token.user_id
     });
   });
-};
+}
 
 /*
- * Get user.
+ * Get user details
  */
-
-var getUser = function (username, password, callback) {
+function getUser(username, password, callback) {
+  debug('getUser', getUser);
   User.verifyPassword({
     username: username,
     password: password
-  }, function (err, profile) {
+  }, function whenVerified(err, profile) {
     if (err) {
       return callback(err);
     }
@@ -282,53 +335,74 @@ var getUser = function (username, password, callback) {
       return callback(null);
     }
 
-    callback(null, profile.id);
+    return callback(null, profile);
   });
-};
+}
 
 /**
- * Save token.
+ * Verify the scope for a token matches the scope pemitted
  */
+function verifyScope(decodedToken, scope, callback) {
+  debug('verifyScope', arguments);
+  // TODO look up if the client permits those scopes
+  return callback(null, true);
+}
 
-var saveAccessToken = function (token, client, user) {
-  return new Promise(function (resolve, reject) {
-    if (!token || !client || !user) {
+// function validateScope(user, decodedToken) {
+//   debug('validateScope', arguments);
+//   return decodedToken && decodedToken.client && decodedToken.client.scope;
+// }
+
+/**
+ * Save token
+ */
+function saveToken(token, value, user) {
+  debug('saveToken ', arguments);
+  return new Promise(function whenPromise(resolve, reject) {
+    if (!token || !value || !user) {
       return reject(new Error('Invalid Options'));
     }
 
-    OAuthToken.create({
+    return OAuthToken.create({
       access_token: token.accessToken,
-      access_token_expires_on: token.accessTokenExpiresOn,
-      client_id: client.id,
+      accessTokenExpiresAt: token.accessTokenExpiresAt,
+      client_id: value.client.client_id,
       refresh_token: token.refreshToken,
       refresh_token_expires_on: token.refreshTokenExpiresOn,
       user_id: user.id
-    }, function (err, token) {
+    }, function whenCreated(err, result) {
       if (err) {
         return reject(err);
       }
-      if (!token) {
-        return reject(new OAuthError('Unable to create token, please report this.'));
+      if (!result) {
+        return reject(new Error('Unable to create token, please report this.'));
       }
 
-      // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L238
-      // {
-      //   accessToken: 'foobar',
-      //   client: {},
-      //   user: {}
-      // };
+      var jwt = signUserAsToken({
+        accessToken: result.id,
+        accessTokenExpiresAt: result.accessTokenExpiresAt,
+        client: value.client,
+        user: user,
+        refreshToken: result.refresh_token,
+        refreshTokenExpiresOn: result.refresh_token_expires_on
+      });
+      debug('updated jwt', jwt);
+      debug('saveToken saved result', result.id);
 
-      resolve({
-        access_token: token.access_token,
-        access_token_expires_on: token.access_token_expires_on,
-        client_id: token.client_id,
-        refresh_token: token.refresh_token,
-        refresh_token_expires_on: token.refresh_token_expires_on,
-        user_id: token.user_id
+      return resolve({
+        jwt: jwt,
+        accessToken: jwt,
+        accessTokenExpiresAt: result.accessTokenExpiresAt,
+        // clientId: result.client_id,
+        client: value.client,
+        user: user,
+        refreshToken: result.refresh_token,
+        refreshTokenExpiresOn: result.refresh_token_expires_on
+        // userId: result.user_id
       });
     });
   });
-};
+}
 
 module.exports.create = create;
 module.exports.flagAsDeleted = flagAsDeleted;
@@ -336,6 +410,7 @@ module.exports.init = init;
 module.exports.list = list;
 module.exports.read = read;
 
+module.exports.signUserAsToken = signUserAsToken;
 module.exports.getAccessToken = getAccessToken;
 module.exports.getAuthorizationCode = getAuthorizationCode;
 module.exports.saveAuthorizationCode = saveAuthorizationCode;
@@ -343,5 +418,7 @@ module.exports.revokeAuthorizationCode = revokeAuthorizationCode;
 module.exports.getClient = getClient;
 module.exports.getRefreshToken = getRefreshToken;
 module.exports.getUser = getUser;
-module.exports.saveAccessToken = saveAccessToken;
-module.exports.saveToken = saveAccessToken;
+module.exports.saveToken = saveToken;
+module.exports.saveAccessToken = saveToken;
+// module.exports.validateScope = validateScope;
+module.exports.verifyScope = verifyScope;

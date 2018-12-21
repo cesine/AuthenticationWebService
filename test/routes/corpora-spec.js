@@ -3,8 +3,8 @@ var supertest = require('supertest');
 
 var authWebService = require('./../../auth_service');
 
-describe('Corpus REST API', function () {
-  describe('delete', function () {
+describe('/corpora', function () {
+  describe('DELETE', function () {
     it('should accept no options', function () {
       return supertest(authWebService)
         .delete('/corpora/testingprototype-testdeletecorpus')

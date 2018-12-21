@@ -1,9 +1,9 @@
 var debug = require('debug')('oauth:routes');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
-var util = require('util');
+var querystring = require('querystring');
 
-var errorMiddleware = require('./../middleware/error-handler').errorHandler;
-var oauth = require('./../middleware/oauth');
+var errorMiddleware = require('../middleware/error-handler').errorHandler;
+var oauth = require('../middleware/oauth');
 
 /**
  * Get authorization from a given user
@@ -13,109 +13,59 @@ var oauth = require('./../middleware/oauth');
  */
 exports.getAuthorize = {
   spec: {
-    path: '/oauth/authorize',
+    path: '/oauth2/authorize',
     description: 'Operations about authorization',
     notes: 'Requests authorization',
     summary: 'Retrieves authorization',
     method: 'GET',
     parameters: [
-      param.query('client_id', 'client_id of the application', 'string'),
-      param.query('redirect_uri', 'requested redirect_uri after registration', 'string')
+      param.body('client_id', 'client_id of the application', 'string'),
+      param.body('redirect_uri', 'requested redirect_uri after registration', 'string')
     ],
     responseClass: 'Authorization',
     errorResponses: [],
     nickname: 'getAuthorize'
   },
-  action: function getAuthorize(req, res) {
+  action: function getAuthorize(req, res, next) {
+    var middleware;
     debug('getAuthorize res.locals', res.locals);
+    debug('req.path', req.path);
+    debug('req.query', req.query);
+    debug('req.body', req.body);
 
     // Redirect anonymous users to login page.
     if (!res.locals.user) {
-      return res.redirect(util.format('/login?redirect=%s&client_id=%s&'
-        + 'redirect_uri=%s', req.path, req.query.client_id, req.query.redirect_uri));
+      delete req.query.client_secret;
+      return res.redirect('/authentication/login/?' + querystring.stringify(req.query));
     }
 
-    console.log('res.locals.user', res.locals.user);
-    return res.redirect(req.query.redirect_uri);
-  }
-};
-/**
- * Authorize an app to a given user's account
- *
- * @param  {Request} req
- * @param  {Response} res
- * @param  {Function} next
- */
-exports.postAuthorize = {
-  spec: {
-    path: '/oauth/authorize',
-    description: 'Operations about authorization',
-    notes: 'Requests authorize',
-    summary: 'Retrieves authorize',
-    method: 'POST',
-    parameters: [
-      param.query('client_id', 'client_id of the application', 'string'),
-      param.query('redirect_uri', 'requested redirect_uri after registration', 'string')
-    ],
-    responseClass: 'Token',
-    errorResponses: [],
-    nickname: 'postAuthorize'
-  },
-  action: function postAuthorize(req, res, next) {
-    console.log('postAuthorize res.locals', res.locals);
-    console.log('req.headers', req.headers);
-    console.log('req.session', req.session);
-    debug(req.user);
 
-    // Redirect anonymous users to login page.
-    if (!res.locals.user) {
-      debug(req.query, req.params);
-      return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
-        req.query.client_id, req.query.redirect_uri));
-    }
+    // https://oauth2-server.readthedocs.io/en/latest/api/oauth2-server.html#authorize-request-response-options-callback
+    let authenticateHandler = {
+      handle: function(request, response) {
+        return res.locals.user;
+      }
+    };
 
-    console.log('res.locals.user', res.locals.user);
-    var middleware = oauth.authorize({
-      handleError: errorMiddleware
+    middleware = oauth.authorize({
+      scope: req.query.scope,
+      authenticateHandler: authenticateHandler,
+      continueMiddleware: true, // does not call through
     });
+    debug('There is a user res.locals.user', res.locals.user, middleware);
+    debug('req.headers', req.headers);
 
-    middleware(req, res, next);
+    return middleware(req, res, function whenDoneAuthorizeMiddleware(err) {
+      debug('done the authorize middleware', err, req.user, res.locals);
+      if (err) {
+        debug('error authorizing client', err, req.query);
+        return next(err);
+      }
+      // next(); // cannot set headers after they are set
+    });
   }
 };
 
-/**
- * Get an OAuth2 Token
- *
- * @param  {Request} req
- * @param  {Response} res
- * @param  {Function} next
- */
-exports.getToken = {
-  spec: {
-    path: '/oauth/token',
-    description: 'Operations about tokens',
-    notes: 'Requests a token',
-    summary: 'Retrieves a token',
-    method: 'GET',
-    parameters: [
-      param.query('client_id', 'client_id of the application', 'string'),
-      param.query('redirect_uri', 'requested redirect_uri after registration', 'string')
-    ],
-    responseClass: 'Token',
-    errorResponses: [],
-    nickname: 'getToken'
-  },
-  action: function getToken(req, res) {
-    // Redirect anonymous users to login page.
-    if (!res.locals.user) {
-      return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
-        req.query.client_id, req.query.redirect_uri));
-    }
-
-    // return oauth.authorize();
-    res.send('TODO');
-  }
-};
 /**
  * Create an OAuth2 token
  *
@@ -123,7 +73,7 @@ exports.getToken = {
  */
 exports.postToken = {
   spec: {
-    path: '/oauth/token',
+    path: '/oauth2/token',
     description: 'Operations about tokens',
     notes: 'Requests a token',
     summary: 'Retrieves a token',
@@ -137,13 +87,27 @@ exports.postToken = {
     nickname: 'postToken'
   },
   action: function postToken(req, res, next) {
-    debug('postToken', req.query, res.headers);
+    var middleware;
+    debug('postToken', req.query, req.body, res.headers);
+    // req.user = res.locals.user; TODO where does the user that is passed to client come from
 
-    var middleware = oauth.token({
-      handleError: errorMiddleware
+    middleware = oauth.token({
+      // continueMiddleware: true,
     });
 
-    return middleware(req, res, next);
+    middleware(req, res, function whenDoneTokenMiddleware(err) {
+      debug('done the token middleware', err, req.user, res.locals);
+
+      if (err) {
+        debug('error authorizing client', err, req.query);
+        return next(err);
+      }
+      // TODO this has no effect
+      // instead working around it by return jwt in saveToken response as accesToken
+      res.set('Authorization', 'Bearer ' + res.locals.oauth.token.jwt);
+
+      // next();
+    });
   }
 };
 // comes from https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L64

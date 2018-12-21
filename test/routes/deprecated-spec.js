@@ -3,7 +3,7 @@ var supertest = require('supertest');
 
 var authWebService = require('./../../auth_service');
 
-describe('Corpus REST API', function () {
+describe('/ deprecated', function () {
   describe('login', function () {
     it('should handle invalid users', function () {
       return supertest(authWebService)
@@ -38,7 +38,7 @@ describe('Corpus REST API', function () {
         })
         .then(function (res) {
           expect(res.body.userFriendlyErrors).to.equal(undefined);
-          expect(res.body.user._id).to.equal('lingllama');
+          expect(res.body.user._id).to.equal('lingllama'); // eslint-disable-line no-underscore-dangle
           expect(res.body.user.username).to.equal('lingllama');
           expect(res.body.user.corpora).length(3);
         });
