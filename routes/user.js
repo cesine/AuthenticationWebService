@@ -65,7 +65,7 @@ exports.getCurrentUser = {
           return next(err, req, res, next);
         }
 
-        if (!profile){
+        if (!profile) {
           var notFound = new Error('Not found');
           notFound.status = 404;
           return next(notFound);

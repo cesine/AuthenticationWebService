@@ -126,22 +126,25 @@ describe('/authentication', function () {
 
           var decoded = AsToken.decode(token);
           expect(decoded).to.deep.equal({
-            name: {
-              givenName: '',
-              familyName: ''
+            client: {},
+            user: {
+              name: {
+                givenName: '',
+                familyName: ''
+              },
+              id: 'test-user-efg_random_uuid',
+              revision: decoded.user.revision,
+              // deletedAt: null,
+              // deletedReason: '',
+              username: 'test-user',
+              email: '',
+              gravatar: decoded.user.gravatar,
+              description: '',
+              language: '',
+              // hash: decoded.user.hash,
+              createdAt: decoded.user.createdAt,
+              updatedAt: decoded.user.updatedAt
             },
-            id: 'test-user-efg_random_uuid',
-            revision: decoded.revision,
-            // deletedAt: null,
-            // deletedReason: '',
-            username: 'test-user',
-            email: '',
-            gravatar: decoded.gravatar,
-            description: '',
-            language: '',
-            // hash: decoded.hash,
-            createdAt: decoded.createdAt,
-            updatedAt: decoded.updatedAt,
             iat: decoded.iat,
             exp: decoded.exp
           });

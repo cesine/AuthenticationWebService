@@ -208,6 +208,7 @@ describe('models/oauth-client', function () {
             expect(token).not.to.equal(null);
             expect(token).deep.equal({
               accessToken: token.accessToken,
+              jwt: token.jwt,
               client: fixtures.client,
               // clientId: 'test-client',
               accessTokenExpiresAt: undefined,
@@ -220,7 +221,7 @@ describe('models/oauth-client', function () {
       });
 
       it('should get an access token', function () {
-        var bearerToken = AsToken.sign({ id: '123', something: 'else' }, 60 * 24);
+        var bearerToken = AsToken.sign({ user: { id: '123', something: 'else' } }, 60 * 24);
         return OAuthClient
           .getAccessToken(bearerToken)
           .then(function (token) {
@@ -232,13 +233,16 @@ describe('models/oauth-client', function () {
               },
               accessTokenExpiresAt: token.accessTokenExpiresAt,
               user: {
-                id: '123'
+                id: '123',
+                something: 'else'
               }
             });
             expect(AsToken.decode(token.accessToken)).deep.equal({
-              id: '123',
-              something: 'else',
-              clientId: 'test-client',
+              client: {},
+              user: {
+                id: '123',
+                something: 'else'
+              },
               iat: Math.floor(Date.now() / 1000),
               exp: Math.floor((Date.now() + 1440000) / 1000)
             });

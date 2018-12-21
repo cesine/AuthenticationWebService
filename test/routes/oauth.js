@@ -81,6 +81,7 @@ describe('routes/oauth2', function () {
       expect(res.locals).to.deep.equal({
         oauth: {
           token: {
+            jwt: res.locals.oauth.token.jwt,
             accessToken: res.locals.oauth.token.accessToken,
             accessTokenExpiresAt: res.locals.oauth.token.accessTokenExpiresAt,
             client: mockClient.client,

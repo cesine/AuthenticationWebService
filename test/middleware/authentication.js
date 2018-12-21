@@ -11,7 +11,7 @@ describe('middleware/authentication', function () {
 
   describe('jwt', function () {
     it('should decode the token', function (done) {
-      var token = 'Bearer v1/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjp7ImdpdmVuTmFtZSI6IiIsImZhbWlseU5hbWUiOiIifSwiaWQiOiJ0ZXN0LXVzZXItZWZnX3JhbmRvbV91dWlkIiwicmV2aXNpb24iOiIxLTE0NjgyMDUzMDkwNjkiLCJkZWxldGVkQXQiOm51bGwsImRlbGV0ZWRSZWFzb24iOiIiLCJ1c2VybmFtZSI6InRlc3QtdXNlciIsImVtYWlsIjoiIiwiZ3JhdmF0YXIiOiI5Y2I0Nzk4ODc0NTkzNTI5MjhkNDEyNmY4OTg0NTRjZiIsImRlc2NyaXB0aW9uIjoiIiwibGFuZ3VhZ2UiOiIiLCJoYXNoIjoiJDJhJDEwJDUxOWkxeW5lQkw0cEgzaVRNdG51b09hRjZkbnFDV041QmgxRDh1bzY4S3pRWTdEcklHeFlxIiwiY3JlYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwidXBkYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwiaWF0IjoxNDY4MjEyMTY3fQ.HCOkTzqR4v-vSSmoXqTS6vHnZPbgWaEDEL2T6iqzwTdnF58sm_ufnFMDmWfxWzBMc15Y--2oCSEhAPdTVfMqh_h4CSkqDNH10MSCrF346OKHLugFT3BUSuvE6NMszBnItBX8P2r7lc6hhLnpbI4lvslCfQNI3PCoQssbmT1IZ3k'; // jshint ignore:line
+      var token = 'Bearer v1/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NUb2tlbiI6ImFkNWEyZDQwLTA1MGUtMTFlOS1hYThhLTNmMzE5MThkMjM3YiIsImNsaWVudCI6eyJjbGllbnRfaWQiOiJ0ZXN0LWNsaWVudCJ9LCJ1c2VyIjp7Im5hbWUiOnsiZ2l2ZW5OYW1lIjoiQW5vbnkiLCJmYW1pbHlOYW1lIjoiTW91c2UifSwiaWQiOiI2ZTYwMTdiMC00MjM1LTExZTYtYWZiNS04ZDc4YTM1YjJmNzkiLCJyZXZpc2lvbiI6IjE5LTE0Njc2NzEwOTY2NzMiLCJ1c2VybmFtZSI6InRlc3QtYW5vbnltb3VzZSIsImVtYWlsIjoiIiwiZ3JhdmF0YXIiOiIxYjYwYjVlMjA0NmEyMWFhNDU2ZDk0ODBiYTBkYThkMSIsImRlc2NyaXB0aW9uIjoiRnJpZW5kbHkiLCJsYW5ndWFnZSI6InpoIiwiY3JlYXRlZEF0IjoiMjAxNi0wNi0yMlQyMjoxOTo1My4zODdaIiwidXBkYXRlZEF0IjoiMjAxNi0wNi0yMlQyMjoyNDo1Ni42NzNaIn0sImlhdCI6MTU0NTM4OTYyMCwiZXhwIjoxNTQ1MzkxMDYwfQ.R-x8mWE9--i4JovTrYDCX5bUzeHlg2weDs_cxMlElX4htnat5BSDSA-tdqNEdCnZRYJG4NY00mzhbn01gfRWFXbMxBnSJvnH3VkxlBvlzXlxpzl90UEHtCeNg0M4lNpypFwMU7bhU3LhQBYdToNJatsF8FAQn6oRstJiC4rtCl0';
       var req = {
         headers: {
           authorization: token
@@ -32,22 +32,22 @@ describe('middleware/authentication', function () {
         expect(req.user).to.deep.equal(res.locals.user);
         expect(req.user).to.deep.equal({
           name: {
-            givenName: '',
-            familyName: ''
+            givenName: 'Anony',
+            familyName: 'Mouse'
           },
-          id: 'test-user-efg_random_uuid',
+          id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
           revision: req.user.revision,
-          deletedAt: null,
-          deletedReason: '',
-          username: 'test-user',
+          // deletedAt: null,
+          // deletedReason: '',
+          username: 'test-anonymouse',
           email: '',
           gravatar: req.user.gravatar,
-          description: '',
-          language: '',
-          hash: req.user.hash,
+          description: 'Friendly',
+          language: 'zh',
+          // hash: req.user.hash,
           createdAt: req.user.createdAt,
-          updatedAt: req.user.updatedAt,
-          iat: req.user.iat
+          updatedAt: req.user.updatedAt
+          // iat: req.user.iat
         });
 
         expect(res.headers.authorization).equal(token);

@@ -66,7 +66,7 @@ describe('/oauth2', function () {
     });
   });
 
-  describe.only('OAuth2 Dance', function () {
+  describe('OAuth2 Dance', function () {
     var clientApp;
     var clientServer;
     var oauthOpts = {
@@ -148,10 +148,10 @@ describe('/oauth2', function () {
                 locals: res.locals,
                 query: req.query,
                 session: req.session,
-                response: response.body,
+                response: response.body
               });
-            }).catch(next);
-
+            })
+            .catch(next);
         });
       // eslint-disable-next-line no-unused-vars
       clientApp.use(function (err, req, res, next) {
