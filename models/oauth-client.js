@@ -43,11 +43,11 @@ var oauthClient = sequelize.define('oauth_clients', {
   deletedReason: Sequelize.TEXT
 });
 
-function signUserAsToken(user, client) {
-  var tokenJson = lodash.omit(user, ['hash', 'deletedAt', 'deletedReason', 'exp']);
-  if (client) {
-    tokenJson.clientId = client.client_id;
-  }
+function signUserAsToken(json) {
+  var tokenJson = lodash.omit(json, ['exp']);
+  tokenJson.user = lodash.omit(json.user, ['hash', 'deletedAt', 'deletedReason']);
+  tokenJson.client = lodash.pick(json.client, ['client_id', 'scope']);
+
   debug('signUserAsToken', tokenJson);
   return AsToken.sign(tokenJson, 60 * 24);
 }
@@ -169,14 +169,14 @@ function init() {
  */
 function getAccessToken(bearerToken) {
   return new Promise(function whenPromise(resolve, reject) {
-    var user = AsToken.verify(bearerToken);
+    var decoded = AsToken.verify(bearerToken);
     var client = {
       client_id: 'test-client' // TODO hard coded
     };
     var access_token;
-    debug('getAccessToken for user', user);
+    debug('getAccessToken for token', decoded);
 
-    access_token = signUserAsToken(user, client);
+    access_token = signUserAsToken(decoded);
     debug('updated access_token', access_token);
 
     OAuthToken.create({
@@ -185,7 +185,7 @@ function getAccessToken(bearerToken) {
       refresh_token: '23waejsowj4wejsrd', // TODO hard coded
       refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
       client_id: client.client_id,
-      user_id: user.id
+      user_id: decoded.user.id
     }, function whenCreated(err, token) {
       if (err) {
         return reject(err);
@@ -198,11 +198,9 @@ function getAccessToken(bearerToken) {
         accessToken: token.access_token,
         accessTokenExpiresAt: token.accessTokenExpiresAt,
         client: {
-          id: token.client_id
+          id: client.client_id
         },
-        user: {
-          id: token.user_id
-        }
+        user: decoded.user
       });
     });
   });
@@ -393,8 +391,17 @@ function saveToken(token, value, user) {
         return reject(new Error('Unable to create token, please report this.'));
       }
 
-      access_token = signUserAsToken(user, value.client);
-      debug('updated access_token', access_token);
+      var jwt = signUserAsToken({
+        accessToken: result.id,
+        accessTokenExpiresAt: result.accessTokenExpiresAt,
+        // clientId: result.client_id,
+        client: value.client,
+        user: user,
+        refreshToken: result.refresh_token,
+        refreshTokenExpiresOn: result.refresh_token_expires_on
+        // userId: result.user_id
+      });
+      debug('updated jwt', jwt);
       // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L238
       // {
       //   accessToken: 'foobar',
@@ -403,10 +410,10 @@ function saveToken(token, value, user) {
       // };
       //
       debug('saveToken saved result', result.id);
-      user.accessToken = access_token;
 
       return resolve({
-        accessToken: result.id,
+        jwt: jwt,
+        accessToken: jwt,
         accessTokenExpiresAt: result.accessTokenExpiresAt,
         // clientId: result.client_id,
         client: value.client,

@@ -59,7 +59,7 @@ exports.postLogin = {
         return next(err, req, res, next);
       }
 
-      token = signUserAsToken(user);
+      token = signUserAsToken({ user });
       debug('token', token);
       res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
       res.set('Authorization', 'Bearer ' + token);
@@ -166,7 +166,7 @@ exports.postRegister = {
         return next(err, req, res, next);
       }
 
-      token = signUserAsToken(user);
+      token = signUserAsToken({ user });
       debug('token', token);
       res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
       res.set('Authorization', 'Bearer ' + token);

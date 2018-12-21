@@ -113,11 +113,12 @@ describe('/oauth2', function () {
       passport.use(new OAuth2Strategy(oauthOpts,
         function (accessToken, refreshToken, profile, cb) {
           debug('in the clientApp oauth OAuth2Strategy', accessToken, refreshToken, profile, cb);
+          // Workaround for user missing in response from strategy
+          var decoded = AsToken.verify(accessToken);
+          decoded.user.accessToken = accessToken;
+
           // res.set('Authorization', 'Bearer ' + accessToken);
-          return cb(null, {
-            id: fixtures.user.id, // TODO hard coded
-            username: 'somebody'
-          }, { info: 'goes here' });
+          return cb(null, decoded.user, { info: 'goes here' });
         }));
       clientApp.get('/auth/example', function (req, res, next) {
         var x = passport.authenticate('oauth2');
@@ -137,6 +138,7 @@ describe('/oauth2', function () {
             success: 'called back',
             headers: req.headers,
             body: req.body,
+            locals: res.locals,
             query: req.query,
             session: req.session
           });
@@ -256,22 +258,25 @@ describe('/oauth2', function () {
           var token = res.headers.authorization.replace(/Bearer v1\//, '');
           var decoded = AsToken.verify(token);
           expect(decoded).to.deep.equal({
-            name: {
-              givenName: 'Anony',
-              familyName: 'Mouse'
+            user: {
+              name: {
+                givenName: 'Anony',
+                familyName: 'Mouse'
+              },
+              id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
+              revision: decoded.user.revision,
+              // deletedAt: null,
+              // deletedReason: '',
+              username: 'test-anonymouse',
+              email: '',
+              gravatar: decoded.user.gravatar,
+              description: 'Friendly',
+              language: 'zh',
+              // hash: decoded.user.hash,
+              createdAt: decoded.user.createdAt,
+              updatedAt: decoded.user.updatedAt
             },
-            id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
-            revision: decoded.revision,
-            // deletedAt: null,
-            // deletedReason: '',
-            username: 'test-anonymouse',
-            email: '',
-            gravatar: decoded.gravatar,
-            description: 'Friendly',
-            language: 'zh',
-            // hash: decoded.hash,
-            createdAt: decoded.createdAt,
-            updatedAt: decoded.updatedAt,
+            client: {},
             iat: decoded.iat,
             exp: decoded.exp
           });
@@ -298,26 +303,30 @@ describe('/oauth2', function () {
           var token = res.body.headers.authorization.replace(/Bearer v1\//, '');
           var decoded = AsToken.verify(token);
           expect(decoded).to.deep.equal({
-            name: {
-              givenName: 'Anony',
-              familyName: 'Mouse'
+            client: {},
+            user: {
+              name: {
+                givenName: 'Anony',
+                familyName: 'Mouse'
+              },
+              id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
+              revision: decoded.user.revision,
+              // deletedAt: null,
+              // deletedReason: '',
+              username: 'test-anonymouse',
+              email: '',
+              gravatar: decoded.user.gravatar,
+              description: 'Friendly',
+              language: 'zh',
+              // hash: decoded.user.hash,
+              createdAt: decoded.user.createdAt,
+              updatedAt: decoded.user.updatedAt
             },
-            id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
-            revision: decoded.revision,
-            // deletedAt: null,
-            // deletedReason: '',
-            username: 'test-anonymouse',
-            email: '',
-            gravatar: decoded.gravatar,
-            description: 'Friendly',
-            language: 'zh',
-            // hash: decoded.hash,
-            createdAt: decoded.createdAt,
-            updatedAt: decoded.updatedAt,
             iat: decoded.iat,
             exp: decoded.exp
           });
 
+          debug('body from calling app', res.body);
           expect(res.body.headers.cookie).to.contain('connect.sid=');
           expect(res.body).to.deep.equal({
             success: 'called back',
@@ -333,6 +342,7 @@ describe('/oauth2', function () {
               code: res.body.query.code,
               state: res.body.query.state
             },
+            locals: {},
             session: {
               cookie: {
                 originalMaxAge: null,
@@ -342,11 +352,53 @@ describe('/oauth2', function () {
               },
               passport: {
                 user: {
-                  id: fixtures.user.id,
-                  username: 'somebody'
+                  accessToken: res.body.session.passport.user.accessToken,
+                  name: {
+                    givenName: 'Anony',
+                    familyName: 'Mouse'
+                  },
+                  id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
+                  revision: decoded.user.revision,
+                  username: 'test-anonymouse',
+                  email: '',
+                  gravatar: decoded.user.gravatar,
+                  description: 'Friendly',
+                  language: 'zh',
+                  createdAt: decoded.user.createdAt,
+                  updatedAt: decoded.user.updatedAt
                 }
               }
             }
+          });
+
+          var newToken = AsToken.decode(res.body.session.passport.user.accessToken);
+          expect(newToken.accessToken).length(36);
+          expect(newToken.refreshToken).length(40);
+
+          expect(newToken).to.deep.equal({
+            accessToken: newToken.accessToken,
+            accessTokenExpiresAt: newToken.accessTokenExpiresAt,
+            refreshToken: newToken.refreshToken,
+            client: {
+              client_id: 'test-client'
+            },
+            user: {
+              name: {
+                givenName: 'Anony',
+                familyName: 'Mouse'
+              },
+              id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79',
+              revision: newToken.user.revision,
+              username: 'test-anonymouse',
+              email: '',
+              gravatar: newToken.user.gravatar,
+              description: 'Friendly',
+              language: 'zh',
+              createdAt: newToken.user.createdAt,
+              updatedAt: newToken.user.updatedAt
+            },
+            iat: newToken.iat,
+            exp: newToken.exp
           });
         });
     });
