@@ -82,7 +82,7 @@ describe('models/oauth-client', function () {
       it('should look up a client using id and secret', function (done) {
         OAuthClient
           .read({
-            client_id: 'test-client',
+            client_id: fixtures.client.client_id,
             client_secret: 'test-secret'
           }, function (err, client) {
             if (err) {
@@ -92,7 +92,7 @@ describe('models/oauth-client', function () {
             expect(client).not.to.equal(null);
 
             expect(client).to.deep.equal({
-              client_id: 'test-client',
+              client_id: fixtures.client.client_id,
               client_secret: 'test-secret',
               contact: 'Joe Smoe <joe@smoe.ca>',
               title: 'Testing Client',
@@ -116,14 +116,14 @@ describe('models/oauth-client', function () {
       it('should look up using id', function (done) {
         OAuthClient
           .read({
-            client_id: 'test-client'
+            client_id: fixtures.client.client_id
           }, function (err, client) {
             if (err) {
               return done(err);
             }
 
             expect(client).not.to.equal(null);
-            expect(client.client_id).equal('test-client');
+            expect(client.client_id).equal(fixtures.client.client_id);
 
             done();
           });
@@ -262,7 +262,7 @@ describe('models/oauth-client', function () {
           expect(token).not.to.equal(null);
           expect(token).deep.equal({
             accessToken: 'test-token',
-            clientId: 'test-client',
+            clientId: fixtures.client.client_id,
             accessTokenExpiresAt: token.accessTokenExpiresAt,
             userId: '6e6017b0-4235-11e6-afb5-8d78a35b2f79'
           });
@@ -275,15 +275,15 @@ describe('models/oauth-client', function () {
     describe('clients', function () {
       it('should get a client', function () {
         return OAuthClient
-          .getClient('test-client', 'test-secret')
+          .getClient(fixtures.client.client_id, 'test-secret')
           .then(function (client_info) {
             expect(client_info).not.to.equal(null);
             expect(client_info).deep.equal({
-              id: 'test-client',
+              id: 'test-client2',
               grants: ['authorization_code'],
               redirectUris: ['http://localhost:8011/auth/example/callback'],
               client: {
-                client_id: 'test-client',
+                client_id: 'test-client2',
                 client_secret: 'test-secret',
                 title: 'Testing Client',
                 description: 'Client used for testing the oauth flow',
@@ -298,7 +298,7 @@ describe('models/oauth-client', function () {
                 deletedReason: null,
                 createdAt: client_info.client.createdAt,
                 updatedAt: client_info.client.updatedAt,
-                id: 'test-client'
+                id: fixtures.client.client_id
               }
             });
           });

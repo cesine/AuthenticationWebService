@@ -409,7 +409,7 @@ describe('/oauth2', function () {
             accessTokenExpiresAt: newToken.accessTokenExpiresAt,
             refreshToken: newToken.refreshToken,
             client: {
-              client_id: 'test-client',
+              client_id: fixtures.client.client_id,
               scope: 'corpora, datalist, session, speech, activity'
             },
             user: {
@@ -440,7 +440,7 @@ describe('/oauth2', function () {
         .post('/oauth2/authorize')
         .type('form')
         .send({
-          client_id: 'test-client',
+          client_id: fixtures.client.client_id,
           client_secret: 'test-secret',
           grant_type: 'authorization_code',
           redirect_uri: 'http://localhost:8011/v1/users'
@@ -461,7 +461,7 @@ describe('/oauth2', function () {
       return supertest(service)
         .get('/oauth2/token')
         .send({
-          client_id: 'test-client',
+          client_id: fixtures.client.client_id,
           client_secret: 'test-secret',
           grant_type: 'authorization_code',
           username: 'test-user',
@@ -486,7 +486,7 @@ describe('/oauth2', function () {
         .post('/oauth2/token')
         .type('form') // content must be application/x-www-form-urlencoded
         .send({
-          client_id: 'test-client',
+          client_id: fixtures.client.client_id,
           client_secret: 'test-secret',
           grant_type: 'authorization_code',
           username: 'test-user',

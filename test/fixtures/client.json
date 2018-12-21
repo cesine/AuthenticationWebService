@@ -1,6 +1,6 @@
 {
-  "id": "test-client",
-  "client_id": "test-client",
+  "id": "test-client222",
+  "client_id": "test-client2",
   "client_secret": "test-secret",
   "title": "Testing Client",
   "description": "Client used for testing the oauth flow",
