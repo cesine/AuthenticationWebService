@@ -74,7 +74,7 @@
     "node": ">8.x.x"
   },
   "scripts": {
-    "coverage": "NODE_ENV=test BUNYAN_LOG_LEVEL=FATAL NODE_TLS_REJECT_UNAUTHORIZED=0 istanbul cover _mocha --include-all-sources -- --recursive test && istanbul check-coverage  --statements 35 --functions 29 --branches 21 --lines 35",
+    "coverage": "NODE_ENV=test BUNYAN_LOG_LEVEL=FATAL NODE_TLS_REJECT_UNAUTHORIZED=0 istanbul cover _mocha --include-all-sources -- --recursive test && istanbul check-coverage  --statements 36 --functions 31 --branches 21 --lines 36",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint .",
     "start": "node ./bin/www",

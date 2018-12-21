@@ -102,7 +102,8 @@ exports.postToken = {
         debug('error authorizing client', err, req.query);
         return next(err);
       }
-      // TODO how return the token? this has no effect
+      // TODO this has no effect
+      // instead working around it by return jwt in saveToken response as accesToken
       res.set('Authorization', 'Bearer ' + res.locals.oauth.token.jwt);
 
       // next();

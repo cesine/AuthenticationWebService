@@ -240,13 +240,11 @@ describe('models/oauth-client', function () {
             expect(token).deep.equal({
               accessToken: token.accessToken,
               client: {
-                id: 'test-client',
-                here: 'too'
+                id: 'test-client2'
               },
               accessTokenExpiresAt: token.accessTokenExpiresAt,
               user: {
-                id: '123',
-                something: 'else'
+                id: '6e6017b0-4235-11e6-afb5-8d78a35b2f79'
               }
             });
             expect(AsToken.decode(token.accessToken)).deep.equal(null);
@@ -284,7 +282,6 @@ describe('models/oauth-client', function () {
               redirectUris: ['http://localhost:8011/auth/example/callback'],
               client: {
                 client_id: 'test-client2',
-                client_secret: 'test-secret',
                 title: 'Testing Client',
                 description: 'Client used for testing the oauth flow',
                 contact: 'Joe Smoe <joe@smoe.ca>',

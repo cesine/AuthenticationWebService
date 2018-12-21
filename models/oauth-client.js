@@ -59,6 +59,7 @@ function signUserAsToken(json) {
  * @param callback
  */
 function create(options, callback) {
+  // TODO avoid sql injections
   var opts = lodash.clone(options);
   if (!options) {
     return callback(new Error('Invalid Options'));
@@ -144,7 +145,7 @@ function flagAsDeleted() {
 }
 
 /**
- * Initialize the table if not already present
+ * Initialize the oauth token and oauth client table if not already present
  * @param callback        [description]
  */
 function init() {
@@ -186,19 +187,21 @@ function getAccessToken(bearerToken) {
       return resolve({
         accessToken: token.id,
         accessTokenExpiresAt: token.accessTokenExpiresAt,
-        client: decoded.client,
-        user: decoded.user
+        client: {
+          // TODO could fetch client details
+          id: token.client_id
+        },
+        user: {
+          // TODO could fetch user details
+          id: token.user_id
+        }
       });
     });
   });
 }
 
 /**
- * Get client.
- * Only seems to support a promise
- * https://github.com/oauthjs/node-oauth2-server/issues/277
- * Despite saying others are possible
- * https://github.com/oauthjs/node-oauth2-server#upgrading-from-2x
+ * Get oauth client details
  */
 function getClient(clientId, clientSecret) {
   debug('getClient arguments', arguments);
@@ -213,12 +216,8 @@ function getClient(clientId, clientSecret) {
       throw new Error('Client id or secret is invalid');
     }
 
-    // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L144
-    // Seems to require a grants
-    // { grants: ['password'] }
-    // { grants: ['authorization_code'], redirectUris: ['http://example.com'] };
     json = {
-      client: client.toJSON(), // TODO remove the secret
+      client: lodash.omit(client.toJSON(), ['client_secret']), // remove the secret
       id: clientId,
       grants: ['authorization_code'],
       redirectUris: client.redirect_uri ? client.redirect_uri.split(',') : []
@@ -229,6 +228,9 @@ function getClient(clientId, clientSecret) {
   });
 }
 
+/**
+ * Get details for a given authorization code
+ */
 function getAuthorizationCode(code) {
   debug('getAuthorizationCode', arguments, AUTHORIZATION_CODE_TRANSIENT_STORE);
   debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
@@ -253,6 +255,9 @@ function getAuthorizationCode(code) {
   });
 }
 
+/**
+ * Revoke a given authorization code
+ */
 function revokeAuthorizationCode(code) {
   debug('revokeAuthorizationCode', arguments);
 
@@ -268,6 +273,9 @@ function revokeAuthorizationCode(code) {
   });
 }
 
+/**
+ * Save details for an authorization code
+ */
 function saveAuthorizationCode(authorizationCode, value, user) {
   debug('saveAuthorizationCode authorizationCode', authorizationCode);
   debug('saveAuthorizationCode value', value);
@@ -289,9 +297,8 @@ function saveAuthorizationCode(authorizationCode, value, user) {
 }
 
 /**
- * Get refresh token.
+ * Get refresh token
  */
-
 function getRefreshToken(bearerToken, callback) {
   OAuthToken.read({
     refresh_token: bearerToken
@@ -312,25 +319,9 @@ function getRefreshToken(bearerToken, callback) {
   });
 }
 
-/**
- * Get token for code
- *
- * @param  {[type]}   bearerToken [description]
- * @param  {Function} callback    [description]
- * @return {[type]}               [description]
- */
-function getTokenFromCode(code, callback) {
-  debug('getTokenFromCode', code);
-  getAuthorizationCode(code).then(function whenCode(result) {
-    debug('done getAuthorizationCode', result);
-    return callback(null, result);
-  }).catch(callback);
-}
-
 /*
- * Get user.
+ * Get user details
  */
-
 function getUser(username, password, callback) {
   debug('getUser', getUser);
   User.verifyPassword({
@@ -348,6 +339,9 @@ function getUser(username, password, callback) {
   });
 }
 
+/**
+ * Verify the scope for a token matches the scope pemitted
+ */
 function verifyScope(decodedToken, scope, callback) {
   debug('verifyScope', arguments);
   // TODO look up if the client permits those scopes
@@ -360,9 +354,8 @@ function verifyScope(decodedToken, scope, callback) {
 // }
 
 /**
- * Save token.
+ * Save token
  */
-
 function saveToken(token, value, user) {
   debug('saveToken ', arguments);
   return new Promise(function whenPromise(resolve, reject) {
@@ -388,21 +381,12 @@ function saveToken(token, value, user) {
       var jwt = signUserAsToken({
         accessToken: result.id,
         accessTokenExpiresAt: result.accessTokenExpiresAt,
-        // clientId: result.client_id,
         client: value.client,
         user: user,
         refreshToken: result.refresh_token,
         refreshTokenExpiresOn: result.refresh_token_expires_on
-        // userId: result.user_id
       });
       debug('updated jwt', jwt);
-      // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L238
-      // {
-      //   accessToken: 'foobar',
-      //   client: {},
-      //   user: {}
-      // };
-      //
       debug('saveToken saved result', result.id);
 
       return resolve({
@@ -433,7 +417,6 @@ module.exports.saveAuthorizationCode = saveAuthorizationCode;
 module.exports.revokeAuthorizationCode = revokeAuthorizationCode;
 module.exports.getClient = getClient;
 module.exports.getRefreshToken = getRefreshToken;
-module.exports.getTokenFromCode = getTokenFromCode;
 module.exports.getUser = getUser;
 module.exports.saveToken = saveToken;
 module.exports.saveAccessToken = saveToken;

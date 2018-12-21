@@ -35,7 +35,7 @@ var oauthToken = sequelize.define('oauth_tokens', {
 
 /**
  * Create a oauth token in the database
- * @param  {oauthToken}   token
+ * @param  {Token}   token
  * @return {Promise}
  */
 function create(options, callback) {
@@ -53,7 +53,7 @@ function create(options, callback) {
 
 /**
  * Read an oauth token from the database
- * @param  {oauthToken}   token
+ * @param  {Token}   token
  * @return {Promise}
  */
 function read(token, callback) {
@@ -86,7 +86,7 @@ function read(token, callback) {
 
 /**
  * List oauth token matching the options
- * @param  {String} options [description]
+ * @param  {Object} options [description]
  * @return {Promise}        [description]
  */
 function list(options, callback) {
@@ -116,7 +116,7 @@ function list(options, callback) {
 
 /**
  * Delete oauth_tokens matching the options
- * @param  {String} options [description]
+ * @param  {Token} options [description]
  * @return {Promise}        [description]
  */
 function flagAsDeleted() {

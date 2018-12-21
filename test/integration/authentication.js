@@ -4,7 +4,6 @@ var AsToken = require('as-token');
 
 var service = require('./../../auth_service');
 var User = require('./../../models/user');
-var fixture = require('./../fixtures/user.json');
 
 describe('/authentication', function () {
   before(function (done) {
