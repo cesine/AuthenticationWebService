@@ -61,11 +61,11 @@ function read(token, callback) {
     where: {}
   };
 
-  if (token.access_token && !token.refresh_token) {
+  if (token.access_token) {
     options.where = {
       access_token: token.access_token
     };
-  } else if (token.refresh_token && !token.access_token) {
+  } else if (token.refresh_token) {
     options.where = {
       refresh_token: token.refresh_token
     };

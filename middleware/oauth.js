@@ -1,3 +1,4 @@
+var debug = require('debug')('middleware:oauth');
 var OAuthServer = require('express-oauth-server');
 var OAuthClient = require('./../models/oauth-client');
 var errorMiddleware = require('./error-handler').errorHandler;
@@ -13,9 +14,8 @@ var oauth = new OAuthServer({
   model: OAuthClient // See https://github.com/thomseddon/node-oauth2-server for specification
 });
 
-console.log('oauth', oauth.server);
-
+debug('oauth', oauth.server);
 for (var att in oauth.server) {
-  console.log('att', att);
+  debug('oauth server has: ', att);
 }
 module.exports = oauth;

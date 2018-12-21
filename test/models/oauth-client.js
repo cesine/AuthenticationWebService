@@ -100,6 +100,7 @@ describe('models/oauth-client', function () {
               hour_limit: 600,
               day_limit: 6000,
               throttle: 500,
+              scope: 'corpora, datalist, session, speech, activity',
               redirect_uri: 'http://localhost:8011/auth/example/callback',
               deletedAt: null,
               deletedReason: null,
@@ -221,7 +222,17 @@ describe('models/oauth-client', function () {
       });
 
       it('should get an access token', function () {
-        var bearerToken = AsToken.sign({ user: { id: '123', something: 'else' } }, 60 * 24);
+        var bearerToken = AsToken.sign({
+          accessToken: 'test-token',
+          user: {
+            id: '123',
+            something: 'else'
+          },
+          client: {
+            id: 'test-client',
+            here: 'too'
+          }
+        }, 60 * 24);
         return OAuthClient
           .getAccessToken(bearerToken)
           .then(function (token) {
@@ -229,7 +240,8 @@ describe('models/oauth-client', function () {
             expect(token).deep.equal({
               accessToken: token.accessToken,
               client: {
-                id: 'test-client'
+                id: 'test-client',
+                here: 'too'
               },
               accessTokenExpiresAt: token.accessTokenExpiresAt,
               user: {
@@ -237,15 +249,7 @@ describe('models/oauth-client', function () {
                 something: 'else'
               }
             });
-            expect(AsToken.decode(token.accessToken)).deep.equal({
-              client: {},
-              user: {
-                id: '123',
-                something: 'else'
-              },
-              iat: Math.floor(Date.now() / 1000),
-              exp: Math.floor((Date.now() + 1440000) / 1000)
-            });
+            expect(AsToken.decode(token.accessToken)).deep.equal(null);
           });
       });
 
@@ -288,6 +292,7 @@ describe('models/oauth-client', function () {
                 hour_limit: 600,
                 day_limit: 6000,
                 throttle: 500,
+                scope: 'corpora, datalist, session, speech, activity',
                 expiresAt: client_info.client.expiresAt,
                 deletedAt: null,
                 deletedReason: null,

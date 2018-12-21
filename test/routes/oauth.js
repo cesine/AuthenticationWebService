@@ -77,7 +77,6 @@ describe('routes/oauth2', function () {
 
     // Workaround to test the fact that the next is not called unless there is an error.
     setTimeout(function () {
-      console.log('res.locals', res.locals);
       expect(res.locals).to.deep.equal({
         oauth: {
           token: {

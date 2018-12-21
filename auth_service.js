@@ -24,6 +24,7 @@ var authWebServiceRoutes = require('./routes/routes');
 var errorHandler = require('./middleware/error-handler').errorHandler;
 var deprecatedRoutes = require('./routes/deprecated');
 var apiVersion = 'v1'; // 'v' + parseInt(require('./package.json').version, 10);
+var apiRegex = /\/v1/;
 var corsOptions = {
   credentials: true,
   maxAge: 86400,
@@ -116,10 +117,13 @@ deprecatedRoutes.addDeprecatedRoutes(authWebService, config);
  * Not found
  */
 authWebService.use(function notFoundMiddleware(req, res, next) {
+  // if (apiRegex.test(req.path) || req.method !== 'GET') {
   var err = new Error('Not Found');
   debug(req.url + ' was not found/handled');
   err.status = 404;
-  next(err, req, res, next);
+  return next(err, req, res, next);
+  // }
+  // next();
 });
 
 authWebService.use(errorHandler);

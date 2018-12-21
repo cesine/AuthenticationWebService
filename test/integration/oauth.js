@@ -65,7 +65,7 @@ describe('/oauth2', function () {
     });
   });
 
-  describe.only('OAuth2 Dance', function () {
+  describe('OAuth2 Dance', function () {
     var clientApp;
     var clientServer;
     var oauthOpts = {
@@ -446,7 +446,7 @@ describe('/oauth2', function () {
           redirect_uri: 'http://localhost:8011/v1/users'
         })
         .expect(404)
-        .expect('Content-Type', 'application/json; charset=utf-8')
+        // .expect('Content-Type', 'application/json; charset=utf-8')
         .then(function (res) {
           expect(res.body).to.deep.equal({
             status: 404,
@@ -468,7 +468,7 @@ describe('/oauth2', function () {
           code: 'ABC'
         })
         .expect(404)
-        .expect('Content-Type', 'application/json; charset=utf-8')
+        // .expect('Content-Type', 'application/json; charset=utf-8')
         .then(function (res) {
           expect(res.body).to.deep.equal({
             status: 404,

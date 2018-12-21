@@ -39,7 +39,19 @@ exports.getAuthorize = {
       return res.redirect('/authentication/login/?' + querystring.stringify(req.query));
     }
 
-    middleware = oauth.authorize({ scope: req.query.scope });
+
+    // https://oauth2-server.readthedocs.io/en/latest/api/oauth2-server.html#authorize-request-response-options-callback
+    let authenticateHandler = {
+      handle: function(request, response) {
+        return res.locals.user;
+      }
+    };
+
+    middleware = oauth.authorize({
+      scope: req.query.scope,
+      authenticateHandler: authenticateHandler,
+      continueMiddleware: true, // does not call through
+    });
     debug('There is a user res.locals.user', res.locals.user, middleware);
     debug('req.headers', req.headers);
 
@@ -47,11 +59,9 @@ exports.getAuthorize = {
       debug('done the authorize middleware', err, req.user, res.locals);
       if (err) {
         debug('error authorizing client', err, req.query);
-        // the error handler will send cleaned json which can be displayed to the user
         return next(err);
       }
-
-      // res.json({ something: true });
+      // next(); // cannot set headers after they are set
     });
   }
 };
@@ -81,20 +91,21 @@ exports.postToken = {
     debug('postToken', req.query, req.body, res.headers);
     // req.user = res.locals.user; TODO where does the user that is passed to client come from
 
-    middleware = oauth.token({});
+    middleware = oauth.token({
+      // continueMiddleware: true,
+    });
 
     middleware(req, res, function whenDoneTokenMiddleware(err) {
       debug('done the token middleware', err, req.user, res.locals);
 
       if (err) {
         debug('error authorizing client', err, req.query);
-        // the error handler will send cleaned json which can be displayed to the user
         return next(err);
       }
       // TODO how return the token? this has no effect
       res.set('Authorization', 'Bearer ' + res.locals.oauth.token.jwt);
 
-      // res.json({ something: true });
+      // next();
     });
   }
 };

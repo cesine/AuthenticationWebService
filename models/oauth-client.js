@@ -171,23 +171,11 @@ function init() {
 function getAccessToken(bearerToken) {
   return new Promise(function whenPromise(resolve, reject) {
     var decoded = AsToken.verify(bearerToken);
-    var client = {
-      client_id: 'test-client' // TODO hard coded
-    };
-    var access_token;
     debug('getAccessToken for token', bearerToken, decoded);
 
-    // access_token = signUserAsToken(decoded);
-    // debug('updated access_token', access_token);
-
-    OAuthToken.create({
-      access_token: bearerToken,
-      accessTokenExpiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000),
-      refresh_token: '23waejsowj4wejsrd', // TODO hard coded
-      refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
-      client_id: client.client_id,
-      user_id: decoded.user.id
-    }, function whenCreated(err, token) {
+    OAuthToken.read({
+      access_token: decoded.accessToken
+    }, function whenFound(err, token) {
       if (err) {
         return reject(err);
       }
@@ -199,9 +187,7 @@ function getAccessToken(bearerToken) {
       return resolve({
         accessToken: token.id,
         accessTokenExpiresAt: token.accessTokenExpiresAt,
-        client: {
-          id: client.client_id
-        },
+        client: decoded.client,
         user: decoded.user
       });
     });
@@ -347,6 +333,7 @@ function getTokenFromCode(code, callback) {
  */
 
 function getUser(username, password, callback) {
+  debug('getUser', getUser);
   User.verifyPassword({
     username: username,
     password: password
@@ -363,13 +350,13 @@ function getUser(username, password, callback) {
 }
 
 function verifyScope(decodedToken, scope, callback) {
-  console.log('verifyScope', arguments);
+  debug('verifyScope', arguments);
   // TODO look up if the client permits those scopes
   return callback(null, true);
 }
 
 // function validateScope(user, decodedToken) {
-//   console.log('validateScope', arguments);
+//   debug('validateScope', arguments);
 //   return decodedToken && decodedToken.client && decodedToken.client.scope;
 // }
 

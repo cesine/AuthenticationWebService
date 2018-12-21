@@ -10,10 +10,15 @@ var cleanErrorStatus = function (status) {
 };
 
 var errorHandler = function (err, req, res, next) {
-  debug('errorHandler ' + process.env.NODE_ENV + req.url, err);
-
   var data;
   var NODE_ENV = process.env.NODE_ENV;
+  debug('errorHandler ' + process.env.NODE_ENV + req.url, err);
+
+  if (res.headersSent) {
+    console.warn('This request has already been replied to', err);
+    return;
+  }
+
   if (['development', 'test', 'local'].indexOf(NODE_ENV) > -1) {
     // expose stack traces
     data = err;
