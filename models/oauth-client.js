@@ -3,7 +3,7 @@
 var debug = require('debug')('model:oauth');
 var Sequelize = require('sequelize');
 var lodash = require('lodash');
-var AsToken = require('as-token');
+var AsToken = require('../lib/token');
 
 var OAuthToken = require('./oauth-token');
 var User = require('./user');

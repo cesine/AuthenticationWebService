@@ -1,6 +1,6 @@
 var expect = require('chai').expect;
 var supertest = require('supertest');
-var AsToken = require('as-token');
+var AsToken = require('../../lib/token');
 
 var service = require('./../../auth_service');
 var User = require('./../../models/user');

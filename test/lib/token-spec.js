@@ -1,37 +1,37 @@
-'use strict';
+var expect = require('chai').expect;
 
-var AsToken = exports.AsToken || require('./..');
+var AsToken = exports.AsToken || require('../../lib/token');
 
 describe('AsToken', function() {
   it('should load', function() {
-    expect(AsToken).toBeDefined();
+    expect(typeof AsToken).to.deep.equal('object');
   });
 
   describe('config', function() {
     it('should have a prefix', function() {
-      expect(AsToken.config.jwt).toBeDefined();
-      expect(AsToken.config.jwt.prefix).toBeDefined();
+      expect(typeof AsToken.config.jwt).to.deep.equal('object');
+      expect(typeof AsToken.config.jwt.prefix).to.deep.equal('string');
     });
 
     it('should have a public key', function() {
-      expect(AsToken.config.jwt.public).toBeDefined();
-      expect(AsToken.config.jwt.public.length).toEqual(271);
+      expect(typeof AsToken.config.jwt.public).to.deep.equal('string');
+      expect(AsToken.config.jwt.public.length).to.deep.equal(271);
     });
 
-    it('should not have a private key', function() {
-      expect(AsToken.config.jwt.private).toBeUndefined();
+    it('should have a private key', function() {
+      expect(AsToken.config.jwt.private).to.not.equal(undefined);
     });
   });
 
   describe('create token', function() {
     it('should have a test public key', function() {
-      expect(AsToken.config.test.public).toBeDefined();
-      expect(AsToken.config.test.public.length).toEqual(271);
+      expect(typeof AsToken.config.test.public).to.deep.equal('string');
+      expect(AsToken.config.test.public.length).to.deep.equal(271);
     });
 
     it('should have a test private key', function() {
-      expect(AsToken.config.test.private).toBeDefined();
-      expect(AsToken.config.test.private.length).toEqual(886);
+      expect(typeof AsToken.config.test.private).to.deep.equal('string');
+      expect(AsToken.config.test.private.length).to.deep.equal(887);
     });
 
     it('should support json', function() {
@@ -43,20 +43,20 @@ describe('AsToken', function() {
       };
       AsToken.config.jwt.private = AsToken.config.test.private;
       var token = AsToken.sign(json);
-      expect(token).toBeDefined();
-      expect(token).toContain(AsToken.config.jwt.prefix);
-      expect(token.length).toBeGreaterThan(300);
+      expect(typeof token).to.deep.equal('string');
+      expect(token).to.contain(AsToken.config.jwt.prefix);
+      expect(token.length).above(300);
     });
   });
 
   describe('verify token', function() {
-    beforeEach(function() {
-      AsToken.config.jwt.private = AsToken.config.test.private;
-    });
+    // beforeEach(function() {
+    //   AsToken.config.jwt.private = AsToken.config.test.private;
+    // });
 
-    afterEach(function() {
-      delete AsToken.config.jwt.private;
-    });
+    // afterEach(function() {
+    //   delete AsToken.config.jwt.private;
+    // });
 
     var json = {
       username: 'anonymous',
@@ -74,7 +74,7 @@ describe('AsToken', function() {
       console.log(bearerToken);
 
       var decoded = AsToken.verify(bearerToken);
-      expect(decoded).toEqual({
+      expect(decoded).to.deep.equal({
         username: 'anonymous',
         client_id: 'abc123',
         iat: decoded.iat,
@@ -87,8 +87,8 @@ describe('AsToken', function() {
         ]
       });
 
-      expect(new Date(decoded.exp).getFullYear()).toEqual(1970);
-      expect(new Date(decoded.exp * 1000).getFullYear()).toEqual(new Date().getFullYear());
+      expect(new Date(decoded.exp).getFullYear()).to.deep.equal(1970);
+      expect(new Date(decoded.exp * 1000).getFullYear()).to.deep.equal(new Date().getFullYear());
     });
 
     it('should throw if token is expired', function() {
@@ -102,7 +102,7 @@ describe('AsToken', function() {
         var verified = AsToken.verify(expired);
         throw verified;
       } catch (err) {
-        expect(err.message).toEqual('jwt expired');
+        expect(err.message).to.deep.equal('jwt expired');
       }
     });
 
@@ -118,7 +118,7 @@ describe('AsToken', function() {
 
       try {
         var decoded = AsToken.decode(mutated);
-        expect(decoded).toEqual({
+        expect(decoded).to.deep.equal({
           username: 'anonymous',
           client_id: 'abc123',
           iat: decoded.iat,
@@ -133,7 +133,7 @@ describe('AsToken', function() {
 
         var verified = AsToken.verify(mutated);
       } catch (err) {
-        expect(err.message).toEqual('invalid signature');
+        expect(err.message).to.deep.equal('invalid signature');
       }
     });
 
@@ -145,7 +145,7 @@ describe('AsToken', function() {
         var verified = AsToken.verify(broken);
         throw verified;
       } catch (err) {
-        expect(err.message).toEqual('jwt malformed');
+        expect(err.message).to.deep.equal('jwt malformed');
       }
     });
   });

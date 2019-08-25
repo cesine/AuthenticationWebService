@@ -1,4 +1,4 @@
-var AsToken = require('as-token');
+var AsToken = require('../lib/token');
 var debug = require('debug')('authentication');
 var lodash = require('lodash');
 var param = require('swagger-node-express/Common/node/paramTypes.js');
