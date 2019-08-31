@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var AsToken = require('as-token');
+var AsToken = require('../../lib/token');
 
 var OAuthClient = require('./../../models/oauth-client');
 var OAuthToken = require('./../../models/oauth-token');

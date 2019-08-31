@@ -1,4 +1,3 @@
-var AsToken = require('as-token');
 var fs = require('fs');
 var Connection = require('fielddb/api/corpus/Connection').Connection;
 
@@ -29,8 +28,6 @@ Connection.knownConnections.georgiantogether = Connection.knownConnections.thiss
 Connection.knownConnections.georgiantogether.userFriendlyServerName = 'Learn X';
 Connection.knownConnections.georgiantogether.brandLowerCase = 'georgiantogether';
 Connection.knownConnections.georgiantogether.serverLabel = 'georgiantogether';
-
-AsToken.config.jwt.private = fs.readFileSync(__dirname + '/jwt_debug.pem', 'utf8');
 
 module.exports = {
   sessionKey: 'uwotm8',

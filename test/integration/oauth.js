@@ -1,4 +1,4 @@
-var AsToken = require('as-token');
+var AsToken = require('../../lib/token');
 var debug = require('debug')('test:integration:oauth');
 var expect = require('chai').expect;
 var Express = require('express');

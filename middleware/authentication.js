@@ -1,4 +1,4 @@
-var AsToken = require('as-token');
+var AsToken = require('../lib/token');
 var debug = require('debug')('middleware:authentication');
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 var JwtStrategy = require('passport-jwt').Strategy;
@@ -8,7 +8,7 @@ var config = require('config');
 var user = require('./../models/user');
 
 var opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeader(),
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: AsToken.config.jwt.private,
   issuer: config.url,
   audience: 'anythings.net'

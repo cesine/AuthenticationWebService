@@ -1,4 +1,4 @@
-var AsToken = require('as-token');
+var AsToken = require('../../lib/token');
 var expect = require('chai').expect;
 
 var authentication = require('./../../middleware/authentication');
