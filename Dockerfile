@@ -1,6 +1,6 @@
-FROM couchdb:1.6.1
-FROM nginx:1.10.3
-FROM node:10
+# FROM couchdb:1.6.1
+# FROM nginx:1.10.3
+FROM node:12
 
 # Create app directory
 WORKDIR /usr/src/app
