@@ -67,7 +67,7 @@ Start dev server:
 ```sh
 ./bin/develop.sh
 ```
-Wait for docker to set up dev env, then open [http://localhost:8000](http://localhost:8000)
+Wait for docker to set up dev env, then open [http://localhost:3183](http://localhost:3183)
 
 ### production mode
 

@@ -11,7 +11,7 @@ services:
             - ./auth-service:/auth-service
             - ./auth-service/media:/media
         ports:
-            - "8000:8000"
+            - "3183:3183"
         environment:
             NODE_ENV: development
         depends_on:
