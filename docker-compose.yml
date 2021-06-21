@@ -1,0 +1,7 @@
+version: '2'
+services:
+    db:
+        image: "frodenas/couchdb:latest"
+        environment:
+          COUCHDB_USERNAME: "couchdb"
+          COUCHDB_PASSWORD: "jPp5fBJySeuJPTN8"
