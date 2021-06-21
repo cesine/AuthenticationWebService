@@ -90,8 +90,8 @@ Copy your .key and .crt files to `nginx/ssl` and run `./bin/deploy.sh`.
 ## install dependencies
 
 ```sh
-# backend
-./bin/npm_backend.sh install [package] --save
+# auth-service
+./bin/npm_auth-service.sh install [package] --save
 ```
 
 ## Release History

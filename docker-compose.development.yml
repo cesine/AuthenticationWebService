@@ -3,13 +3,13 @@ services:
     db:
         ports:
           - "5984:5984"
-    backend:
-        build: ./backend
-        working_dir: /backend
+    auth-service:
+        build: ./auth-service
+        working_dir: /auth-service
         command: npm run develop
         volumes:
-            - ./backend:/backend
-            - ./backend/media:/media
+            - ./auth-service:/auth-service
+            - ./auth-service/media:/media
         ports:
             - "8000:8000"
         environment:

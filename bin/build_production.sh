@@ -4,6 +4,6 @@
 
 source bin/env.sh
 
-echo "building backend"
+echo "building auth-service"
 dcprod build
-rm ./backend/assets.json
+rm ./auth-service/assets.json

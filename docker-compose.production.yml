@@ -1,8 +1,8 @@
 version: '2'
 services:
-    backend:
+    auth-service:
         build:
-            context: ./backend
+            context: ./auth-service
         environment:
             NODE_ENV: production
         depends_on:
@@ -12,9 +12,9 @@ services:
             context: ./
             dockerfile: ./nginx/Dockerfile
         depends_on:
-            - backend
+            - auth-service
         volumes: 
-            - "./backend/media:/media"
+            - "./auth-service/media:/media"
             - "./logs/nginx:/tmp/logs"
         ports:
             - "80:80"

@@ -3,11 +3,11 @@
 
 source bin/env.sh
 
-#build backend unless skipping explicitly
+#build auth-service unless skipping explicitly
 if ! [[ $* == *--skipbuild* ]]; then
-    ./bin/npm_backend.sh i
+    ./bin/npm_auth-service.sh i
 else
-    echo "skipping backend build..."
+    echo "skipping auth-service build..."
 fi
 
 if ! [[ $* == *--dontstop* ]]; then

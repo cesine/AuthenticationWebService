@@ -13,10 +13,10 @@ services:
             - 5900:5900
     testserver:
         image: node:7.7
-        working_dir: /backend
+        working_dir: /auth-service
         command: npm run test
         volumes:
-            - ./backend:/backend
+            - ./auth-service:/auth-service
         network_mode: "service:selenium"
         environment:
             NODE_ENV: test
