@@ -5,13 +5,16 @@ FROM node:12
 # Create app directory
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-RUN npm ci
-
 COPY . .
-RUN ls -alt
+RUN NODE_ENV=production npm ci
+
+RUN ls -alt; \
+  ls config/local.js # required to be able to run the tests against deployed couchdb
+
+ENV DEBUG="*,-express*"
+ENV NODE_ENV=beta
 
 EXPOSE 3183
-EXPOSE 5984
+# EXPOSE 5984
 
-CMD couchdb && node bin/www
+CMD [ "node", "bin/www" ]
