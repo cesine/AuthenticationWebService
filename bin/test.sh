@@ -3,12 +3,11 @@
 
 source bin/env.sh
 
-#build frontend unless skipping explicitly
+#build backend unless skipping explicitly
 if ! [[ $* == *--skipbuild* ]]; then
-    ./bin/build_frontend.sh
     ./bin/npm_backend.sh i
 else
-    echo "skipping frontend build..."
+    echo "skipping backend build..."
 fi
 
 if ! [[ $* == *--dontstop* ]]; then

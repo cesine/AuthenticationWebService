@@ -3,14 +3,6 @@ services:
     db:
         ports:
           - "5984:5984"
-    frontend:
-        build: ./frontend
-        working_dir: /frontend
-        command: npm run develop
-        volumes:
-            - ./frontend:/frontend
-        ports:
-            - "3000:3000"
     backend:
         build: ./backend
         working_dir: /backend

@@ -90,9 +90,6 @@ Copy your .key and .crt files to `nginx/ssl` and run `./bin/deploy.sh`.
 ## install dependencies
 
 ```sh
-# frontend
-./bin/npm_frontend.sh install [package] --save-dev
-
 # backend
 ./bin/npm_backend.sh install [package] --save
 ```

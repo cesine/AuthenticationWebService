@@ -17,7 +17,6 @@ services:
         command: npm run test
         volumes:
             - ./backend:/backend
-            - ./frontend/dist:/static
         network_mode: "service:selenium"
         environment:
             NODE_ENV: test
