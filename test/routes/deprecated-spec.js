@@ -554,7 +554,7 @@ describe('/ deprecated', () => {
     before(function () {
       debug('/forgotpassword', process.env.REPLAY);
 
-      this.timeout(19000);
+      this.timeout(30000);
 
       return supertest(authWebService)
         .post('/register')
@@ -1507,8 +1507,9 @@ describe('/ deprecated', () => {
 
   describe('syncDetails', () => {
     const uniqueDBname = process.env.REPLAY ? Date.now() : '1637871012346';
+    let userCookies;
     before(function () {
-      debug('/forgotpassword', process.env.REPLAY);
+      debug('syncDetails', process.env.REPLAY);
 
       this.timeout(40000);
       return supertest(authWebService)
@@ -1521,10 +1522,23 @@ describe('/ deprecated', () => {
         })
         .then((res) => {
           debug('register testuser8', res.body);
+
+          return supertest(authWebService)
+            .post('/register')
+            .set('x-request-id', `${requestId}-register-new`)
+            .send({
+              username: testUsername,
+              password: 'test',
+              appbrand: 'georgiantogether',
+              email: 'testuser@lingsync.org',
+            })
+        })
+        .then((res) => {
+          expect(res.body.user.username).to.equal(testUsername, JSON.stringify(res.body));
         });
     });
 
-    it('should try to create all corpora listed in the user', () => supertest(authWebService)
+    it.only('should try to create all corpora listed in the user', () => supertest(authWebService)
       .post('/login')
       .set('x-request-id', `${requestId}-syncDetails`)
       .send({
@@ -1548,26 +1562,45 @@ describe('/ deprecated', () => {
           .to.equal(true, JSON.stringify(res.body));
         expect(res.body.user.newCorpora && res.body.user.newCorpora.length)
           .above(2, JSON.stringify(res.body.user.newCorpora));
+        expect(res.headers['set-cookie']).to.equal(undefined, 'auth should not set a session cookie');
 
-        return supertest(`http://${testUsername}:test@localhost:5984`)
+        return supertest(`http://localhost:5984`)
+          .post('/_session')
+          .set('Accept', 'application/json')
+          .send({
+            name: testUsername,
+            password: 'test'
+          })
+      })
+      .then((res) => {
+        console.log('res.headers', res.headers);
+        expect(res.headers['set-cookie']).not.to.equal(undefined, 'corpus should set a session cookie');
+
+        const setCookie = Array.isArray(res.headers['set-cookie']) ? res.headers['set-cookie'] : [res.headers['set-cookie']];
+        console.log('setCookie', setCookie);
+        userCookies = setCookie.map((cookie) => cookie.split(';')[0]).join('; ');
+        console.log('userCookies', userCookies);
+
+        return supertest(`http://localhost:5984`)
           .get('/someoneelsesdb-shouldnt_be_creatable')
+          .set('cookie', userCookies)
           .set('x-request-id', `${requestId}-syncDetails-after`)
           .set('Accept', 'application/json');
       })
       .then((res) => {
         expect(res.status).to.equal(404);
 
-        return supertest(`http://${testUsername}:test@localhost:5984`)
+        return supertest(`http://localhost:5984`)
           .get(`/${testUsername}-an_offline_corpus_created_in_the_prototype${uniqueDBname}/_design/deprecated/_view/corpora`)
           .set('x-request-id', `${requestId}-syncDetails`)
+          .set('cookie', userCookies)
           .set('Accept', 'application/json');
       })
       .then((res) => {
         if (res.status === 200) {
           expect(res.body.total_rows).to.equal(1);
         } else {
-          debug('syncDetails', JSON.stringify(res.body));
-          expect(res.status).to.be.oneOf([401, 404]); // delay in views creation on new resources
+          expect(res.status).to.be.oneOf([401, 404], `${testUsername}-an_offline_corpus_created_in_the_prototype${uniqueDBname} ${JSON.stringify(res.body)}`); // 404 if delay in views creation on new resources
         }
       }));
   });
