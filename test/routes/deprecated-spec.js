@@ -1538,7 +1538,7 @@ describe('/ deprecated', () => {
         });
     });
 
-    it.only('should try to create all corpora listed in the user', () => supertest(authWebService)
+    it('should try to create all corpora listed in the user', () => supertest(authWebService)
       .post('/login')
       .set('x-request-id', `${requestId}-syncDetails`)
       .send({

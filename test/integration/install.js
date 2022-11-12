@@ -16,7 +16,8 @@ if (!destination) {
   destination.auth = `${config.couchKeys.username}:${config.couchKeys.password}`;
   destination = url.format(destination).replace(/\/$/, '');
 }
-const source = process.env.SOURCE_URL;
+const { SOURCE_URL } = process.env;
+const source = SOURCE_URL;
 debug('destination', destination);
 debug('source', source);
 let adminSessionCookie;
@@ -27,6 +28,8 @@ describe('install', () => {
     replay._localhosts = new Set();
     // eslint-disable-next-line no-underscore-dangle
     debug('before replay localhosts', replay._localhosts);
+
+    expect(SOURCE_URL).not.to.contain('example.org', `Please specify a valid SOURCE_URL to be able to run the test, current value: ${SOURCE_URL}`);
 
     return supertest(destination)
       .post('/_session')
