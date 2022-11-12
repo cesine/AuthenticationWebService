@@ -197,6 +197,44 @@ describe('install', () => {
     });
   });
 
+  describe.only('prototype online app', () => {
+    before(() => supertest(destination)
+      .get('/_all_dbs')
+      .set('Accept', 'application/json')
+      .then((res) => {
+        expect(res.body).includes('_users', JSON.stringify(res.body));
+      }));
+
+    it('should replicate prototype', function () {
+      this.timeout(40000);
+      const dbnameToReplicate = 'prototype';
+
+      return supertest(destination)
+        .post('/_replicate')
+        .set('cookie', adminSessionCookie)
+        .set('Accept', 'application/json')
+        .send({
+          source: `${source}/${dbnameToReplicate}`,
+          target: {
+            url: `${destination}/${dbnameToReplicate}`,
+          },
+          create_target: true,
+        })
+        .then((res) => {
+          debug('res.body prototype', res.body);
+          expect(res.body.ok).to.equal(true);
+
+          return supertest(destination)
+            .get('/_all_dbs')
+            .set('Accept', 'application/json');
+        })
+        .then((res) => {
+          debug('res.body prototype after', res.body);
+          expect(res.body).includes(dbnameToReplicate);
+        });
+    });
+  });
+
   describe('new_corpus_activity_feed', () => {
     // TODO add admin role to the admin user
     // unable to replicate the activity feeds
